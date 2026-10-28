@@ -12,6 +12,8 @@ $navActivo = $navActivo ?? 'inicio';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= e($tituloPagina) ?></title>
   <meta name="description" content="<?= e($descripcion) ?>" />
+  <meta name="theme-color" content="#00472F" />
+  <meta name="color-scheme" content="light" />
   <link rel="icon" href="<?= e(mass_asset('assets/img/logo.svg')) ?>" type="image/svg+xml" />
   <link rel="stylesheet" href="<?= e(mass_asset('assets/css/styles.css')) ?>" />
   <?php foreach ($paginaCssExtra as $css): ?>
