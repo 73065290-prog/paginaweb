@@ -28,6 +28,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="MASS_USE_DB" value="0"/>
         <ini name="display_errors" value="1"/>
     </php>
 </phpunit>

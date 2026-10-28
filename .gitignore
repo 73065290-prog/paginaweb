@@ -18,6 +18,7 @@ composer.lock
 .env
 .env.*
 !.env.example
+backend/config/database.local.php
 *.pem
 *.key
 credentials.json

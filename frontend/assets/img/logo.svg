@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" fill="none">
+  <text x="0" y="28" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800" fill="#00472F" letter-spacing="-0.8">mass</text>
+  <text x="78" y="28" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#2F9E60">online</text>
+  <circle cx="158" cy="20" r="9" fill="#FF8A3D"/>
+  <path d="M153.5 20.2l2.8 2.8 6-6.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

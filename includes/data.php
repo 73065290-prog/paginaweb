@@ -6,6 +6,13 @@ declare(strict_types=1);
  */
 function mass_categorias(): array
 {
+    if (class_exists('CategoriaRepository') && Database::connected()) {
+        $rows = (new CategoriaRepository())->all();
+        if ($rows !== []) {
+            return $rows;
+        }
+    }
+
     return [
         [
             'id' => 'frutas',
@@ -75,6 +82,13 @@ function mass_categorias(): array
 
 function mass_productos(): array
 {
+    if (class_exists('ProductoRepository') && Database::connected()) {
+        $rows = (new ProductoRepository())->all();
+        if ($rows !== []) {
+            return $rows;
+        }
+    }
+
     return [
         [
             'id' => 1,
@@ -309,6 +323,13 @@ function mass_filtros_catalogo(): array
 
 function mass_tiendas(): array
 {
+    if (class_exists('TiendaRepository') && Database::connected()) {
+        $rows = (new TiendaRepository())->all();
+        if ($rows !== []) {
+            return $rows;
+        }
+    }
+
     return [
         [
             'id' => 'magdalena',
@@ -1190,6 +1211,10 @@ function mass_admin_producto_guardar(int $id, array $data): array
     }
     $_SESSION['admin_producto_overrides'][$id] = $campos;
 
+    if (class_exists('ProductoRepository') && Database::connected()) {
+        (new ProductoRepository())->update($id, $campos);
+    }
+
     return ['ok' => true, 'errores' => [], 'id' => $id];
 }
 
@@ -1211,7 +1236,7 @@ function mass_admin_producto_crear(array $data): array
         $_SESSION['admin_productos_extra'] = [];
     }
 
-    $_SESSION['admin_productos_extra'][] = array_merge($campos, [
+    $payload = array_merge($campos, [
         'id' => $id,
         'marca' => $campos['marca'],
         'stockTone' => 'ok',
@@ -1221,6 +1246,16 @@ function mass_admin_producto_crear(array $data): array
         'imgNombre' => 'nuevo_' . $id . '.jpg',
         'esNuevo' => true,
     ]);
+
+    // Con MySQL: fuente de verdad = BD (evita duplicar en sesión + catálogo)
+    if (class_exists('ProductoRepository') && Database::connected()) {
+        $dbId = (new ProductoRepository())->create($payload);
+        if ($dbId > 0) {
+            return ['ok' => true, 'errores' => [], 'id' => $dbId];
+        }
+    }
+
+    $_SESSION['admin_productos_extra'][] = $payload;
 
     return ['ok' => true, 'errores' => [], 'id' => $id];
 }

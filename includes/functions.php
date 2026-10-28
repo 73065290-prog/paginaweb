@@ -178,6 +178,12 @@ function pedido_costo_envio(string $modo): float
 function pedido_descuento_cupon(string $cupon): float
 {
     $cupon = strtoupper(trim($cupon));
+    if (class_exists('CuponRepository') && Database::connected()) {
+        $dbDesc = (new CuponRepository())->descuento($cupon);
+        if ($dbDesc >= 0) {
+            return $dbDesc;
+        }
+    }
     return match ($cupon) {
         'CLUBMASS10' => 5.0,
         'CLUBMASS60' => 6.0,
@@ -421,6 +427,46 @@ function pedido_confirmar(string $pago = 'yape'): ?array
         ],
     ];
 
+    // Persistencia MySQL cuando hay conexión (además de sesión para la UI)
+    if (class_exists('PedidoRepository') && Database::connected()) {
+        $lineas = [];
+        foreach ($items as $item) {
+            $p = producto_por_id((int) $item['id']);
+            if (!$p) {
+                continue;
+            }
+            $cant = (int) $item['cantidad'];
+            $precio = (float) $p['precio'];
+            $lineas[] = [
+                'producto_id' => (int) $p['id'],
+                'nombre' => (string) $p['nombre'],
+                'precio_unit' => $precio,
+                'cantidad' => $cant,
+                'subtotal' => $precio * $cant,
+            ];
+        }
+        (new PedidoRepository())->create([
+            'codigo' => $codigo,
+            'entrega' => (string) ($pedido['entrega'] ?? 'retiro'),
+            'pago' => $pago,
+            'comprobante' => (string) ($pedido['comprobante'] ?? 'boleta'),
+            'nombre' => (string) ($pedido['nombre'] ?? ''),
+            'apellido' => (string) ($pedido['apellido'] ?? ''),
+            'documento' => (string) ($pedido['documento'] ?? ''),
+            'telefono' => (string) ($pedido['telefono'] ?? ''),
+            'direccion' => (string) ($pedido['direccion'] ?? ''),
+            'referencia' => (string) ($pedido['referencia'] ?? ''),
+            'tienda_id' => (string) ($pedido['tienda_id'] ?? ''),
+            'horario' => (string) ($pedido['horario'] ?? ''),
+            'cupon' => (string) ($pedido['cupon'] ?? ''),
+            'subtotal' => (float) ($resumen['subtotal'] ?? 0),
+            'descuento' => (float) ($resumen['descuento'] ?? 0),
+            'envio' => (float) ($resumen['envio'] ?? 0),
+            'total' => (float) ($resumen['total'] ?? 0),
+            'estado' => 'confirmado',
+        ], $lineas);
+    }
+
     $_SESSION['ultimo_pedido'] = $orden;
     carrito_vaciar();
     return $orden;
@@ -441,9 +487,16 @@ function mass_demo_password_hash(): string
     return '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG';
 }
 
-/** Usuarios demo SGC-Mass (Figma 30-9006). Sin MySQL. */
+/** Usuarios demo SGC-Mass (Figma 30-9006). Prefiere MySQL si está conectado. */
 function mass_usuarios_auth(): array
 {
+    if (class_exists('UsuarioRepository') && Database::connected()) {
+        $dbUsers = (new UsuarioRepository())->allAuthUsers();
+        if ($dbUsers !== []) {
+            return $dbUsers;
+        }
+    }
+
     $hash = mass_demo_password_hash();
 
     return [
@@ -583,10 +636,32 @@ function mass_base(): string
     return defined('MASS_BASE_HREF') ? MASS_BASE_HREF : '';
 }
 
-/** Ruta a asset o recurso desde la carpeta del script actual. */
+/**
+ * URL de página/app relativa a la raíz del proyecto (no assets).
+ * Ej.: mass_url('logout.php') → ../logout.php desde admin/ o cliente_interfaces/
+ */
+function mass_url(string $path = ''): string
+{
+    $path = ltrim(str_replace('\\', '/', $path), '/');
+    return mass_base() . $path;
+}
+
+/** Ruta a asset estático (CSS/JS/IMG) en frontend/assets. */
 function mass_asset(string $path): string
 {
-    return mass_base() . ltrim($path, '/');
+    $path = ltrim(str_replace('\\', '/', $path), '/');
+    if (str_starts_with($path, 'frontend/assets/')) {
+        return mass_base() . $path;
+    }
+    if (str_starts_with($path, 'assets/')) {
+        return mass_base() . 'frontend/' . $path;
+    }
+    // Compatibilidad: archivos sueltos de assets (solo si parecen estáticos)
+    if (preg_match('/\.(css|js|svg|png|jpe?g|gif|webp|ico)$/i', $path)) {
+        return mass_base() . 'frontend/assets/' . $path;
+    }
+    // No tratar rutas de app (logout.php, admin/...) como assets
+    return mass_url($path);
 }
 
 /** URL relativa a una página de la tienda (cliente_interfaces). */

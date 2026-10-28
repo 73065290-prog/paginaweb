@@ -11,6 +11,7 @@
     },
     "autoload": {
         "files": [
+            "backend/bootstrap.php",
             "includes/data.php",
             "includes/functions.php"
         ]
