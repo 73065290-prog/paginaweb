@@ -1,7 +1,7 @@
 # Mass Online · SGC-Mass
 
 <p align="center">
-  <img src="docs/img/banner-mass-online.svg" alt="Mass Online — Tienda online y panel WMS SGC-Mass" width="100%" />
+  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/banner-mass-online.png" alt="Mass Online — Tienda online y panel WMS SGC-Mass" width="100%" />
 </p>
 
 <p align="center">
@@ -41,9 +41,9 @@ Todo corre en **PHP puro** con datos demo en sesión (sin MySQL). Ideal para pr�
 ## Vistas principales
 
 <p align="center">
-  <img src="docs/img/preview-tienda.svg" alt="Vista previa Tienda Mass Online" width="48%" />
+  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/preview-tienda.png" alt="Vista previa Tienda Mass Online" width="48%" />
   &nbsp;
-  <img src="docs/img/preview-admin.svg" alt="Vista previa Admin SGC-Mass" width="48%" />
+  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/preview-admin.png" alt="Vista previa Admin SGC-Mass" width="48%" />
 </p>
 
 <p align="center"><em>Izquierda:</em> storefront (hero, catálogo, carrito) · <em>Derecha:</em> dashboard WMS (KPIs, alertas de góndola)</p>
@@ -167,7 +167,7 @@ Proyecto académico de **Pruebas y Calidad de Software** — demo funcional de t
 ---
 
 <p align="center">
-  <img src="assets/img/logo.svg" alt="Mass Online" height="36" />
+  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/logo-mass.png" alt="Mass Online" height="36" />
   <br/>
   <sub>Mass Online · SGC-Mass — demo PHP · uso académico</sub>
 </p>
