@@ -1,13 +1,24 @@
-﻿# Dependencies / build
+# Dependencies / build
 node_modules/
-vendor/
+/vendor/
 dist/
 build/
+composer.lock
+
+# PHPUnit / coverage
+/.phpunit.cache/
+/docs/pruebas/evidencias/coverage/
+
+# SonarScanner local workdir
+.scannerwork/
+
+# PROMTS/ se versiona siempre (no ignorar esta carpeta)
 
 # Secrets / local env
 .env
 .env.*
 !.env.example
+backend/config/database.local.php
 *.pem
 *.key
 credentials.json

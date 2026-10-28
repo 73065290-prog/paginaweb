@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="D:\xampp\htdocs\paginaweb\phpunit.xml" tests="32" assertions="99" errors="0" failures="0" skipped="0" time="0.389606">
+    <testsuite name="Unit" tests="20" assertions="49" errors="0" failures="0" skipped="0" time="0.320315">
+      <testsuite name="Tests\Unit\PedidoReglasTest" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" tests="8" assertions="22" errors="0" failures="0" skipped="0" time="0.116025">
+        <testcase name="test_tracking_express_incluye_en_camino_retiro_no" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="100" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="3" time="0.066766"/>
+        <testcase name="test_normaliza_entrega_express_y_default_retiro" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="11" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="3" time="0.000934"/>
+        <testcase name="test_costo_envio_retiro_gratis_y_express_4_90" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="19" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="2" time="0.000376"/>
+        <testcase name="test_descuento_cupones_validos_e_invalidos" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="26" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="3" time="0.000358"/>
+        <testcase name="test_validar_entrega_falla_campos_obligatorios_vacios" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="34" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="3" time="0.043852"/>
+        <testcase name="test_validar_entrega_express_requiere_direccion_completa" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="54" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="2" time="0.001698"/>
+        <testcase name="test_validar_retiro_ok_en_tienda_con_stock" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="71" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="3" time="0.000627"/>
+        <testcase name="test_resumen_express_suma_envio_respecto_retiro" file="D:\xampp\htdocs\paginaweb\tests\Unit\PedidoReglasTest.php" line="89" class="Tests\Unit\PedidoReglasTest" classname="Tests.Unit.PedidoReglasTest" assertions="3" time="0.001415"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\AuthReglasTest" file="D:\xampp\htdocs\paginaweb\tests\Unit\AuthReglasTest.php" tests="5" assertions="11" errors="0" failures="0" skipped="0" time="0.199527">
+        <testcase name="test_auth_admin_ok_con_password_demo" file="D:\xampp\htdocs\paginaweb\tests\Unit\AuthReglasTest.php" line="19" class="Tests\Unit\AuthReglasTest" classname="Tests.Unit.AuthReglasTest" assertions="2" time="0.048288"/>
+        <testcase name="test_auth_admin_no_entra_como_cliente" file="D:\xampp\htdocs\paginaweb\tests\Unit\AuthReglasTest.php" line="27" class="Tests\Unit\AuthReglasTest" classname="Tests.Unit.AuthReglasTest" assertions="1" time="0.047928"/>
+        <testcase name="test_auth_cliente_ok_y_no_es_admin" file="D:\xampp\htdocs\paginaweb\tests\Unit\AuthReglasTest.php" line="34" class="Tests\Unit\AuthReglasTest" classname="Tests.Unit.AuthReglasTest" assertions="3" time="0.051072"/>
+        <testcase name="test_auth_password_incorrecta_falla" file="D:\xampp\htdocs\paginaweb\tests\Unit\AuthReglasTest.php" line="44" class="Tests\Unit\AuthReglasTest" classname="Tests.Unit.AuthReglasTest" assertions="2" time="0.049982"/>
+        <testcase name="test_auth_falla_con_credenciales_vacias" file="D:\xampp\htdocs\paginaweb\tests\Unit\AuthReglasTest.php" line="11" class="Tests\Unit\AuthReglasTest" classname="Tests.Unit.AuthReglasTest" assertions="3" time="0.002256"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\DineroYFormatoTest" file="D:\xampp\htdocs\paginaweb\tests\Unit\DineroYFormatoTest.php" tests="2" assertions="4" errors="0" failures="0" skipped="0" time="0.000807">
+        <testcase name="test_dinero_formatea_con_dos_decimales" file="D:\xampp\htdocs\paginaweb\tests\Unit\DineroYFormatoTest.php" line="11" class="Tests\Unit\DineroYFormatoTest" classname="Tests.Unit.DineroYFormatoTest" assertions="2" time="0.000440"/>
+        <testcase name="test_escape_html_previene_xss_basico" file="D:\xampp\htdocs\paginaweb\tests\Unit\DineroYFormatoTest.php" line="18" class="Tests\Unit\DineroYFormatoTest" classname="Tests.Unit.DineroYFormatoTest" assertions="2" time="0.000367"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\ProductoAdminValidacionTest" file="D:\xampp\htdocs\paginaweb\tests\Unit\ProductoAdminValidacionTest.php" tests="5" assertions="12" errors="0" failures="0" skipped="0" time="0.003956">
+        <testcase name="test_validar_rechaza_nombre_corto_y_ean_invalido" file="D:\xampp\htdocs\paginaweb\tests\Unit\ProductoAdminValidacionTest.php" line="30" class="Tests\Unit\ProductoAdminValidacionTest" classname="Tests.Unit.ProductoAdminValidacionTest" assertions="3" time="0.000854"/>
+        <testcase name="test_validar_rechaza_pvp_menor_o_igual_a_costo" file="D:\xampp\htdocs\paginaweb\tests\Unit\ProductoAdminValidacionTest.php" line="43" class="Tests\Unit\ProductoAdminValidacionTest" classname="Tests.Unit.ProductoAdminValidacionTest" assertions="2" time="0.000714"/>
+        <testcase name="test_validar_rechaza_reorden_mayor_igual_capacidad" file="D:\xampp\htdocs\paginaweb\tests\Unit\ProductoAdminValidacionTest.php" line="54" class="Tests\Unit\ProductoAdminValidacionTest" classname="Tests.Unit.ProductoAdminValidacionTest" assertions="2" time="0.000723"/>
+        <testcase name="test_validar_rechaza_abc_no_seleccionado" file="D:\xampp\htdocs\paginaweb\tests\Unit\ProductoAdminValidacionTest.php" line="65" class="Tests\Unit\ProductoAdminValidacionTest" classname="Tests.Unit.ProductoAdminValidacionTest" assertions="2" time="0.000706"/>
+        <testcase name="test_validar_acepta_payload_completo_valido" file="D:\xampp\htdocs\paginaweb\tests\Unit\ProductoAdminValidacionTest.php" line="73" class="Tests\Unit\ProductoAdminValidacionTest" classname="Tests.Unit.ProductoAdminValidacionTest" assertions="3" time="0.000959"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Feature" tests="12" assertions="50" errors="0" failures="0" skipped="0" time="0.069291">
+      <testsuite name="Tests\Feature\AuthSesionTest" file="D:\xampp\htdocs\paginaweb\tests\Feature\AuthSesionTest.php" tests="2" assertions="8" errors="0" failures="0" skipped="0" time="0.048714">
+        <testcase name="test_login_admin_persiste_y_logout_limpia_sesion" file="D:\xampp\htdocs\paginaweb\tests\Feature\AuthSesionTest.php" line="11" class="Tests\Feature\AuthSesionTest" classname="Tests.Feature.AuthSesionTest" assertions="5" time="0.048291"/>
+        <testcase name="test_acceso_sin_autenticar_no_es_admin_ni_cliente" file="D:\xampp\htdocs\paginaweb\tests\Feature\AuthSesionTest.php" line="24" class="Tests\Feature\AuthSesionTest" classname="Tests.Feature.AuthSesionTest" assertions="3" time="0.000422"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CarritoSesionTest" file="D:\xampp\htdocs\paginaweb\tests\Feature\CarritoSesionTest.php" tests="3" assertions="8" errors="0" failures="0" skipped="0" time="0.002581">
+        <testcase name="test_agregar_producto_persiste_en_sesion_y_calcula_totales" file="D:\xampp\htdocs\paginaweb\tests\Feature\CarritoSesionTest.php" line="11" class="Tests\Feature\CarritoSesionTest" classname="Tests.Feature.CarritoSesionTest" assertions="4" time="0.001357"/>
+        <testcase name="test_cambiar_cantidad_y_eliminar_linea" file="D:\xampp\htdocs\paginaweb\tests\Feature\CarritoSesionTest.php" line="22" class="Tests\Feature\CarritoSesionTest" classname="Tests.Feature.CarritoSesionTest" assertions="3" time="0.000589"/>
+        <testcase name="test_no_agrega_producto_inexistente_ni_cantidad_invalida" file="D:\xampp\htdocs\paginaweb\tests\Feature\CarritoSesionTest.php" line="33" class="Tests\Feature\CarritoSesionTest" classname="Tests.Feature.CarritoSesionTest" assertions="1" time="0.000634"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CatalogoYSqliteLabTest" file="D:\xampp\htdocs\paginaweb\tests\Feature\CatalogoYSqliteLabTest.php" tests="2" assertions="12" errors="0" failures="0" skipped="0" time="0.012423">
+        <testcase name="test_filtrar_productos_por_categoria_y_busqueda" file="D:\xampp\htdocs\paginaweb\tests\Feature\CatalogoYSqliteLabTest.php" line="12" class="Tests\Feature\CatalogoYSqliteLabTest" classname="Tests.Feature.CatalogoYSqliteLabTest" assertions="7" time="0.000777"/>
+        <testcase name="test_sqlite_laboratorio_guarda_y_lee_en_memoria_aislada" file="D:\xampp\htdocs\paginaweb\tests\Feature\CatalogoYSqliteLabTest.php" line="43" class="Tests\Feature\CatalogoYSqliteLabTest" classname="Tests.Feature.CatalogoYSqliteLabTest" assertions="5" time="0.011646"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\PedidoConfirmacionTest" file="D:\xampp\htdocs\paginaweb\tests\Feature\PedidoConfirmacionTest.php" tests="2" assertions="11" errors="0" failures="0" skipped="0" time="0.003050">
+        <testcase name="test_confirmar_pedido_express_guarda_orden_y_vacia_carrito" file="D:\xampp\htdocs\paginaweb\tests\Feature\PedidoConfirmacionTest.php" line="11" class="Tests\Feature\PedidoConfirmacionTest" classname="Tests.Feature.PedidoConfirmacionTest" assertions="7" time="0.002314"/>
+        <testcase name="test_confirmar_retiro_tiene_envio_cero" file="D:\xampp\htdocs\paginaweb\tests\Feature\PedidoConfirmacionTest.php" line="37" class="Tests\Feature\PedidoConfirmacionTest" classname="Tests.Feature.PedidoConfirmacionTest" assertions="4" time="0.000736"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ProductoAdminPersistenciaTest" file="D:\xampp\htdocs\paginaweb\tests\Feature\ProductoAdminPersistenciaTest.php" tests="3" assertions="11" errors="0" failures="0" skipped="0" time="0.002524">
+        <testcase name="test_crear_producto_valido_persiste_en_sesion_admin" file="D:\xampp\htdocs\paginaweb\tests\Feature\ProductoAdminPersistenciaTest.php" line="11" class="Tests\Feature\ProductoAdminPersistenciaTest" classname="Tests.Feature.ProductoAdminPersistenciaTest" assertions="5" time="0.001038"/>
+        <testcase name="test_crear_producto_vacio_no_persiste" file="D:\xampp\htdocs\paginaweb\tests\Feature\ProductoAdminPersistenciaTest.php" line="37" class="Tests\Feature\ProductoAdminPersistenciaTest" classname="Tests.Feature.ProductoAdminPersistenciaTest" assertions="2" time="0.000737"/>
+        <testcase name="test_guardar_edicion_actualiza_override_en_sesion" file="D:\xampp\htdocs\paginaweb\tests\Feature\ProductoAdminPersistenciaTest.php" line="58" class="Tests\Feature\ProductoAdminPersistenciaTest" classname="Tests.Feature.ProductoAdminPersistenciaTest" assertions="4" time="0.000749"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

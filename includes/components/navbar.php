@@ -48,19 +48,19 @@ $authAvatar = $authRol === 'admin'
               <small><?= $authRol === 'admin' ? 'Administrador WMS' : 'Cliente / Proveedor' ?></small>
             </div>
             <?php if ($authRol === 'admin'): ?>
-              <a href="<?= e(mass_asset('admin/index.php')) ?>">Ir al panel admin</a>
+              <a href="<?= e(mass_url('admin/index.php')) ?>">Ir al panel admin</a>
             <?php else: ?>
               <a href="pedido.php">Mis pedidos / Checkout</a>
               <a href="catalogo.php">Seguir comprando</a>
             <?php endif; ?>
-            <a class="is-logout" href="<?= e(mass_asset('logout.php')) ?>">Cerrar sesión</a>
+            <a class="is-logout" href="<?= e(mass_url('logout.php')) ?>">Cerrar sesión</a>
           <?php else: ?>
             <div class="cuenta-head">
               <strong>Acceso Mass</strong>
               <span>Elige cómo ingresar</span>
             </div>
-            <a href="<?= e(mass_asset('admin/login.php?rol=cliente')) ?>">Soy cliente / proveedor</a>
-            <a href="<?= e(mass_asset('admin/login.php?rol=admin')) ?>">Soy administrador</a>
+            <a href="<?= e(mass_url('admin/login.php?rol=cliente')) ?>">Soy cliente / proveedor</a>
+            <a href="<?= e(mass_url('admin/login.php?rol=admin')) ?>">Soy administrador</a>
           <?php endif; ?>
         </div>
       </div>

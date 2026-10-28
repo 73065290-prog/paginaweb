@@ -24,7 +24,8 @@ $fechaHoy = 'Jueves, 24 de Octubre de 2024';
     <header class="admin-top">
       <form class="admin-search admin-search--wide" method="get" action="inventario.php" role="search">
         <span aria-hidden="true">🔍</span>
-        <input type="search" name="q" placeholder="Buscar por producto, SKU, EAN o nombre…" value="<?= e($_GET['q'] ?? '') ?>" />
+        <label for="adminSearchQ" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0">Buscar por producto, SKU, EAN o nombre</label>
+        <input id="adminSearchQ" type="search" name="q" placeholder="Buscar por producto, SKU, EAN o nombre…" value="<?= e($_GET['q'] ?? '') ?>" />
       </form>
       <div class="admin-top-right">
         <span class="admin-sync">● Sinc: En línea <small>(Última actualización: 1m)</small></span>

@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+if (!defined('MASS_ROOT')) {
+    define('MASS_ROOT', dirname(__DIR__));
+}
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params([
         'lifetime' => 0,
@@ -11,14 +15,17 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+require_once MASS_ROOT . '/backend/bootstrap.php';
 require_once __DIR__ . '/data.php';
 require_once __DIR__ . '/functions.php';
 
-// Prefijo relativo a assets/ desde admin/ o cliente_interfaces/
+// Prefijo relativo desde admin/ o cliente_interfaces/ hacia la raíz del proyecto
 if (!defined('MASS_BASE_HREF')) {
     $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
     if (preg_match('#/(admin|cliente_interfaces)$#', $scriptDir)) {
         define('MASS_BASE_HREF', '../');
+    } elseif (preg_match('#/frontend/views/(admin|cliente)$#', $scriptDir)) {
+        define('MASS_BASE_HREF', '../../../');
     } else {
         define('MASS_BASE_HREF', '');
     }
