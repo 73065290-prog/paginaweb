@@ -19,8 +19,27 @@ switch ($accion) {
     case 'agregar':
         $id = (int) ($_POST['id'] ?? 0);
         $cantidad = max(1, (int) ($_POST['cantidad'] ?? 1));
+        $antes = 0;
+        foreach (carrito_items() as $it) {
+            if ((int) $it['id'] === $id) {
+                $antes = (int) $it['cantidad'];
+                break;
+            }
+        }
+        $tope = carrito_tope_linea($id);
         carrito_agregar($id, $cantidad);
-        flash_set('Producto agregado al carrito');
+        $despues = $antes;
+        foreach (carrito_items() as $it) {
+            if ((int) $it['id'] === $id) {
+                $despues = (int) $it['cantidad'];
+                break;
+            }
+        }
+        if ($tope > 0 && ($antes + $cantidad) > $tope) {
+            flash_set('Solo hay ' . $tope . ' unidades disponibles — ajustamos tu canasta');
+        } else {
+            flash_set('Producto agregado al carrito');
+        }
         break;
 
     case 'cambiar':
@@ -32,7 +51,11 @@ switch ($accion) {
     case 'set_cantidad':
         $id = (int) ($_POST['id'] ?? 0);
         $cantidad = (int) ($_POST['cantidad'] ?? 1);
+        $tope = carrito_tope_linea($id);
         carrito_set_cantidad($id, $cantidad);
+        if ($cantidad > $tope && $tope > 0) {
+            flash_set('Solo hay ' . $tope . ' unidades disponibles — ajustamos tu canasta');
+        }
         break;
 
     case 'eliminar':

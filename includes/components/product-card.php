@@ -4,6 +4,7 @@ declare(strict_types=1);
 /** @var array $p */
 $p = $p ?? [];
 $badge = $p['badge'] ?? null;
+$qtyMax = max(1, carrito_tope_linea((int) ($p['id'] ?? 0)));
 ?>
 <article class="product">
   <a class="product-link" href="producto.php?id=<?= (int) $p['id'] ?>">
@@ -33,7 +34,7 @@ $badge = $p['badge'] ?? null;
       <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>" />
       <div class="qty">
         <button type="button" class="qty-minus" aria-label="Menos">−</button>
-        <input type="number" name="cantidad" value="1" min="1" max="99" class="qty-input" aria-label="Cantidad" />
+        <input type="number" name="cantidad" value="1" min="1" max="<?= (int) $qtyMax ?>" class="qty-input" aria-label="Cantidad" />
         <button type="button" class="qty-plus" aria-label="Más">+</button>
       </div>
       <button class="btn-add" type="submit">🛒 Agregar</button>

@@ -11,6 +11,8 @@ $antes = !empty($p['precioAntes']) ? (float) $p['precioAntes'] : null;
 $subtotal = $precio * $qty;
 $ahorroUn = ($antes !== null && $antes > $precio) ? ($antes - $precio) : 0.0;
 $tope = !empty($p['tope']) || $qty >= 3 && (int) ($p['id'] ?? 0) === 2;
+$stockMax = carrito_tope_linea((int) ($p['id'] ?? 0));
+$enTopeStock = $stockMax > 0 && $qty >= $stockMax;
 $badge = $p['badge'] ?? null;
 $volver = 'pedido.php';
 ?>
@@ -41,6 +43,9 @@ $volver = 'pedido.php';
     <?php if ($tope): ?>
       <div class="cart-alert">⚠ Tope de abastecimiento barrial — máx. 3 unidades</div>
     <?php endif; ?>
+    <?php if ($enTopeStock): ?>
+      <div class="cart-alert">⚠ Solo hay <?= (int) $stockMax ?> unidades disponibles</div>
+    <?php endif; ?>
     <div class="cart-line-actions">
       <form method="post" action="carrito.php">
         <?= csrf_field() ?>
@@ -66,7 +71,7 @@ $volver = 'pedido.php';
       <input type="hidden" name="volver" value="<?= e($volver) ?>" />
       <button type="submit" name="cantidad" value="<?= max(1, $qty - 1) ?>" aria-label="Menos">−</button>
       <span><?= $qty ?></span>
-      <button type="submit" name="cantidad" value="<?= min(99, $qty + 1) ?>" aria-label="Más" <?= $tope && $qty >= 3 ? 'disabled' : '' ?>>+</button>
+      <button type="submit" name="cantidad" value="<?= min($stockMax > 0 ? $stockMax : 99, $qty + 1) ?>" aria-label="Más" <?= ($tope && $qty >= 3) || $enTopeStock ? 'disabled' : '' ?>>+</button>
     </form>
     <div class="cart-subtotal">
       <span>Subtotal</span>

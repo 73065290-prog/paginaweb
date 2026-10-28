@@ -53,12 +53,39 @@ function carrito_cantidad_maxima(): int
     return 99;
 }
 
+/** Stock disponible del producto (detalle demo / catálogo). */
+function producto_stock_disponible(int $id): int
+{
+    $detalle = function_exists('mass_producto_detalle') ? mass_producto_detalle($id) : null;
+    if (is_array($detalle) && isset($detalle['stockCantidad'])) {
+        return max(0, (int) $detalle['stockCantidad']);
+    }
+    $p = producto_por_id($id);
+    if (!$p) {
+        return 0;
+    }
+    return (($p['stockTone'] ?? 'ok') === 'bajo') ? 8 : 24;
+}
+
+/** Tope efectivo por línea: min(99, stock disponible). */
+function carrito_tope_linea(int $id): int
+{
+    $stock = producto_stock_disponible($id);
+    if ($stock <= 0) {
+        return 0;
+    }
+    return min(carrito_cantidad_maxima(), $stock);
+}
+
 function carrito_agregar(int $id, int $cantidad = 1): void
 {
     if ($cantidad < 1 || !producto_por_id($id)) {
         return;
     }
-    $max = carrito_cantidad_maxima();
+    $max = carrito_tope_linea($id);
+    if ($max < 1) {
+        return;
+    }
     $cantidad = min($max, $cantidad);
     foreach ($_SESSION['carrito'] as &$item) {
         if ((int) $item['id'] === $id) {
@@ -81,7 +108,7 @@ function carrito_cambiar(int $id, int $delta): void
             unset($_SESSION['carrito'][$i]);
             $_SESSION['carrito'] = array_values($_SESSION['carrito']);
         } else {
-            $_SESSION['carrito'][$i]['cantidad'] = min(carrito_cantidad_maxima(), $nueva);
+            $_SESSION['carrito'][$i]['cantidad'] = min(carrito_tope_linea($id), $nueva);
         }
         return;
     }
@@ -106,9 +133,14 @@ function carrito_set_cantidad(int $id, int $cantidad): void
         carrito_eliminar($id);
         return;
     }
+    $max = carrito_tope_linea($id);
+    if ($max < 1) {
+        carrito_eliminar($id);
+        return;
+    }
     foreach ($_SESSION['carrito'] as $i => $item) {
         if ((int) $item['id'] === $id) {
-            $_SESSION['carrito'][$i]['cantidad'] = min(carrito_cantidad_maxima(), $cantidad);
+            $_SESSION['carrito'][$i]['cantidad'] = min($max, $cantidad);
             return;
         }
     }

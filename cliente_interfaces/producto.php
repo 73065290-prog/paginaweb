@@ -147,7 +147,7 @@ require __DIR__ . '/../includes/layouts/header.php';
           <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'producto.php?id=' . (int) $producto['id']) ?>" />
           <div class="qty">
             <button type="button" class="qty-minus" aria-label="Menos">−</button>
-            <input type="number" name="cantidad" value="1" min="1" max="99" class="qty-input" aria-label="Cantidad" />
+            <input type="number" name="cantidad" value="1" min="1" max="<?= (int) max(1, carrito_tope_linea((int) $producto['id'])) ?>" class="qty-input" aria-label="Cantidad" />
             <button type="button" class="qty-plus" aria-label="Más">+</button>
           </div>
           <button class="btn-add-pdp" type="submit">
