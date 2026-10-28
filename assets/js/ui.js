@@ -9,7 +9,11 @@
   function setCart(open) {
     overlay?.classList.toggle("open", open);
     drawer?.classList.toggle("open", open);
+    drawer?.setAttribute("aria-hidden", open ? "false" : "true");
     document.body.style.overflow = open ? "hidden" : "";
+    if (open) {
+      closeCart?.focus();
+    }
   }
 
   openCart?.addEventListener("click", () => setCart(true));
