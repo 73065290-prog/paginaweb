@@ -52,14 +52,15 @@ switch ($accion) {
 
     case 'cupon':
         $codigo = strtoupper(trim((string) ($_POST['cupon'] ?? '')));
-        if ($codigo === 'CLUBMASS10') {
-            pedido_set(['cupon' => $codigo]);
-            flash_set('Cupón CLUBMASS10 aplicado');
-        } elseif ($codigo === '') {
+        if ($codigo === '') {
             pedido_set(['cupon' => '']);
             flash_set('Cupón quitado');
+        } elseif (pedido_es_cupon_valido($codigo)) {
+            pedido_set(['cupon' => $codigo]);
+            flash_set('Cupón ' . $codigo . ' aplicado (−' . dinero(pedido_descuento_cupon($codigo)) . ')');
         } else {
-            flash_set('Cupón no válido — prueba CLUBMASS10');
+            $validos = implode(' o ', array_keys(pedido_cupones_validos()));
+            flash_set('Cupón no válido — prueba ' . $validos);
         }
         break;
 

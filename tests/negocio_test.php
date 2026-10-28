@@ -45,6 +45,10 @@ assert_true(pedido_costo_envio('express') === 4.9, 'express cuesta S/ 4.90');
 assert_true(pedido_descuento_cupon('CLUBMASS10') === 5.0, 'cupón CLUBMASS10 = 5');
 assert_true(pedido_descuento_cupon('CLUBMASS60') === 6.0, 'cupón CLUBMASS60 = 6');
 assert_true(pedido_descuento_cupon('XXX') === 0.0, 'cupón inválido = 0');
+assert_true(pedido_es_cupon_valido('CLUBMASS60'), 'CLUBMASS60 es cupón válido');
+assert_true(pedido_es_cupon_valido('clubmass10'), 'cupón válido case-insensitive');
+assert_true(!pedido_es_cupon_valido('XXX'), 'XXX no es cupón válido');
+assert_true(isset(pedido_cupones_validos()['CLUBMASS10'], pedido_cupones_validos()['CLUBMASS60']), 'mapa de cupones tiene ambos códigos');
 
 // 4) Resumen retiro vs express
 $_SESSION['carrito'] = [

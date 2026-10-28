@@ -150,14 +150,14 @@ require __DIR__ . '/../includes/layouts/header.php';
             <input type="hidden" name="volver" value="pedido.php" />
             <label for="cuponInput">Cupón de descuento</label>
             <div class="coupon-row">
-              <input id="cuponInput" name="cupon" type="text" placeholder="Ej. CLUBMASS10" value="" autocomplete="off" />
+              <input id="cuponInput" name="cupon" type="text" placeholder="Ej. CLUBMASS10 / CLUBMASS60" value="" autocomplete="off" />
               <button type="submit" class="btn-aplicar">Aplicar</button>
             </div>
           </form>
 
-          <?php if ($resumen['cupon'] === 'CLUBMASS10'): ?>
+          <?php if ($resumen['descuentoCupon'] > 0 && $resumen['cupon'] !== ''): ?>
           <div class="coupon-applied">
-            <span>Cupón <strong>CLUBMASS10</strong> · −<?= e(dinero($resumen['descuentoCupon'])) ?></span>
+            <span>Cupón <strong><?= e($resumen['cupon']) ?></strong> · −<?= e(dinero($resumen['descuentoCupon'])) ?></span>
             <form method="post" action="carrito.php">
               <input type="hidden" name="accion" value="cupon" />
               <input type="hidden" name="cupon" value="" />

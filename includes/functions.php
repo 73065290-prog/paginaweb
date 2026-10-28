@@ -175,14 +175,29 @@ function pedido_costo_envio(string $modo): float
     return pedido_normalizar_entrega($modo) === 'express' ? 4.9 : 0.0;
 }
 
+/**
+ * Cupones válidos Club Mass → monto de descuento.
+ *
+ * @return array<string, float>
+ */
+function pedido_cupones_validos(): array
+{
+    return [
+        'CLUBMASS10' => 5.0,
+        'CLUBMASS60' => 6.0,
+    ];
+}
+
 function pedido_descuento_cupon(string $cupon): float
 {
     $cupon = strtoupper(trim($cupon));
-    return match ($cupon) {
-        'CLUBMASS10' => 5.0,
-        'CLUBMASS60' => 6.0,
-        default => 0.0,
-    };
+    $mapa = pedido_cupones_validos();
+    return $mapa[$cupon] ?? 0.0;
+}
+
+function pedido_es_cupon_valido(string $cupon): bool
+{
+    return pedido_descuento_cupon($cupon) > 0.0;
 }
 
 /**
