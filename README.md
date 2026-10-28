@@ -143,6 +143,13 @@ Detalle completo en [`MEJORAS.md`](MEJORAS.md):
 | `fix/carrito-cantidad-maxima` | Bug | Tope 99 unidades en agregar/cambiar |
 | `mejora/seguridad-csrf` | Seguridad | CSRF + cookies de sesión endurecidas |
 | `docs/readme-proyecto` | Docs | Documentación de arranque |
+| `mejora/csrf-admin-productos` | Seguridad | CSRF en productos admin |
+| `mejora/session-regenerate-login` | Seguridad | Regenerar sesión al login |
+| `mejora/headers-seguridad` | Seguridad | Headers HTTP en Apache |
+| `fix/sanitizar-redirect-volver` | Bug | Redirect `volver` seguro |
+| `mejora/accesibilidad-carrito-aria` | a11y | ARIA del carrito |
+| `mejora/runner-tests-cli` | Calidad | Runner `tests/run_all.php` |
+| *(más)* | — | Ver [`MEJORAS.md`](MEJORAS.md) |
 
 ---
 
