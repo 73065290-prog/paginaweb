@@ -602,6 +602,24 @@ function csrf_validar(?string $token): bool
         && hash_equals($esperado, $token);
 }
 
+/**
+ * Normaliza destino post-acción del carrito (anti open-redirect).
+ * Solo permite rutas relativas locales sin esquema ni path traversal.
+ */
+function mass_safe_return_url(string $url, string $fallback = 'pedido.php'): string
+{
+    $url = trim($url);
+    if ($url === '' || str_contains($url, '://') || str_starts_with($url, '//') || str_contains($url, '..')) {
+        return $fallback;
+    }
+    // Evitar saltos de línea en Location
+    $url = str_replace(["\r", "\n", "\0"], '', $url);
+    if ($url === '' || !preg_match('#^[a-zA-Z0-9_./?&=%#\-]+$#', $url)) {
+        return $fallback;
+    }
+    return $url;
+}
+
 function redirect(string $url): never
 {
     header('Location: ' . $url);
