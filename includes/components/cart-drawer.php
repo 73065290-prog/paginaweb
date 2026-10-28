@@ -22,6 +22,7 @@ $items = carrito_items();
             <p><?= e(dinero((float) $p['precio'])) ?> c/u · x<?= (int) $item['cantidad'] ?></p>
             <div class="qty" style="margin-top:0.3rem">
               <form method="post" action="carrito.php" style="display:inline">
+                <?= csrf_field() ?>
                 <input type="hidden" name="accion" value="cambiar" />
                 <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
                 <input type="hidden" name="delta" value="-1" />
@@ -30,6 +31,7 @@ $items = carrito_items();
               </form>
               <span><?= (int) $item['cantidad'] ?></span>
               <form method="post" action="carrito.php" style="display:inline">
+                <?= csrf_field() ?>
                 <input type="hidden" name="accion" value="cambiar" />
                 <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
                 <input type="hidden" name="delta" value="1" />

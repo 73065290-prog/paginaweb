@@ -141,6 +141,7 @@ require __DIR__ . '/../includes/layouts/header.php';
         </div>
 
         <form class="pdp-actions" method="post" action="carrito.php">
+          <?= csrf_field() ?>
           <input type="hidden" name="accion" value="agregar" />
           <input type="hidden" name="id" value="<?= (int) $producto['id'] ?>" />
           <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'producto.php?id=' . (int) $producto['id']) ?>" />
@@ -218,6 +219,7 @@ require __DIR__ . '/../includes/layouts/header.php';
             <?php endif; ?>
           </div>
           <form method="post" action="carrito.php">
+            <?= csrf_field() ?>
             <input type="hidden" name="accion" value="agregar" />
             <input type="hidden" name="id" value="<?= (int) $producto['id'] ?>" />
             <input type="hidden" name="cantidad" value="1" />

@@ -43,12 +43,14 @@ $volver = 'pedido.php';
     <?php endif; ?>
     <div class="cart-line-actions">
       <form method="post" action="carrito.php">
+        <?= csrf_field() ?>
         <input type="hidden" name="accion" value="guardar" />
         <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
         <input type="hidden" name="volver" value="<?= e($volver) ?>" />
         <button type="submit">♡ Guardar para después</button>
       </form>
       <form method="post" action="carrito.php">
+        <?= csrf_field() ?>
         <input type="hidden" name="accion" value="eliminar" />
         <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
         <input type="hidden" name="volver" value="<?= e($volver) ?>" />
@@ -58,6 +60,7 @@ $volver = 'pedido.php';
   </div>
   <div class="cart-line-side">
     <form class="qty cart-qty" method="post" action="carrito.php">
+      <?= csrf_field() ?>
       <input type="hidden" name="accion" value="set_cantidad" />
       <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
       <input type="hidden" name="volver" value="<?= e($volver) ?>" />

@@ -556,6 +556,29 @@ function flash_set(string $mensaje): void
     $_SESSION['flash'] = $mensaje;
 }
 
+/** Token CSRF por sesión (formularios POST del carrito / checkout). */
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_field(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '" />';
+}
+
+function csrf_validar(?string $token): bool
+{
+    $esperado = $_SESSION['csrf_token'] ?? '';
+    return is_string($esperado)
+        && $esperado !== ''
+        && is_string($token)
+        && hash_equals($esperado, $token);
+}
+
 function redirect(string $url): never
 {
     header('Location: ' . $url);
