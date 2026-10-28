@@ -8,12 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $accion = (string) ($_POST['accion'] ?? '');
-$volver = (string) ($_POST['volver'] ?? 'pedido.php');
-
-// Evitar open redirect: solo rutas relativas del sitio
-if ($volver === '' || str_contains($volver, '://') || str_starts_with($volver, '//') || str_contains($volver, '..')) {
-    $volver = 'pedido.php';
-}
+$volver = mass_safe_return_url((string) ($_POST['volver'] ?? 'pedido.php'), 'pedido.php');
 
 if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
     flash_set('Sesión inválida. Recarga la página e intenta de nuevo.');
