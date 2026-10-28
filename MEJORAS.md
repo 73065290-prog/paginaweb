@@ -103,3 +103,23 @@ git push origin main
 > Nota: al fusionar las tres ramas de código habrá solapamiento en
 > `includes/functions.php`; resolver priorizando ambas correcciones
 > (cupones + tope 99) más los helpers CSRF.
+
+---
+
+## Rondas adicionales (ramas individuales)
+
+| Rama | Tipo | Resumen |
+|------|------|---------|
+| `mejora/csrf-admin-productos` | Seguridad | CSRF en alta/edición WMS productos |
+| `mejora/session-regenerate-login` | Seguridad | `session_regenerate_id` al autenticar |
+| `mejora/headers-seguridad` | Seguridad | Cabeceras HTTP en `.htaccess` |
+| `fix/sanitizar-redirect-volver` | Bug/Seguridad | `mass_safe_return_url()` anti open-redirect |
+| `mejora/accesibilidad-carrito-aria` | UX/a11y | Dialog/ARIA del carrito |
+| `mejora/runner-tests-cli` | Calidad | `tests/run_all.php` |
+| `mejora/catalogo-empty-state` | UX | Empty state con CTA limpiar filtros |
+| `mejora/meta-theme-color` | UX | `theme-color` marca Mass |
+| `mejora/toast-aria-live` | a11y | Toast flash con `aria-live` |
+| `fix/admin-filtro-pedidos` | Bug | Validación filtros pedidos admin |
+
+Cada mejora vive en su propia rama desde `main` para revisión independiente.
+
