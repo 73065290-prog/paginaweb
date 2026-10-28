@@ -1,20 +1,14 @@
 # Mass Online · SGC-Mass
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/banner-mass-online.png" alt="Mass Online — Tienda online y panel WMS SGC-Mass" width="100%" />
-</p>
+![Mass Online — Tienda online y panel WMS SGC-Mass](./docs/img/banner-mass-online.png)
 
-<p align="center">
-  <strong>Demo PHP</strong> de e-commerce y operaciones para <em>Tiendas Mass</em>:<br/>
-  catálogo, carrito, checkout (retiro / delivery) y panel admin WMS (inventario, pedidos, productos).
-</p>
+**Demo PHP** de e-commerce y operaciones para *Tiendas Mass*:
+catálogo, carrito, checkout (retiro / delivery) y panel admin WMS (inventario, pedidos, productos).
 
-<p align="center">
-  <img alt="PHP" src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php&logoColor=white" />
-  <img alt="Sesión" src="https://img.shields.io/badge/Persistencia-Sesión%20PHP-00472F" />
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-CLI%20PHP-2F9E60" />
-  <img alt="Licencia demo" src="https://img.shields.io/badge/Uso-Académico%20%2F%20Demo-FF8A3D" />
-</p>
+![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php&logoColor=white)
+![Sesión](https://img.shields.io/badge/Persistencia-Sesión%20PHP-00472F)
+![Tests](https://img.shields.io/badge/Tests-CLI%20PHP-2F9E60)
+![Licencia demo](https://img.shields.io/badge/Uso-Académico%20%2F%20Demo-FF8A3D)
 
 ---
 
@@ -40,13 +34,11 @@ Todo corre en **PHP puro** con datos demo en sesión (sin MySQL). Ideal para pr�
 
 ## Vistas principales
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/preview-tienda.png" alt="Vista previa Tienda Mass Online" width="48%" />
-  &nbsp;
-  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/preview-admin.png" alt="Vista previa Admin SGC-Mass" width="48%" />
-</p>
+| Tienda Mass Online | Admin SGC-Mass |
+|:---:|:---:|
+| ![Vista previa Tienda Mass Online](./docs/img/preview-tienda.png) | ![Vista previa Admin SGC-Mass](./docs/img/preview-admin.png) |
 
-<p align="center"><em>Izquierda:</em> storefront (hero, catálogo, carrito) · <em>Derecha:</em> dashboard WMS (KPIs, alertas de góndola)</p>
+*Izquierda:* storefront (hero, catálogo, carrito) · *Derecha:* dashboard WMS (KPIs, alertas de góndola)
 
 ### Flujo cliente
 1. Catálogo y ficha de producto (PDP)
@@ -166,8 +158,6 @@ Proyecto académico de **Pruebas y Calidad de Software** — demo funcional de t
 
 ---
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/73065290-prog/paginaweb/main/docs/img/logo-mass.png" alt="Mass Online" height="36" />
-  <br/>
-  <sub>Mass Online · SGC-Mass — demo PHP · uso académico</sub>
-</p>
+![Mass Online](./docs/img/logo-mass.png)
+
+*Mass Online · SGC-Mass — demo PHP · uso académico*
