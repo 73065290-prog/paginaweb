@@ -47,14 +47,22 @@ function carrito_total_monto(): float
     return $total;
 }
 
+/** Tope de unidades por línea en carrito (alineado con UI qty). */
+function carrito_cantidad_maxima(): int
+{
+    return 99;
+}
+
 function carrito_agregar(int $id, int $cantidad = 1): void
 {
     if ($cantidad < 1 || !producto_por_id($id)) {
         return;
     }
+    $max = carrito_cantidad_maxima();
+    $cantidad = min($max, $cantidad);
     foreach ($_SESSION['carrito'] as &$item) {
         if ((int) $item['id'] === $id) {
-            $item['cantidad'] = (int) $item['cantidad'] + $cantidad;
+            $item['cantidad'] = min($max, (int) $item['cantidad'] + $cantidad);
             return;
         }
     }
@@ -73,7 +81,7 @@ function carrito_cambiar(int $id, int $delta): void
             unset($_SESSION['carrito'][$i]);
             $_SESSION['carrito'] = array_values($_SESSION['carrito']);
         } else {
-            $_SESSION['carrito'][$i]['cantidad'] = $nueva;
+            $_SESSION['carrito'][$i]['cantidad'] = min(carrito_cantidad_maxima(), $nueva);
         }
         return;
     }
@@ -100,7 +108,7 @@ function carrito_set_cantidad(int $id, int $cantidad): void
     }
     foreach ($_SESSION['carrito'] as $i => $item) {
         if ((int) $item['id'] === $id) {
-            $_SESSION['carrito'][$i]['cantidad'] = min(99, $cantidad);
+            $_SESSION['carrito'][$i]['cantidad'] = min(carrito_cantidad_maxima(), $cantidad);
             return;
         }
     }
