@@ -8,8 +8,10 @@ $tituloAdmin = 'Pedidos & Picking — Mass Admin';
 $adminActivo = 'pedidos';
 $adminCrumb = 'Pedidos & Picking';
 
-$filtro = (string) ($_GET['modo'] ?? 'todos');
-$codigo = (string) ($_GET['codigo'] ?? '');
+$filtroRaw = (string) ($_GET['modo'] ?? 'todos');
+$filtro = in_array($filtroRaw, ['todos', 'express', 'retiro'], true) ? $filtroRaw : 'todos';
+$codigo = strtoupper(trim((string) ($_GET['codigo'] ?? '')));
+$codigo = preg_replace('/[^A-Z0-9\-]/', '', $codigo) ?? '';
 $pedidos = mass_admin_pedidos();
 
 if ($filtro === 'express' || $filtro === 'retiro') {
@@ -22,7 +24,7 @@ if ($filtro === 'express' || $filtro === 'retiro') {
 if ($codigo !== '') {
     $pedidos = array_values(array_filter(
         $pedidos,
-        static fn (array $p): bool => ($p['codigo'] ?? '') === $codigo
+        static fn (array $p): bool => str_contains(strtoupper((string) ($p['codigo'] ?? '')), $codigo)
     ));
 }
 
