@@ -13,10 +13,13 @@ $ahorroUn = ($antes !== null && $antes > $precio) ? ($antes - $precio) : 0.0;
 $tope = !empty($p['tope']) || $qty >= 3 && (int) ($p['id'] ?? 0) === 2;
 $badge = $p['badge'] ?? null;
 $volver = 'pedido.php';
+$cartCheckId = 'cart-sel-' . (int) ($p['id'] ?? 0);
+$cartCheckLabel = 'Seleccionar ' . (string) ($p['nombre'] ?? 'producto');
 ?>
 <article class="cart-line">
-  <label class="cart-check">
-    <input type="checkbox" checked name="sel[]" value="<?= (int) $p['id'] ?>" />
+  <label class="cart-check" for="<?= e($cartCheckId) ?>">
+    <span class="sr-only"><?= e($cartCheckLabel) ?></span>
+    <input id="<?= e($cartCheckId) ?>" type="checkbox" checked name="sel[]" value="<?= (int) $p['id'] ?>" />
   </label>
   <div class="cart-line-media">
     <?php if ($badge): ?>

@@ -9,6 +9,9 @@ composer.lock
 /.phpunit.cache/
 /docs/pruebas/evidencias/coverage/
 
+# SonarScanner local workdir
+.scannerwork/
+
 # Secrets / local env
 .env
 .env.*
