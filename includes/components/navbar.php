@@ -65,10 +65,17 @@ $authAvatar = $authRol === 'admin'
         </div>
       </div>
 
-      <button class="btn-carrito" id="openCart" type="button">
+      <button
+        class="btn-carrito"
+        id="openCart"
+        type="button"
+        aria-label="Abrir carrito, <?= (int) $unidades ?> producto<?= $unidades === 1 ? '' : 's' ?>, total <?= e(dinero($monto)) ?>"
+        aria-controls="cartDrawer"
+        aria-haspopup="dialog"
+      >
         <span aria-hidden="true">🛒</span>
         <span>
-          <span id="cartLabel"><?= (int) $unidades ?> producto<?= $unidades === 1 ? '' : 's' ?></span>
+          <span id="cartLabel" aria-live="polite"><?= (int) $unidades ?> producto<?= $unidades === 1 ? '' : 's' ?></span>
           <small id="cartTotalNav"><?= e(dinero($monto)) ?></small>
         </span>
       </button>

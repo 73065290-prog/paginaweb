@@ -3,7 +3,7 @@ declare(strict_types=1);
 $items = carrito_items();
 ?>
 <div class="overlay" id="overlay"></div>
-<aside class="cart-drawer" id="cartDrawer" aria-label="Carrito">
+<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Carrito de compras" aria-hidden="true">
   <div class="cart-head">
     <h3>Tu carrito</h3>
     <button class="close-btn" id="closeCart" type="button" aria-label="Cerrar">×</button>
