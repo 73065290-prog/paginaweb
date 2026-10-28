@@ -1,8 +1,13 @@
-﻿# Dependencies / build
+# Dependencies / build
 node_modules/
-vendor/
+/vendor/
 dist/
 build/
+composer.lock
+
+# PHPUnit / coverage
+/.phpunit.cache/
+/docs/pruebas/evidencias/coverage/
 
 # Secrets / local env
 .env
