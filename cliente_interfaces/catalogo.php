@@ -202,7 +202,11 @@ require __DIR__ . '/../includes/layouts/header.php';
 
         <div class="catalog-grid">
           <?php if (!$pageItems): ?>
-            <div class="empty" style="grid-column:1/-1">No hay productos con estos filtros.</div>
+            <div class="empty catalog-empty" style="grid-column:1/-1" role="status">
+              <strong>No encontramos productos con estos filtros</strong>
+              <p>Prueba ampliar el rango de precio, marcar stock disponible o quitar marcas.</p>
+              <a class="btn btn-verde" href="catalogo.php">Limpiar filtros</a>
+            </div>
           <?php else: ?>
             <?php foreach ($pageItems as $i => $p): ?>
               <?php if ($i === 3): ?>
