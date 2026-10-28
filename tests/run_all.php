@@ -27,6 +27,7 @@ if (is_file($phpunit)) {
 
 $suites = [
     'auth_test.php',
+    'proveedor_test.php',
     'negocio_test.php',
     'productos_admin_test.php',
     'carrito_test.php',

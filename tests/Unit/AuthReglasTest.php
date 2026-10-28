@@ -38,6 +38,7 @@ final class AuthReglasTest extends TestCase
         auth_login($r['usuario']);
         $this->assertTrue(auth_es_cliente());
         $this->assertFalse(auth_es_admin());
+        $this->assertFalse(auth_es_proveedor());
     }
 
     /** // P15 */
@@ -46,5 +47,17 @@ final class AuthReglasTest extends TestCase
         $r = auth_intentar('admin', 'wrong-password', 'admin');
         $this->assertFalse($r['ok']);
         $this->assertNull($r['usuario']);
+    }
+
+    /** // P16 */
+    public function test_auth_proveedor_separado_de_cliente(): void
+    {
+        $cruzado = auth_intentar('proveedor', '123456', 'cliente');
+        $this->assertFalse($cruzado['ok']);
+        $r = auth_intentar('proveedor', '123456', 'proveedor');
+        $this->assertTrue($r['ok']);
+        auth_login($r['usuario']);
+        $this->assertTrue(auth_es_proveedor());
+        $this->assertFalse(auth_es_cliente());
     }
 }

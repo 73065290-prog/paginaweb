@@ -25,6 +25,7 @@ final class AuthSesionTest extends TestCase
     {
         $this->assertFalse(auth_es_admin());
         $this->assertFalse(auth_es_cliente());
+        $this->assertFalse(auth_es_proveedor());
         $this->assertNull(auth_usuario());
     }
 }

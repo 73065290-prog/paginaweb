@@ -1259,3 +1259,226 @@ function mass_admin_producto_crear(array $data): array
 
     return ['ok' => true, 'errores' => [], 'id' => $id];
 }
+
+/** Perfil demo del proveedor conectado (B2B Mass). */
+function mass_proveedor_perfil(): array
+{
+    $u = function_exists('auth_usuario') ? auth_usuario() : null;
+    return [
+        'nombre' => (string) ($u['nombre'] ?? 'Ana Ríos'),
+        'cargo' => (string) ($u['cargo'] ?? 'Ejecutiva de abastecimiento'),
+        'empresa' => (string) ($u['empresa'] ?? 'Distribuidora Primor SAC'),
+        'ruc' => (string) ($u['ruc'] ?? '20123456789'),
+        'email' => (string) ($u['usuario'] ?? 'proveedor@mass.pe'),
+        'telefono' => '+51 987 654 321',
+        'avatar' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=96&h=96&fit=crop',
+        'categoria' => 'Abarrotes · Aceites · Granos',
+        'slaEntrega' => '48 h',
+        'calificacion' => 4.8,
+    ];
+}
+
+function mass_proveedor_kpis(): array
+{
+    $ordenes = mass_proveedor_ordenes();
+    $pendientes = count(array_filter($ordenes, static fn (array $o): bool => ($o['estado'] ?? '') === 'pendiente'));
+    $confirmadas = count(array_filter($ordenes, static fn (array $o): bool => ($o['estado'] ?? '') === 'confirmada'));
+    $enRuta = count(array_filter($ordenes, static fn (array $o): bool => ($o['estado'] ?? '') === 'en_ruta'));
+    $montoMes = 0.0;
+    foreach ($ordenes as $o) {
+        if (in_array($o['estado'] ?? '', ['confirmada', 'en_ruta', 'entregada'], true)) {
+            $montoMes += (float) ($o['total'] ?? 0);
+        }
+    }
+    return [
+        'ocPendientes' => $pendientes,
+        'ocConfirmadas' => $confirmadas,
+        'entregasRuta' => $enRuta,
+        'skusActivos' => count(mass_proveedor_skus()),
+        'montoMes' => $montoMes,
+        'fillRate' => 96.4,
+        'slaCumplido' => 98.1,
+    ];
+}
+
+function mass_proveedor_ordenes_base(): array
+{
+    return [
+        [
+            'id' => 'OC-Mass-2401',
+            'tienda' => 'Mass Magdalena',
+            'fecha' => '2026-10-26',
+            'entrega' => '2026-10-28',
+            'estado' => 'pendiente',
+            'estadoLabel' => 'Pendiente de confirmar',
+            'items' => 4,
+            'unidades' => 180,
+            'total' => 4280.50,
+            'prioridad' => 'alta',
+            'lineas' => [
+                ['sku' => 'ACE-PRI-900', 'nombre' => 'Aceite Primor 900 ml', 'cant' => 80, 'precio' => 7.20],
+                ['sku' => 'ARR-COS-5K', 'nombre' => 'Arroz Costeño 5 kg', 'cant' => 40, 'precio' => 18.50],
+                ['sku' => 'FID-DON-1K', 'nombre' => 'Fideos Don Vittorio 1 kg', 'cant' => 36, 'precio' => 4.80],
+                ['sku' => 'AZU-BEL-1K', 'nombre' => 'Azúcar Bell\'s 1 kg', 'cant' => 24, 'precio' => 3.90],
+            ],
+        ],
+        [
+            'id' => 'OC-Mass-2398',
+            'tienda' => 'Mass San Miguel',
+            'fecha' => '2026-10-24',
+            'entrega' => '2026-10-27',
+            'estado' => 'confirmada',
+            'estadoLabel' => 'Confirmada',
+            'items' => 3,
+            'unidades' => 120,
+            'total' => 2650.00,
+            'prioridad' => 'media',
+            'lineas' => [
+                ['sku' => 'ACE-PRI-900', 'nombre' => 'Aceite Primor 900 ml', 'cant' => 60, 'precio' => 7.20],
+                ['sku' => 'LEC-GLOR-1L', 'nombre' => 'Leche Gloria 1 L', 'cant' => 40, 'precio' => 4.50],
+                ['sku' => 'YOG-GLOR-1K', 'nombre' => 'Yogurt Gloria 1 kg', 'cant' => 20, 'precio' => 6.80],
+            ],
+        ],
+        [
+            'id' => 'OC-Mass-2390',
+            'tienda' => 'Mass Miraflores',
+            'fecha' => '2026-10-22',
+            'entrega' => '2026-10-25',
+            'estado' => 'en_ruta',
+            'estadoLabel' => 'En ruta a tienda',
+            'items' => 2,
+            'unidades' => 90,
+            'total' => 1890.00,
+            'prioridad' => 'media',
+            'lineas' => [
+                ['sku' => 'ARR-COS-5K', 'nombre' => 'Arroz Costeño 5 kg', 'cant' => 50, 'precio' => 18.50],
+                ['sku' => 'ACE-PRI-900', 'nombre' => 'Aceite Primor 900 ml', 'cant' => 40, 'precio' => 7.20],
+            ],
+        ],
+        [
+            'id' => 'OC-Mass-2375',
+            'tienda' => 'Mass Magdalena',
+            'fecha' => '2026-10-18',
+            'entrega' => '2026-10-20',
+            'estado' => 'entregada',
+            'estadoLabel' => 'Entregada',
+            'items' => 5,
+            'unidades' => 210,
+            'total' => 5120.75,
+            'prioridad' => 'baja',
+            'lineas' => [
+                ['sku' => 'ACE-PRI-900', 'nombre' => 'Aceite Primor 900 ml', 'cant' => 100, 'precio' => 7.20],
+                ['sku' => 'ARR-COS-5K', 'nombre' => 'Arroz Costeño 5 kg', 'cant' => 40, 'precio' => 18.50],
+                ['sku' => 'FID-DON-1K', 'nombre' => 'Fideos Don Vittorio 1 kg', 'cant' => 30, 'precio' => 4.80],
+                ['sku' => 'AZU-BEL-1K', 'nombre' => 'Azúcar Bell\'s 1 kg', 'cant' => 20, 'precio' => 3.90],
+                ['sku' => 'LEC-GLOR-1L', 'nombre' => 'Leche Gloria 1 L', 'cant' => 20, 'precio' => 4.50],
+            ],
+        ],
+        [
+            'id' => 'OC-Mass-2360',
+            'tienda' => 'Mass Surco',
+            'fecha' => '2026-10-15',
+            'entrega' => '2026-10-17',
+            'estado' => 'rechazada',
+            'estadoLabel' => 'Rechazada (sin stock)',
+            'items' => 1,
+            'unidades' => 48,
+            'total' => 345.60,
+            'prioridad' => 'baja',
+            'lineas' => [
+                ['sku' => 'ACE-PRI-900', 'nombre' => 'Aceite Primor 900 ml', 'cant' => 48, 'precio' => 7.20],
+            ],
+        ],
+    ];
+}
+
+function mass_proveedor_ordenes(?string $filtroEstado = null): array
+{
+    $overrides = $_SESSION['proveedor_ordenes'] ?? [];
+    if (!is_array($overrides)) {
+        $overrides = [];
+    }
+    $labels = [
+        'pendiente' => 'Pendiente de confirmar',
+        'confirmada' => 'Confirmada',
+        'en_ruta' => 'En ruta a tienda',
+        'entregada' => 'Entregada',
+        'rechazada' => 'Rechazada',
+    ];
+    $out = [];
+    foreach (mass_proveedor_ordenes_base() as $o) {
+        $id = (string) $o['id'];
+        if (isset($overrides[$id]) && is_array($overrides[$id])) {
+            $o = array_merge($o, $overrides[$id]);
+            $est = (string) ($o['estado'] ?? 'pendiente');
+            $o['estadoLabel'] = $labels[$est] ?? $o['estadoLabel'];
+        }
+        if ($filtroEstado !== null && $filtroEstado !== '' && $filtroEstado !== 'todos') {
+            if (($o['estado'] ?? '') !== $filtroEstado) {
+                continue;
+            }
+        }
+        $out[] = $o;
+    }
+    return $out;
+}
+
+function mass_proveedor_orden_por_id(string $id): ?array
+{
+    foreach (mass_proveedor_ordenes() as $o) {
+        if ((string) $o['id'] === $id) {
+            return $o;
+        }
+    }
+    return null;
+}
+
+/**
+ * @return array{ok:bool, errores:array<int,string>}
+ */
+function proveedor_orden_cambiar_estado(string $id, string $nuevoEstado): array
+{
+    $permitidos = ['confirmada', 'rechazada', 'en_ruta', 'entregada'];
+    if (!in_array($nuevoEstado, $permitidos, true)) {
+        return ['ok' => false, 'errores' => ['Estado no permitido']];
+    }
+    $orden = mass_proveedor_orden_por_id($id);
+    if ($orden === null) {
+        return ['ok' => false, 'errores' => ['Orden de compra no encontrada']];
+    }
+    $actual = (string) ($orden['estado'] ?? '');
+    $transiciones = [
+        'pendiente' => ['confirmada', 'rechazada'],
+        'confirmada' => ['en_ruta', 'rechazada'],
+        'en_ruta' => ['entregada'],
+    ];
+    if (!isset($transiciones[$actual]) || !in_array($nuevoEstado, $transiciones[$actual], true)) {
+        return ['ok' => false, 'errores' => ['No se puede pasar de ' . $actual . ' a ' . $nuevoEstado]];
+    }
+    if (!isset($_SESSION['proveedor_ordenes']) || !is_array($_SESSION['proveedor_ordenes'])) {
+        $_SESSION['proveedor_ordenes'] = [];
+    }
+    $_SESSION['proveedor_ordenes'][$id] = ['estado' => $nuevoEstado];
+    return ['ok' => true, 'errores' => []];
+}
+
+function mass_proveedor_skus(): array
+{
+    return [
+        ['sku' => 'ACE-PRI-900', 'ean' => '7750123456789', 'nombre' => 'Aceite Vegetal Primor 900 ml', 'categoria' => 'Abarrotes', 'precio' => 7.20, 'stock' => 2400, 'moq' => 24, 'lead' => '48 h', 'estado' => 'activo'],
+        ['sku' => 'ARR-COS-5K', 'ean' => '7750987654321', 'nombre' => 'Arroz Extra Costeño 5 kg', 'categoria' => 'Abarrotes', 'precio' => 18.50, 'stock' => 860, 'moq' => 10, 'lead' => '72 h', 'estado' => 'activo'],
+        ['sku' => 'FID-DON-1K', 'ean' => '7750111222333', 'nombre' => 'Fideos Spaghetti Don Vittorio 1 kg', 'categoria' => 'Abarrotes', 'precio' => 4.80, 'stock' => 1500, 'moq' => 20, 'lead' => '48 h', 'estado' => 'activo'],
+        ['sku' => 'AZU-BEL-1K', 'ean' => '7750444555666', 'nombre' => 'Azúcar Rubia Bell\'s 1 kg', 'categoria' => 'Abarrotes', 'precio' => 3.90, 'stock' => 420, 'moq' => 20, 'lead' => '48 h', 'estado' => 'bajo'],
+        ['sku' => 'LEC-GLOR-1L', 'ean' => '7750777888999', 'nombre' => 'Leche Evaporada Gloria 1 L', 'categoria' => 'Lácteos', 'precio' => 4.50, 'stock' => 0, 'moq' => 24, 'lead' => '24 h', 'estado' => 'agotado'],
+        ['sku' => 'YOG-GLOR-1K', 'ean' => '7750123123456', 'nombre' => 'Yogurt Natural Gloria 1 kg', 'categoria' => 'Lácteos', 'precio' => 6.80, 'stock' => 310, 'moq' => 12, 'lead' => '24 h', 'estado' => 'activo'],
+    ];
+}
+
+function mass_proveedor_entregas(): array
+{
+    return [
+        ['id' => 'ENT-8821', 'oc' => 'OC-Mass-2390', 'tienda' => 'Mass Miraflores', 'fecha' => '2026-10-25', 'ventana' => '08:00 – 12:00', 'estado' => 'en_ruta', 'chofer' => 'Jorge Palacios', 'placa' => 'B2C-814'],
+        ['id' => 'ENT-8810', 'oc' => 'OC-Mass-2398', 'tienda' => 'Mass San Miguel', 'fecha' => '2026-10-27', 'ventana' => '14:00 – 18:00', 'estado' => 'programada', 'chofer' => 'Por asignar', 'placa' => '—'],
+        ['id' => 'ENT-8799', 'oc' => 'OC-Mass-2375', 'tienda' => 'Mass Magdalena', 'fecha' => '2026-10-20', 'ventana' => '09:00 – 13:00', 'estado' => 'entregada', 'chofer' => 'Luis Cárdenas', 'placa' => 'A1F-302'],
+    ];
+}

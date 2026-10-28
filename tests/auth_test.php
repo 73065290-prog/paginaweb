@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Pruebas autenticación SGC-Mass (Figma 30-9006)
+ * Pruebas autenticación — roles admin / cliente / proveedor
  *   php tests/auth_test.php
  */
 
@@ -27,52 +27,55 @@ function assert_true(bool $cond, string $msg): void
     }
 }
 
-echo "=== Auth SGC-Mass ===\n";
+echo "=== Auth SGC-Mass (3 roles) ===\n";
 
-// Vacío
 $r = auth_intentar('', '', 'admin');
 assert_true(!$r['ok'], 'usuario/password vacíos falla');
 assert_true(count($r['errores']) >= 2, 'reporta ambos errores');
 
-// Credenciales malas
 $r = auth_intentar('admin', 'wrong', 'admin');
 assert_true(!$r['ok'], 'password incorrecta falla');
 
-// Admin OK con usuario corto
 $r = auth_intentar('admin', '123456', 'admin');
 assert_true($r['ok'], 'admin / 123456 OK');
 assert_true(($r['usuario']['rol'] ?? '') === 'admin', 'rol admin');
 
-// Admin OK con correo
 $r = auth_intentar('admin.operaciones@mass.pe', '123456', 'admin');
 assert_true($r['ok'], 'correo corporativo OK');
 
-// Rol cruzado: admin en modo cliente
 $r = auth_intentar('admin', '123456', 'cliente');
 assert_true(!$r['ok'], 'admin no entra en modo cliente');
 
-// Cliente OK
 $r = auth_intentar('cliente', '123456', 'cliente');
 assert_true($r['ok'], 'cliente / 123456 OK');
 assert_true(($r['usuario']['rol'] ?? '') === 'cliente', 'rol cliente');
 
-// Proveedor OK
 $r = auth_intentar('proveedor@mass.pe', '123456', 'cliente');
-assert_true($r['ok'], 'proveedor correo OK');
+assert_true(!$r['ok'], 'proveedor no entra como cliente');
 
-// Sesión login/logout
+$r = auth_intentar('proveedor', '123456', 'proveedor');
+assert_true($r['ok'], 'proveedor / 123456 OK');
+assert_true(($r['usuario']['rol'] ?? '') === 'proveedor', 'rol proveedor');
+assert_true(($r['usuario']['empresa'] ?? '') !== '', 'proveedor trae empresa');
+
 auth_login($r['usuario'], true);
-assert_true(auth_es_cliente(), 'sesión cliente activa');
-assert_true(!auth_es_admin(), 'no es admin');
+assert_true(auth_es_proveedor(), 'sesión proveedor activa');
+assert_true(!auth_es_cliente(), 'proveedor no es cliente');
+assert_true(!auth_es_admin(), 'proveedor no es admin');
+assert_true(auth_destino_post_login('proveedor') === '../proveedor/index.php', 'destino proveedor');
+assert_true(auth_destino_post_login('cliente') === '../cliente_interfaces/index.php', 'destino cliente');
 auth_logout();
 assert_true(auth_usuario() === null, 'logout limpia sesión');
+
+$r = auth_intentar('cliente', '123456', 'cliente');
+auth_login($r['usuario']);
+assert_true(auth_es_cliente(), 'sesión cliente activa');
+assert_true(!auth_es_proveedor(), 'cliente no es proveedor');
+auth_logout();
 
 $r = auth_intentar('admin', '123456', 'admin');
 auth_login($r['usuario']);
 assert_true(auth_es_admin(), 'sesión admin activa');
-assert_true(str_contains((string) auth_usuario()['nombre'], 'Gonzalo') || auth_usuario()['nombre'] !== '', 'nombre en sesión');
-
-// Regeneración: tras login la sesión sigue usable
 assert_true(auth_usuario() !== null, 'sesión válida tras regenerate_id');
 
 echo "\nResultado: {$passed} OK, {$failed} FAIL\n";

@@ -25,7 +25,8 @@ Todo corre en **PHP puro** (sin Laravel ni frameworks JS). Por defecto usa datos
 
 | Módulo | Ruta | Para quién |
 |--------|------|------------|
-| Tienda online | `cliente_interfaces/` → `frontend/views/cliente/` | Cliente / proveedor de pedidos |
+| Tienda online | `cliente_interfaces/` → `frontend/views/cliente/` | Cliente Mass Online |
+| Portal proveedor | `proveedor/` → `frontend/views/proveedor/` | Proveedor B2B (OC, SKU, entregas) |
 | Panel WMS | `admin/` → `frontend/views/admin/` | Administrador de operaciones |
 | Backend | `backend/` | Config, repositorios PDO, middleware |
 | Núcleo | `includes/` | Auth, carrito, checkout, fallback demo |
@@ -68,10 +69,12 @@ Todo corre en **PHP puro** (sin Laravel ni frameworks JS). Por defecto usa datos
 1. Copia el proyecto a tu servidor local, por ejemplo:
    - XAMPP → `htdocs/paginaweb` (o el nombre de carpeta que uses)
 2. Abre:
-   - **Tienda:** `http://localhost/<carpeta>/` → redirige a `cliente_interfaces/`
-   - **Admin:** `http://localhost/<carpeta>/admin/login.php`
-3. Atajo demo de checkout:  
-   `cliente_interfaces/pedido.php?demo=1` (carga una canasta de ejemplo)
+   - **Tienda (cliente):** `http://localhost/<carpeta>/` → `cliente_interfaces/`
+   - **Login por rol:** `http://localhost/<carpeta>/admin/login.php` (Admin · Cliente · Proveedor)
+   - **Portal proveedor:** tras login Proveedor → `proveedor/`
+   - **Admin WMS:** tras login Admin → `admin/`
+3. Atajo demo de checkout cliente:  
+   `cliente_interfaces/pedido.php?demo=1`
 
 ### MySQL opcional (XAMPP)
 
@@ -86,12 +89,13 @@ Sin BD configurada, el sistema sigue funcionando con datos demo en sesión.
 
 ## Credenciales demo
 
-| Usuario | Contraseña | Rol |
-|---------|------------|-----|
-| `admin` · `admin.operaciones@mass.pe` | `123456` | Administrador WMS |
-| `cliente` · `proveedor@mass.pe` | `123456` | Cliente / proveedor pedidos |
+| Usuario | Contraseña | Rol | Destino |
+|---------|------------|-----|---------|
+| `admin` · `admin.operaciones@mass.pe` | `123456` | Administrador WMS | `admin/` |
+| `cliente` · `cliente@mass.pe` | `123456` | Cliente Mass Online | `cliente_interfaces/` |
+| `proveedor` · `proveedor@mass.pe` | `123456` | Proveedor B2B | `proveedor/` |
 
-> Solo para demo académica. No uses estas claves en producción.
+> Roles **separados**. Solo para demo académica.
 
 ## Cupones demo
 

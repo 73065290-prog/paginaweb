@@ -120,6 +120,7 @@ git push origin main
 | `mejora/meta-theme-color` | UX | `theme-color` marca Mass |
 | `mejora/toast-aria-live` | a11y | Toast flash con `aria-live` |
 | `fix/admin-filtro-pedidos` | Bug | Validación filtros pedidos admin |
+| `mejora/roles-cliente-proveedor` | Feature | Roles separados: cliente tienda + portal proveedor B2B |
 
 Cada mejora vive en su propia rama desde `main` para revisión independiente.
 

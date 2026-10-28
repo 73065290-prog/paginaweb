@@ -22,9 +22,9 @@ require_once __DIR__ . '/functions.php';
 // Prefijo relativo desde admin/ o cliente_interfaces/ hacia la raíz del proyecto
 if (!defined('MASS_BASE_HREF')) {
     $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-    if (preg_match('#/(admin|cliente_interfaces)$#', $scriptDir)) {
+    if (preg_match('#/(admin|cliente_interfaces|proveedor)$#', $scriptDir)) {
         define('MASS_BASE_HREF', '../');
-    } elseif (preg_match('#/frontend/views/(admin|cliente)$#', $scriptDir)) {
+    } elseif (preg_match('#/frontend/views/(admin|cliente|proveedor)$#', $scriptDir)) {
         define('MASS_BASE_HREF', '../../../');
     } else {
         define('MASS_BASE_HREF', '');

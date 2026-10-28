@@ -7,9 +7,11 @@ $authUser = auth_usuario();
 $authNombre = $authUser['nombre'] ?? 'Mi Cuenta';
 $authCargo = $authUser['cargo'] ?? '';
 $authRol = $authUser['rol'] ?? '';
-$authAvatar = $authRol === 'admin'
-    ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop'
-    : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop';
+$authAvatar = match ($authRol) {
+    'admin' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop',
+    'proveedor' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=64&h=64&fit=crop',
+    default => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop',
+};
 ?>
 <header class="header">
   <div class="container header-main">
@@ -45,22 +47,26 @@ $authAvatar = $authRol === 'admin'
             <div class="cuenta-head">
               <strong><?= e((string) $authNombre) ?></strong>
               <span><?= e((string) $authCargo) ?></span>
-              <small><?= $authRol === 'admin' ? 'Administrador WMS' : 'Cliente / Proveedor' ?></small>
+              <small><?= e(auth_etiqueta_rol((string) $authRol)) ?></small>
             </div>
             <?php if ($authRol === 'admin'): ?>
               <a href="<?= e(mass_url('admin/index.php')) ?>">Ir al panel admin</a>
+            <?php elseif ($authRol === 'proveedor'): ?>
+              <a href="<?= e(mass_url('proveedor/index.php')) ?>">Ir al portal proveedor</a>
             <?php else: ?>
-              <a href="pedido.php">Mis pedidos / Checkout</a>
+              <a href="cuenta.php">Mi cuenta cliente</a>
+              <a href="pedido.php">Checkout / pedidos</a>
               <a href="catalogo.php">Seguir comprando</a>
             <?php endif; ?>
             <a class="is-logout" href="<?= e(mass_url('logout.php')) ?>">Cerrar sesión</a>
           <?php else: ?>
             <div class="cuenta-head">
               <strong>Acceso Mass</strong>
-              <span>Elige cómo ingresar</span>
+              <span>Elige tu rol</span>
             </div>
-            <a href="<?= e(mass_url('admin/login.php?rol=cliente')) ?>">Soy cliente / proveedor</a>
-            <a href="<?= e(mass_url('admin/login.php?rol=admin')) ?>">Soy administrador</a>
+            <a href="<?= e(mass_url('admin/login.php?rol=cliente')) ?>">Soy cliente (tienda)</a>
+            <a href="<?= e(mass_url('admin/login.php?rol=proveedor')) ?>">Soy proveedor (B2B)</a>
+            <a href="<?= e(mass_url('admin/login.php?rol=admin')) ?>">Soy administrador WMS</a>
           <?php endif; ?>
         </div>
       </div>

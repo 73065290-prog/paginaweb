@@ -13,13 +13,15 @@ DELETE FROM usuarios;
 DELETE FROM roles;
 SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO roles (id, nombre) VALUES (1, 'admin'), (2, 'cliente');
+INSERT INTO roles (id, nombre) VALUES (1, 'admin'), (2, 'cliente'), (3, 'proveedor');
 
 INSERT INTO usuarios (usuario, password_hash, rol_id, nombre, cargo) VALUES
 ('admin.operaciones@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 1, 'Gonzalo Méndez', 'Administrador de Tienda'),
 ('admin', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 1, 'Gonzalo Méndez', 'Administrador WMS'),
-('proveedor@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'Ana Proveedor', 'Cliente / Proveedor Pedidos'),
-('cliente', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'Cliente Demo', 'Portal Pedidos');
+('cliente@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'María López', 'Cliente Mass Online'),
+('cliente', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'María López', 'Cliente Mass Online'),
+('proveedor@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 3, 'Ana Ríos', 'Ejecutiva de abastecimiento'),
+('proveedor', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 3, 'Ana Ríos', 'Ejecutiva de abastecimiento');
 
 INSERT INTO categorias (id, nombre, badge, badge_tone, count_hint, cat_filtro, img) VALUES
 ('frutas', 'Frutas y Verduras', 'Diario', '', 85, 'Frutas', 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&h=400&fit=crop'),

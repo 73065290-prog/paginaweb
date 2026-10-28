@@ -510,7 +510,38 @@ function mass_demo_password_hash(): string
     return '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG';
 }
 
-/** Usuarios demo SGC-Mass (Figma 30-9006). Prefiere MySQL si está conectado. */
+/** Roles válidos: admin WMS, cliente tienda, proveedor B2B. */
+function auth_roles_validos(): array
+{
+    return ['admin', 'cliente', 'proveedor'];
+}
+
+function auth_normalizar_rol(string $rol): string
+{
+    $rol = mb_strtolower(trim($rol));
+    return in_array($rol, auth_roles_validos(), true) ? $rol : 'admin';
+}
+
+function auth_etiqueta_rol(string $rol): string
+{
+    return match (auth_normalizar_rol($rol)) {
+        'cliente' => 'Cliente Mass Online',
+        'proveedor' => 'Proveedor B2B',
+        default => 'Administrador WMS',
+    };
+}
+
+/** Destino post-login relativo a admin/login.php */
+function auth_destino_post_login(string $rol): string
+{
+    return match (auth_normalizar_rol($rol)) {
+        'cliente' => '../cliente_interfaces/index.php',
+        'proveedor' => '../proveedor/index.php',
+        default => 'index.php',
+    };
+}
+
+/** Usuarios demo SGC-Mass. Prefiere MySQL si está conectado. */
 function mass_usuarios_auth(): array
 {
     if (class_exists('UsuarioRepository') && Database::connected()) {
@@ -538,18 +569,36 @@ function mass_usuarios_auth(): array
             'cargo' => 'Administrador WMS',
         ],
         [
-            'usuario' => 'proveedor@mass.pe',
+            'usuario' => 'cliente@mass.pe',
             'password_hash' => $hash,
             'rol' => 'cliente',
-            'nombre' => 'Ana Proveedor',
-            'cargo' => 'Cliente / Proveedor Pedidos',
+            'nombre' => 'María López',
+            'cargo' => 'Cliente Mass Online',
         ],
         [
             'usuario' => 'cliente',
             'password_hash' => $hash,
             'rol' => 'cliente',
-            'nombre' => 'Cliente Demo',
-            'cargo' => 'Portal Pedidos',
+            'nombre' => 'María López',
+            'cargo' => 'Cliente Mass Online',
+        ],
+        [
+            'usuario' => 'proveedor@mass.pe',
+            'password_hash' => $hash,
+            'rol' => 'proveedor',
+            'nombre' => 'Ana Ríos',
+            'cargo' => 'Ejecutiva de abastecimiento',
+            'empresa' => 'Distribuidora Primor SAC',
+            'ruc' => '20123456789',
+        ],
+        [
+            'usuario' => 'proveedor',
+            'password_hash' => $hash,
+            'rol' => 'proveedor',
+            'nombre' => 'Ana Ríos',
+            'cargo' => 'Ejecutiva de abastecimiento',
+            'empresa' => 'Distribuidora Primor SAC',
+            'ruc' => '20123456789',
         ],
     ];
 }
@@ -561,7 +610,7 @@ function auth_intentar(string $usuario, string $password, string $rolEsperado = 
 {
     $usuario = mb_strtolower(trim($usuario));
     $password = trim($password);
-    $rolEsperado = $rolEsperado === 'cliente' ? 'cliente' : 'admin';
+    $rolEsperado = auth_normalizar_rol($rolEsperado);
     $errores = [];
 
     if ($usuario === '') {
@@ -585,7 +634,7 @@ function auth_intentar(string $usuario, string $password, string $rolEsperado = 
         if (($u['rol'] ?? '') !== $rolEsperado) {
             return [
                 'ok' => false,
-                'errores' => ['Este usuario no corresponde al modo seleccionado (' . $rolEsperado . ')'],
+                'errores' => ['Este usuario no corresponde al modo seleccionado (' . auth_etiqueta_rol($rolEsperado) . ')'],
                 'usuario' => null,
             ];
         }
@@ -611,6 +660,8 @@ function auth_login(array $usuario, bool $recordar = false): void
         'rol' => (string) $usuario['rol'],
         'nombre' => (string) $usuario['nombre'],
         'cargo' => (string) ($usuario['cargo'] ?? ''),
+        'empresa' => (string) ($usuario['empresa'] ?? ''),
+        'ruc' => (string) ($usuario['ruc'] ?? ''),
         'login_at' => date('c'),
         'recordar' => $recordar,
     ];
@@ -639,12 +690,36 @@ function auth_es_cliente(): bool
     return $u !== null && ($u['rol'] ?? '') === 'cliente';
 }
 
+function auth_es_proveedor(): bool
+{
+    $u = auth_usuario();
+    return $u !== null && ($u['rol'] ?? '') === 'proveedor';
+}
+
 /** Protege páginas admin: redirige a login si no hay sesión admin. */
 function auth_requerir_admin(): void
 {
     if (!auth_es_admin()) {
         flash_set('Inicia sesión como Administrador WMS');
         redirect('login.php');
+    }
+}
+
+/** Protege portal proveedor B2B. */
+function auth_requerir_proveedor(): void
+{
+    if (!auth_es_proveedor()) {
+        flash_set('Inicia sesión como Proveedor Mass');
+        redirect(mass_url('admin/login.php?rol=proveedor'));
+    }
+}
+
+/** Protege áreas de cuenta cliente. */
+function auth_requerir_cliente(): void
+{
+    if (!auth_es_cliente()) {
+        flash_set('Inicia sesión como Cliente Mass Online');
+        redirect(mass_url('admin/login.php?rol=cliente'));
     }
 }
 

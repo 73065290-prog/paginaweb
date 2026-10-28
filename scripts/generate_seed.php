@@ -39,14 +39,15 @@ $out[] = 'DELETE FROM usuarios;';
 $out[] = 'DELETE FROM roles;';
 $out[] = 'SET FOREIGN_KEY_CHECKS = 1;';
 $out[] = '';
-$out[] = "INSERT INTO roles (id, nombre) VALUES (1, 'admin'), (2, 'cliente');";
+$out[] = "INSERT INTO roles (id, nombre) VALUES (1, 'admin'), (2, 'cliente'), (3, 'proveedor');";
 $out[] = '';
 
 $hash = mass_demo_password_hash();
 $out[] = 'INSERT INTO usuarios (usuario, password_hash, rol_id, nombre, cargo) VALUES';
 $userRows = [];
 foreach (mass_usuarios_auth() as $u) {
-    $rolId = ($u['rol'] ?? '') === 'admin' ? 1 : 2;
+    $rol = (string) ($u['rol'] ?? 'cliente');
+    $rolId = $rol === 'admin' ? 1 : ($rol === 'proveedor' ? 3 : 2);
     $userRows[] = sprintf(
         '(%s, %s, %d, %s, %s)',
         sql_str((string) $u['usuario']),

@@ -51,4 +51,19 @@ final class AuthLogoutCambioRolTest extends TestCase
         $this->assertTrue(auth_es_cliente());
         $this->assertSame('cliente', auth_usuario()['rol'] ?? '');
     }
+
+    public function test_cambiar_de_cliente_a_proveedor_reemplaza_sesion(): void
+    {
+        $cliente = auth_intentar('cliente', '123456', 'cliente');
+        auth_login($cliente['usuario']);
+        $this->assertTrue(auth_es_cliente());
+
+        auth_logout();
+        $prov = auth_intentar('proveedor', '123456', 'proveedor');
+        auth_login($prov['usuario']);
+
+        $this->assertTrue(auth_es_proveedor());
+        $this->assertFalse(auth_es_cliente());
+        $this->assertSame('proveedor', auth_usuario()['rol'] ?? '');
+    }
 }

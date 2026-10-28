@@ -226,6 +226,10 @@ body.login-body {
   margin-bottom: 0.55rem;
 }
 
+.role-switch--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .role-tab {
   display: flex;
   flex-direction: column;
