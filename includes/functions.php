@@ -614,7 +614,7 @@ function mass_safe_return_url(string $url, string $fallback = 'pedido.php'): str
     }
     // Evitar saltos de línea en Location
     $url = str_replace(["\r", "\n", "\0"], '', $url);
-    if ($url === '' || !preg_match('#^[a-zA-Z0-9_./?&=%#\-]+$#', $url)) {
+    if ($url === '' || !preg_match('~^[A-Za-z0-9_./?&=%#\\-]+$~', $url)) {
         return $fallback;
     }
     return $url;
