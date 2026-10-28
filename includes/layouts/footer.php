@@ -68,9 +68,9 @@ $footerModo = $footerModo ?? 'inicio';
   <?php require __DIR__ . '/../components/cart-drawer.php'; ?>
 
   <?php if (!empty($flash)): ?>
-    <div class="toast show" id="toast" role="status"><?= e($flash) ?></div>
+    <div class="toast show" id="toast" role="status" aria-live="polite" aria-atomic="true"><?= e($flash) ?></div>
   <?php else: ?>
-    <div class="toast" id="toast" role="status"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   <?php endif; ?>
 
   <script src="<?= e(mass_asset('assets/js/ui.js')) ?>"></script>
