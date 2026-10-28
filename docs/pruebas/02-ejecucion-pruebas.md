@@ -28,7 +28,7 @@ Evidencia cruda de la corrida con cobertura: `docs/pruebas/evidencias/ejecucion-
 
 ## 2. Resultados por caso (suite automatizada)
 
-Fuente: ejecución PHPUnit + PCOV del **2026-10-28 01:29:33** (`OK (32 tests, 99 assertions)`, Time **00:01.639**, Lines **58.30%**).
+Fuente: ejecución PHPUnit + PCOV del **2026-10-28 01:58:35** (`OK (32 tests, 99 assertions)`, Time **00:00.402**, Lines **58.44%**).
 
 | ID | Funcionalidad evaluada | Tipo | Datos de entrada | Procedimiento ejecutado | Resultado esperado | Resultado obtenido | Estado | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -75,8 +75,8 @@ Fuente: ejecución PHPUnit + PCOV del **2026-10-28 01:29:33** (`OK (32 tests, 99
 | Omitidos / Bloqueados | **0** |
 | Assertions | **99** |
 | % aprobación | **100%** = (32/32)×100 |
-| Tiempo | **1.639 s** (corrida con PCOV) |
-| Cobertura de líneas (`includes/`) | **58.30%** (811/1391) |
+| Tiempo | **0.402 s** (corrida con PCOV) |
+| Cobertura de líneas (`includes/`) | **58.44%** (817/1398) |
 
 ## 4. Análisis de defectos / incidencias durante el desarrollo de pruebas
 

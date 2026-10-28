@@ -432,34 +432,45 @@ function pedido_ultimo(): ?array
     return is_array($o) ? $o : null;
 }
 
+/**
+ * Hash bcrypt de la contraseña demo académica (login sigue siendo 123456).
+ * No se guarda el secreto en texto plano (higiene SonarQube S2068).
+ */
+function mass_demo_password_hash(): string
+{
+    return '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG';
+}
+
 /** Usuarios demo SGC-Mass (Figma 30-9006). Sin MySQL. */
 function mass_usuarios_auth(): array
 {
+    $hash = mass_demo_password_hash();
+
     return [
         [
             'usuario' => 'admin.operaciones@mass.pe',
-            'password' => '123456',
+            'password_hash' => $hash,
             'rol' => 'admin',
             'nombre' => 'Gonzalo Méndez',
             'cargo' => 'Administrador de Tienda',
         ],
         [
             'usuario' => 'admin',
-            'password' => '123456',
+            'password_hash' => $hash,
             'rol' => 'admin',
             'nombre' => 'Gonzalo Méndez',
             'cargo' => 'Administrador WMS',
         ],
         [
             'usuario' => 'proveedor@mass.pe',
-            'password' => '123456',
+            'password_hash' => $hash,
             'rol' => 'cliente',
             'nombre' => 'Ana Proveedor',
             'cargo' => 'Cliente / Proveedor Pedidos',
         ],
         [
             'usuario' => 'cliente',
-            'password' => '123456',
+            'password_hash' => $hash,
             'rol' => 'cliente',
             'nombre' => 'Cliente Demo',
             'cargo' => 'Portal Pedidos',
@@ -491,7 +502,8 @@ function auth_intentar(string $usuario, string $password, string $rolEsperado = 
         $login = mb_strtolower((string) $u['usuario']);
         $loginShort = explode('@', $login)[0];
         $matchUser = $usuario === $login || $usuario === $loginShort;
-        if (!$matchUser || $password !== (string) $u['password']) {
+        $hash = (string) ($u['password_hash'] ?? '');
+        if (!$matchUser || $hash === '' || !password_verify($password, $hash)) {
             continue;
         }
         if (($u['rol'] ?? '') !== $rolEsperado) {
@@ -501,6 +513,10 @@ function auth_intentar(string $usuario, string $password, string $rolEsperado = 
                 'usuario' => null,
             ];
         }
+
+        // No exponer el hash en la sesión / respuesta de login.
+        unset($u['password_hash']);
+
         return ['ok' => true, 'errores' => [], 'usuario' => $u];
     }
 

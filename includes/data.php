@@ -1088,27 +1088,30 @@ function producto_admin_validar(array $data, int $idExcluir = 0): array
         $errores[] = 'Selecciona una clasificación ABC (A, B o C)';
     }
 
-    // Unicidad EAN / nombre (alta y edición)
-    if ($errores === [] || (strlen($ean) === 13 || mb_strlen($nombre) >= 3)) {
+    // Unicidad EAN / nombre (alta y edición) — un solo recorrido del catálogo
+    $debeValidarUnicidad = $errores === [] || strlen($ean) === 13 || mb_strlen($nombre) >= 3;
+    if ($debeValidarUnicidad) {
+        $nombreNorm = mb_strtolower($nombre);
+        $eanDuplicado = false;
+        $nombreDuplicado = false;
         foreach (mass_admin_productos() as $p) {
             if ((int) ($p['id'] ?? 0) === $idExcluir) {
                 continue;
             }
-            if (strlen($ean) === 13 && (string) ($p['ean'] ?? '') === $ean) {
+            if (!$eanDuplicado && strlen($ean) === 13 && (string) ($p['ean'] ?? '') === $ean) {
                 $errores[] = 'El EAN-13 ya está registrado en otro SKU del WMS';
-                break;
+                $eanDuplicado = true;
             }
-        }
-        $nombreNorm = mb_strtolower($nombre);
-        if ($nombreNorm !== '') {
-            foreach (mass_admin_productos() as $p) {
-                if ((int) ($p['id'] ?? 0) === $idExcluir) {
-                    continue;
-                }
-                if (mb_strtolower((string) ($p['nombre'] ?? '')) === $nombreNorm) {
-                    $errores[] = 'Ya existe un producto con el mismo nombre comercial';
-                    break;
-                }
+            if (
+                !$nombreDuplicado
+                && $nombreNorm !== ''
+                && mb_strtolower((string) ($p['nombre'] ?? '')) === $nombreNorm
+            ) {
+                $errores[] = 'Ya existe un producto con el mismo nombre comercial';
+                $nombreDuplicado = true;
+            }
+            if ($eanDuplicado && $nombreDuplicado) {
+                break;
             }
         }
     }

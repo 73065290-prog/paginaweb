@@ -34,8 +34,8 @@ Corrida con cobertura (evidencia `evidencias/ejecucion-automatizada.txt`):
 | Fallidos | 0 |
 | Bloqueados | 0 |
 | % aprobación | 100% |
-| Tiempo | 1.639 s |
-| Cobertura líneas | 58.30% (811/1391) |
+| Tiempo | 0.402 s |
+| Cobertura líneas | 58.44% (817/1398) |
 
 Tabla caso a caso: `02-ejecucion-pruebas.md`.
 
@@ -55,6 +55,8 @@ La automatización cubre reglas y persistencia; lo visual/Figma permanece manual
 ## 7. Análisis de calidad del código con SonarQube
 
 Configurado en `sonar-project.properties` y guía `05-guia-sonarqube.md`.
+Preparación local: `scripts\prepare-sonar.bat` → escaneo: `scripts\scan-sonar.bat`.
+Higiene previa: passwords demo con `password_hash`/`password_verify`; validación de productos sin bucles duplicados.
 
 | Métrica Sonar | Valor |
 | --- | --- |
@@ -68,7 +70,7 @@ Configurado en `sonar-project.properties` y guía `05-guia-sonarqube.md`.
 
 ## 8. Conclusiones
 
-- **Estado del software (pruebas dinámicas):** la suite automatizada de 32 casos pasa al 100% con cobertura de líneas 58.30% sobre `includes/`.
+- **Estado del software (pruebas dinámicas):** la suite automatizada de 32 casos pasa al 100% con cobertura de líneas 58.44% sobre `includes/`.
 - **Defectos identificados en el armado de pruebas:** INC-01 (assert de tracking) e INC-02 (contrato de filtros de stock); sin cambios forzados a producción para “hacer pasar” tests.
 - **Nivel de automatización:** alto en lógica de negocio/auth/carrito/productos; medio-bajo en UI visual.
 - **SonarQube:** [COMPLETAR TRAS SONARQUBE]
