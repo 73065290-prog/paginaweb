@@ -95,6 +95,7 @@ require __DIR__ . '/../includes/layouts/header.php';
             <div class="cart-toolbar-links">
               <?php if ($items): ?>
               <form method="post" action="carrito.php" class="inline-form">
+                <?= csrf_field() ?>
                 <input type="hidden" name="accion" value="vaciar" />
                 <input type="hidden" name="volver" value="pedido.php" />
                 <button type="submit">Vaciar canasta</button>
@@ -130,6 +131,7 @@ require __DIR__ . '/../includes/layouts/header.php';
                     <strong><?= e(dinero((float) $sug['precio'])) ?></strong>
                   </div>
                   <form method="post" action="carrito.php">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="accion" value="agregar" />
                     <input type="hidden" name="id" value="<?= (int) $sug['id'] ?>" />
                     <input type="hidden" name="cantidad" value="1" />
@@ -146,6 +148,7 @@ require __DIR__ . '/../includes/layouts/header.php';
           <h2 id="sumTitle">Resumen de tu pedido</h2>
 
           <form class="coupon-form" method="post" action="carrito.php">
+            <?= csrf_field() ?>
             <input type="hidden" name="accion" value="cupon" />
             <input type="hidden" name="volver" value="pedido.php" />
             <label for="cuponInput">Cupón de descuento</label>
@@ -159,6 +162,7 @@ require __DIR__ . '/../includes/layouts/header.php';
           <div class="coupon-applied">
             <span>Cupón <strong><?= e($resumen['cupon']) ?></strong> · −<?= e(dinero($resumen['descuentoCupon'])) ?></span>
             <form method="post" action="carrito.php">
+              <?= csrf_field() ?>
               <input type="hidden" name="accion" value="cupon" />
               <input type="hidden" name="cupon" value="" />
               <input type="hidden" name="volver" value="pedido.php" />
@@ -168,6 +172,7 @@ require __DIR__ . '/../includes/layouts/header.php';
           <?php endif; ?>
 
           <form method="post" action="carrito.php" id="entregaForm">
+            <?= csrf_field() ?>
             <input type="hidden" name="accion" value="paso2" />
             <input type="hidden" name="volver" value="pedido.php?paso=2" />
 
@@ -226,6 +231,7 @@ require __DIR__ . '/../includes/layouts/header.php';
             data-horarios-retiro="<?= e(json_encode(mass_horarios_entrega('retiro'), JSON_UNESCAPED_UNICODE) ?: '{}') ?>"
             data-horarios-express="<?= e(json_encode(mass_horarios_entrega('express'), JSON_UNESCAPED_UNICODE) ?: '{}') ?>"
           >
+            <?= csrf_field() ?>
             <input type="hidden" name="accion" value="paso3" />
             <input type="hidden" name="volver" value="pedido.php?paso=3" />
 
@@ -335,6 +341,7 @@ require __DIR__ . '/../includes/layouts/header.php';
       <div class="checkout-layout">
         <section class="checkout-main">
           <form method="post" action="carrito.php" class="pago-form">
+            <?= csrf_field() ?>
             <input type="hidden" name="accion" value="confirmar" />
             <input type="hidden" name="volver" value="pedido.php?paso=ok" />
 

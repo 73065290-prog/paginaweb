@@ -15,23 +15,27 @@ $usuarioVal = (string) ($_POST['usuario'] ?? 'admin.operaciones@mass.pe');
 $recordar = isset($_POST['recordar']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $resultado = auth_intentar(
-        (string) ($_POST['usuario'] ?? ''),
-        (string) ($_POST['password'] ?? ''),
-        $rol
-    );
+    if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
+        $error = 'Sesión inválida. Recarga la página e intenta de nuevo.';
+    } else {
+        $resultado = auth_intentar(
+            (string) ($_POST['usuario'] ?? ''),
+            (string) ($_POST['password'] ?? ''),
+            $rol
+        );
 
-    if ($resultado['ok'] && $resultado['usuario']) {
-        auth_login($resultado['usuario'], $recordar);
-        flash_set('Bienvenido, ' . $resultado['usuario']['nombre']);
-        if (($resultado['usuario']['rol'] ?? '') === 'cliente') {
-            redirect('../cliente_interfaces/pedido.php?demo=1');
+        if ($resultado['ok'] && $resultado['usuario']) {
+            auth_login($resultado['usuario'], $recordar);
+            flash_set('Bienvenido, ' . $resultado['usuario']['nombre']);
+            if (($resultado['usuario']['rol'] ?? '') === 'cliente') {
+                redirect('../cliente_interfaces/pedido.php?demo=1');
+            }
+            redirect('index.php');
         }
-        redirect('index.php');
-    }
 
-    $error = implode(' · ', $resultado['errores']);
-    $usuarioVal = (string) ($_POST['usuario'] ?? '');
+        $error = implode(' · ', $resultado['errores']);
+        $usuarioVal = (string) ($_POST['usuario'] ?? '');
+    }
 }
 
 $flashMsg = $flash ?? '';
@@ -89,6 +93,7 @@ $flashMsg = $flash ?? '';
       <?php endif; ?>
 
       <form method="post" action="login.php" class="login-form" id="loginForm" novalidate>
+        <?= csrf_field() ?>
         <div class="role-switch" role="tablist" aria-label="Tipo de acceso">
           <label class="role-tab <?= $rol === 'admin' ? 'is-active' : '' ?>">
             <input type="radio" name="rol" value="admin" <?= $rol === 'admin' ? 'checked' : '' ?> />

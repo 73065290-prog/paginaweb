@@ -27,6 +27,7 @@ $badge = $p['badge'] ?? null;
       <?php endif; ?>
     </div>
     <form class="product-actions" method="post" action="carrito.php">
+      <?= csrf_field() ?>
       <input type="hidden" name="accion" value="agregar" />
       <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
       <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>" />
