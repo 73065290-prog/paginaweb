@@ -13,6 +13,11 @@ $postSticky = [];
 
 // Alta / edición (demo en sesión) — al guardar se cierra el modal
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
+        flash_set('Sesión inválida. Recarga la página e intenta de nuevo.');
+        redirect('productos.php');
+    }
+
     $accion = (string) ($_POST['accion'] ?? '');
 
     if ($accion === 'guardar_producto') {
@@ -311,6 +316,7 @@ $queryBase = static function (array $extra = []) use ($q, $filtroAbc, $filtroSto
         data-modo="<?= $esAlta ? 'crear' : 'editar' ?>"
         novalidate
       >
+        <?= csrf_field() ?>
         <input type="hidden" name="accion" value="<?= $esAlta ? 'crear_producto' : 'guardar_producto' ?>" />
         <?php if (!$esAlta): ?>
           <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
