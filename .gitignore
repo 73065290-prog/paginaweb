@@ -12,6 +12,8 @@ composer.lock
 # SonarScanner local workdir
 .scannerwork/
 
+# PROMTS/ se versiona siempre (no ignorar esta carpeta)
+
 # Secrets / local env
 .env
 .env.*
