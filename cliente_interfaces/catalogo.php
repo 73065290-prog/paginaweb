@@ -110,10 +110,11 @@ require __DIR__ . '/../includes/layouts/header.php';
           <div class="filter-block">
             <h4>Rango de precio</h4>
             <div class="price-range">
+              <label class="sr-only" for="priceMaxRange">Precio máximo del catálogo</label>
               <input class="range-slider" id="priceMaxRange" type="range" min="0" max="40" step="0.5" value="<?= e((string) $max) ?>" />
               <div class="price-inputs">
-                <label>Min <input name="min" id="priceMin" type="number" min="0" value="<?= e((string) $min) ?>" step="0.1" /></label>
-                <label>Max <input name="max" id="priceMax" type="number" min="0" value="<?= e((string) $max) ?>" step="0.1" /></label>
+                <label for="priceMin">Min <input name="min" id="priceMin" type="number" min="0" value="<?= e((string) $min) ?>" step="0.1" /></label>
+                <label for="priceMax">Max <input name="max" id="priceMax" type="number" min="0" value="<?= e((string) $max) ?>" step="0.1" /></label>
               </div>
             </div>
           </div>
@@ -169,7 +170,8 @@ require __DIR__ . '/../includes/layouts/header.php';
 
           <div class="catalog-search">
             <span aria-hidden="true">🔍</span>
-            <input name="q" type="search" placeholder="Buscar en este catálogo…" value="<?= e($q) ?>" />
+            <label class="sr-only" for="catalogSearchQ">Buscar en este catálogo</label>
+            <input id="catalogSearchQ" name="q" type="search" placeholder="Buscar en este catálogo…" value="<?= e($q) ?>" />
           </div>
           <div class="toolbar-right">
             <label for="sortSelect">Ordenar por</label>

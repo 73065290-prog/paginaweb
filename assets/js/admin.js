@@ -55,8 +55,8 @@
 
   const recalcMargen = () => {
     if (!costoInput || !precioInput || !margenPctLabel || !margenBrutoLabel) return;
-    const costo = parseFloat(costoInput.value) || 0;
-    const precio = parseFloat(precioInput.value) || 0;
+    const costo = Number.parseFloat(costoInput.value) || 0;
+    const precio = Number.parseFloat(precioInput.value) || 0;
     const bruto = precio - costo;
     const pct = precio > 0 ? (bruto / precio) * 100 : 0;
     margenPctLabel.textContent = pct.toFixed(2) + "%";
@@ -95,7 +95,7 @@
     if (!formProducto) return errores;
 
     const val = (name) => (formProducto.elements[name]?.value || "").trim();
-    const num = (name) => parseFloat(val(name)) || 0;
+    const num = (name) => Number.parseFloat(val(name)) || 0;
     const nombre = val("nombre");
     const ean = val("ean").replace(/\D+/g, "");
     const unidad = val("unidad");
@@ -104,8 +104,8 @@
     const descripcion = val("descripcion");
     const costo = num("costo");
     const precio = num("precio");
-    const reorden = parseInt(val("puntoReorden"), 10) || 0;
-    const capacidad = parseInt(val("capacidadGondola"), 10) || 0;
+    const reorden = Number.parseInt(val("puntoReorden"), 10) || 0;
+    const capacidad = Number.parseInt(val("capacidadGondola"), 10) || 0;
     const abc = (formProducto.querySelector('input[name="abc"]:checked') || {}).value || "";
 
     if (nombre.length < 3) errores.push("El nombre comercial debe tener al menos 3 caracteres");
@@ -164,16 +164,16 @@
     setInv("categoria", !(formProducto.elements.categoria?.value || "").trim());
     setInv("subcategoria", !(formProducto.elements.subcategoria?.value || "").trim());
     setInv("descripcion", (formProducto.elements.descripcion?.value || "").trim().length < 10);
-    setInv("costo", (parseFloat(formProducto.elements.costo?.value) || 0) <= 0);
-    setInv("precio", (parseFloat(formProducto.elements.precio?.value) || 0) <= 0);
-    const costo = parseFloat(formProducto.elements.costo?.value) || 0;
-    const precio = parseFloat(formProducto.elements.precio?.value) || 0;
+    setInv("costo", (Number.parseFloat(formProducto.elements.costo?.value) || 0) <= 0);
+    setInv("precio", (Number.parseFloat(formProducto.elements.precio?.value) || 0) <= 0);
+    const costo = Number.parseFloat(formProducto.elements.costo?.value) || 0;
+    const precio = Number.parseFloat(formProducto.elements.precio?.value) || 0;
     if (precio > 0 && costo > 0 && precio <= costo) {
       formProducto.elements.precio?.classList.add("is-invalid");
       formProducto.elements.costo?.classList.add("is-invalid");
     }
-    const reorden = parseInt(formProducto.elements.puntoReorden?.value || "0", 10) || 0;
-    const capacidad = parseInt(formProducto.elements.capacidadGondola?.value || "0", 10) || 0;
+    const reorden = Number.parseInt(formProducto.elements.puntoReorden?.value || "0", 10) || 0;
+    const capacidad = Number.parseInt(formProducto.elements.capacidadGondola?.value || "0", 10) || 0;
     setInv("puntoReorden", reorden < 1 || (capacidad > 0 && reorden >= capacidad));
     setInv("capacidadGondola", capacidad < 1);
     const abc = formProducto.querySelector('input[name="abc"]:checked');
