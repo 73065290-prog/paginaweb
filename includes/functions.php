@@ -532,6 +532,11 @@ function auth_intentar(string $usuario, string $password, string $rolEsperado = 
 
 function auth_login(array $usuario, bool $recordar = false): void
 {
+    // Evita fijación de sesión tras autenticarse
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
+
     $_SESSION['auth'] = [
         'usuario' => (string) $usuario['usuario'],
         'rol' => (string) $usuario['rol'],

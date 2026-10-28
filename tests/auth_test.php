@@ -72,5 +72,8 @@ auth_login($r['usuario']);
 assert_true(auth_es_admin(), 'sesión admin activa');
 assert_true(str_contains((string) auth_usuario()['nombre'], 'Gonzalo') || auth_usuario()['nombre'] !== '', 'nombre en sesión');
 
+// Regeneración: tras login la sesión sigue usable
+assert_true(auth_usuario() !== null, 'sesión válida tras regenerate_id');
+
 echo "\nResultado: {$passed} OK, {$failed} FAIL\n";
 exit($failed > 0 ? 1 : 0);
