@@ -1,0 +1,47 @@
+Análisis de duplicidad — 55ce88d y eb68b44
+Fecha: 2026-11-03
+Método: objetos Git locales. git.exe ausente.
+
+55ce88d619acb834ac418653168f4d21bca91061
+  árbol: 83743b4ef7855c5196715150848328675aed0d3b
+  padre: 0177c5deb582
+  autor: cursor12310-sys 1793153103 -0500
+  mensaje: Integrar frontend/backend, MySQL, correccion de logout y prompts.
+  ancestro de main local: SI
+  rama que todavía lo apunta: correccion/sonar-accesibilidad
+
+eb68b448db9ac91538721fd5319b353cde1a2809
+  árbol: facd2127d04c1f6f21cd62d4ebe09a592c5f9839
+  padres: a94d2c6625586179cd8acbda250631ea2b28d3b2, 55ce88d619acb834ac418653168f4d21bca91061
+  autor: cursor12310-sys 1793153343 -0500
+  mensaje: Integrar en main frontend/backend, MySQL, prompts y correccion de logout.
+           Resuelve conflictos con mejoras previas de main (CSRF, carrito, cupones) y conserva shims + PROMTS.
+  ancestro de main local: SI
+  main local 3a58798 tiene como único padre a eb68b44
+
+Árboles iguales: NO
+El padre 55ce88d es el segundo padre del merge. El primer padre a94d2c6 no tiene el mismo árbol que ninguno de los dos.
+
+El merge, respecto de a94d2c6, incorpora 122 rutas del refactor (backend/, frontend/, database/, PROMTS/, composer.json, pruebas PHPUnit, sonar-project.properties y los shims).
+
+Entre el árbol de 55ce88d y el de eb68b44 hay 35 rutas distintas. El merge conservó piezas que ya estaban en main y que el commit de la rama no traía, entre ellas:
+  .htaccess
+  MEJORAS.md
+  README.md
+  docs/img/*
+  includes/functions.php
+  includes/components/cart-line.php, cart-drawer.php, navbar.php, product-card.php
+  includes/init.php y layouts
+  tests/carrito_test.php, csrf_test.php, redirect_test.php, negocio_test.php, auth_test.php, run_all.php
+  frontend/views de admin login, pedidos, productos y del cliente
+
+Conclusión: duplicidad parcial de intención, no de contenido.
+El mensaje se parece. El árbol no. eb68b44 ya incluye a 55ce88d como padre y además la resolución de conflictos.
+Se conserva eb68b44, que ya está en main.
+No se vuelve a mergear 55ce88d.
+No se borra ninguno de los dos commits.
+No se reescribe main.
+
+Merges locales sin Pull Request, tomados de .git/logs/HEAD:
+  1. Fast-forward de fix/sonar-a11y-parse-labels sobre feature/mejoras-admin-qa-cliente, ambos en 128a41d. No se creó commit de merge.
+  2. Commit de merge eb68b44 en main local, padres a94d2c6 y 55ce88d. Este es el refactor que ya forma parte de main. Se deja como está.

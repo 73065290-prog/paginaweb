@@ -1,0 +1,61 @@
+PROMPT 25 — decisiones
+Fecha: 2026-11-03
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+Bolt: INT-006-BOLT-009 — PENDIENTE
+
+Método: git.exe no está instalado en este equipo. La comparación se calculó leyendo los objetos Git locales (loose y pack), con la definición de diff de tres puntos: del merge-base entre main y la rama hasta la punta de la rama. main local = 3a587981005d544cb18118650de64d0f5bca466e.
+
+1. mejora/carrito-limite-stock
+   Punta: 8a69a4715a56d8fbca5eefefd38eee077404cdc7
+   Autor: Kervin-Mansilla, 1793149704 -0500
+   Mensaje: mejora: limitar cantidad del carrito al stock disponible
+   Padre: 19ddfec866f44c07086ed774f7aacaf28f1a3bdb
+   Merge-base con main: 19ddfec866f44c07086ed774f7aacaf28f1a3bdb
+   ¿Ancestro de main? NO
+   Commits propios fuera de main: 1
+   git diff main...rama: 7 archivos, iguales al diff contra el padre
+     M MEJORAS.md
+     M cliente_interfaces/carrito.php
+     M cliente_interfaces/producto.php
+     M includes/components/cart-line.php
+     M includes/components/product-card.php
+     M includes/functions.php
+     M tests/carrito_test.php
+   Cambio relevante: carrito_tope_linea = min(99, stock). Stock demo 42 o 8 si stockTone es bajo. El alta, el cambio y set_cantidad no superan ese tope. La UI usa max=stock y desactiva el botón + al llegar. El mensaje es "Solo hay N unidades disponibles — ajustamos tu canasta".
+   Relación con PROMPT 09: el servicio actual del árbol de trabajo, backend/services/CarritoService.php, conserva CANTIDAD_MAXIMA = 99. stockDisponible() solo informa. carrito_agregar, cambiar y setCantidad no aplican el stock. Ese archivo no está en el commit de main. El PROMPT 09 pidió no fusionar esta rama y dejar la decisión para el Prompt 25.
+   Conflictos: el parche modifica includes/functions.php en la versión anterior al merge eb68b44. El árbol de trabajo ya delega esas funciones en CarritoService. Fusionar la rama repetiría la lógica y chocaría con el refactor.
+   DECISIÓN: REHACER. No abrir Pull Request. Una integración futura tendría que vivir en CarritoService y en las vistas vigentes, y solo si se acepta cambiar el tope comercial de 99. Este prompt no modifica esos archivos.
+
+2. feature/mejoras-admin-qa-cliente
+   Punta: 128a41da728506b39b5ed218a058f79f274ef23b
+   Merge-base con main: cd06ef0b7533097369ba52acab2680e2adb04bea
+   ¿Ancestro de main? NO
+   Commits fuera de main: 2
+     282dc999aaea Fix Sonar a11y labels and Number.parse* in admin.js
+     128a41da7285 Actualizar clave del proyecto SonarQube a Pagina_Web_V2
+   Diff de tres puntos desde cd06ef0: 7 archivos
+     M .gitignore
+     M assets/js/admin.js
+     M cliente_interfaces/catalogo.php
+     A docs/pruebas/prompt-correccion-sonar-a11y.md
+     M includes/admin/header.php
+     M includes/components/cart-line.php
+     M sonar-project.properties
+   El commit propio 128a41d solo cambia sonar.projectKey y sonar.projectName a Pagina_Web_V2.
+   El árbol de 128a41d es idéntico al de 41a4bde1272615b44fcd1ca85b430e780433e0d6 (0 archivos distintos). 41a4bde sí es ancestro de main. 282dc999 no lo es: se rehecho el mismo árbol sobre cd06ef0 después de un reset.
+   DECISIÓN: CERRAR. El contenido ya está en main. Un PR no aportaría cambios y podría repetir el historial. No se borra la rama remota.
+
+3. fix/sonar-a11y-parse-labels
+   Punta: el mismo 128a41da728506b39b5ed218a058f79f274ef23b
+   Mismo merge-base, mismo diff y mismo árbol.
+   El reflog registra un fast-forward local de esta rama dentro de feature/mejoras-admin-qa-cliente, sin commit de merge.
+   DECISIÓN: CERRAR. Misma justificación. No se borra la rama remota.
+
+Pull Requests creados: ninguno.
+Pull Requests preparados para fusionar: ninguno. Las tres decisiones son rehacer o cerrar.
+Enlaces: pendientes de autorización y, además, no corresponden hasta que exista una rama cuya decisión sea fusionar.
+
+Protección de main: NO activa desde este prompt.
+Consulta GET /repos/73065290-prog/paginaweb/branches/main/protection → 401 Unauthorized.
+No se afirma que la regla exista. No se publicó configuración.

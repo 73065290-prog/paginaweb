@@ -1,0 +1,13 @@
+Pull Requests — Prompt 25
+Fecha: 2026-11-03
+
+Creados en GitHub: ninguno.
+Enlaces: no existen. No se inventan.
+
+Preparados para abrir: ninguno.
+
+Motivo: las decisiones son rehacer (mejora/carrito-limite-stock) y cerrar (feature/mejoras-admin-qa-cliente y fix/sonar-a11y-parse-labels). El prompt pide no abrir Pull Requests para ramas que deban rehacerse o cerrarse.
+
+Publicar un PR exigiría push a GitHub. Este prompt no autoriza publicar.
+
+Cuando una rama futura sí deba fusionarse, el PR tendrá título, resumen, justificación, ID del bolt, pruebas, evidencias y riesgos. Hasta entonces no hay PR pendiente de estas tres ramas.

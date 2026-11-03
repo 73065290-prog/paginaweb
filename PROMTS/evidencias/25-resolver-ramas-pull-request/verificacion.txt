@@ -1,0 +1,31 @@
+Verificaciones del Prompt 25
+Fecha: 2026-11-03
+
+1. Comparación main...rama
+   Resultado: calculada sobre objetos Git. git.exe no está instalado, así que no hubo salida literal del comando git.
+   mejora/carrito-limite-stock: merge-base 19ddfec866f4, 7 archivos, 1 commit fuera de main.
+   feature/mejoras-admin-qa-cliente: merge-base cd06ef0b7533, 7 archivos, 2 commits fuera de main.
+   fix/sonar-a11y-parse-labels: mismo resultado que la rama anterior. Misma punta 128a41d.
+
+2. Historial
+   Registrado en comparacion-objetos-git.txt y decisiones.txt.
+
+3. Commits 55ce88d y eb68b44
+   Árboles distintos. 55ce88d es el segundo padre de eb68b44. Ambos son ancestros de main.
+   Duplicidad parcial de intención. Se conserva el merge eb68b44. Detalle en commits-55ce88d-eb68b44.txt.
+
+4. Pull Requests
+   Creados: 0. Preparados para fusión: 0. Enlaces: no existen.
+
+5. Protección de main
+   No aplicada. La API respondió 401. Ver proteccion-main.txt.
+
+6. MEJORAS.md
+   La tabla de ramas pendientes y la sección Prompt 25 describen rehacer, cerrar y cerrar. No marcan ninguna fusión como hecha.
+
+7. Historial de main
+   No se reescribió. No se borraron ramas ni commits. No hubo push.
+
+8. Commit local
+   El identificador queda en commit-resultado.txt, escrito al crear la rama docs/int-006-bolt-009.
+   HEAD se deja en main para no mezclar el árbol de trabajo, que tiene cambios de otros prompts.
