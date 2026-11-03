@@ -10,10 +10,10 @@
 
   <rect x="24" y="88" width="912" height="160" rx="18" fill="#006B45"/>
   <text x="56" y="150" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF">Todo lo que necesitas,</text>
-  <text x="56" y="188" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#FF8A3D">más cerca de ti</text>
-  <text x="56" y="222" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#E7F5EE">Catálogo · Retiro en tienda · Delivery Express</text>
+  <text x="56" y="188" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#FF8A3D">mÃ¡s cerca de ti</text>
+  <text x="56" y="222" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#E7F5EE">CatÃ¡logo Â· Retiro en tienda Â· Delivery Express</text>
   <rect x="720" y="150" width="170" height="44" rx="22" fill="#FF8A3D"/>
-  <text x="805" y="178" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#fff">Ver catálogo</text>
+  <text x="805" y="178" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#fff">Ver catÃ¡logo</text>
 
   <!-- product cards -->
   <g font-family="Arial, Helvetica, sans-serif">
