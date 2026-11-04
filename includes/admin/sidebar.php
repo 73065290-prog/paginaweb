@@ -43,19 +43,19 @@ $kpisSide = mass_admin_kpis();
         <span class="nav-badge"><?= (int) $pickingCount ?></span>
       <?php endif; ?>
     </a>
-    <a href="inventario.php#mermas" class="<?= $adminActivo === 'mermas' ? 'is-active' : '' ?>">
+    <a href="conteos.php" class="<?= $adminActivo === 'conteos' ? 'is-active' : '' ?>">
       <span class="nav-ico" aria-hidden="true">↻</span>
       Conteos Cíclicos &amp; Auditorías
     </a>
-    <a href="inventario.php#mermas" class="<?= $adminActivo === 'caducidades' ? 'is-active' : '' ?>">
+    <a href="mermas.php" class="<?= $adminActivo === 'mermas' ? 'is-active' : '' ?>">
       <span class="nav-ico" aria-hidden="true">⚠</span>
       Mermas y Caducidades
     </a>
-    <a href="index.php#ventas" class="<?= $adminActivo === 'ventas' ? 'is-active' : '' ?>">
+    <a href="reportes.php" class="<?= $adminActivo === 'reportes' ? 'is-active' : '' ?>">
       <span class="nav-ico" aria-hidden="true">◉</span>
       Reportes y Analítica
     </a>
-    <a href="#config" class="<?= $adminActivo === 'config' ? 'is-active' : '' ?>">
+    <a href="configuracion.php" class="<?= $adminActivo === 'config' ? 'is-active' : '' ?>">
       <span class="nav-ico" aria-hidden="true">⚙</span>
       Configuración del Sistema
     </a>

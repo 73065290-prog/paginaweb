@@ -17,4 +17,8 @@ return [
     'admin.productos' => 'frontend/views/admin/productos.php',
     'admin.inventario' => 'frontend/views/admin/inventario.php',
     'admin.pedidos' => 'frontend/views/admin/pedidos.php',
+    'admin.conteos' => 'frontend/views/admin/conteos.php',
+    'admin.mermas' => 'frontend/views/admin/mermas.php',
+    'admin.reportes' => 'frontend/views/admin/reportes.php',
+    'admin.configuracion' => 'frontend/views/admin/configuracion.php',
 ];
