@@ -53,47 +53,143 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $errores = $resultado['errores'];
         }
+    } elseif ($accion === 'crear') {
+        $ids = is_array($_POST['ids'] ?? null) ? $_POST['ids'] : [];
+        $resultado = mass_ops_conteo_crear((string) ($_POST['pasillo'] ?? ''), (string) ($_POST['tipo'] ?? ''), $ids);
+        if ($resultado['ok']) {
+            flash_set('Conteo ' . (string) $resultado['id'] . ' programado.');
+            mass_ops_volver('conteos.php', ['id' => (string) $resultado['id']]);
+        }
+        $errores = $resultado['errores'];
+    } elseif ($accion === 'cancelar') {
+        $resultado = mass_ops_conteo_cancelar($conteoId);
+        if ($resultado['ok']) {
+            flash_set('Conteo ' . $conteoId . ' cancelado.');
+            mass_ops_volver('conteos.php', ['estado' => $estado]);
+        }
+        $errores = $resultado['errores'];
     }
 }
 
-if (!in_array($estado, ['todos', 'pendiente', 'en_curso', 'cerrado'], true)) {
+if (!in_array($estado, ['todos', 'pendiente', 'en_curso', 'cerrado', 'cancelado'], true)) {
     $estado = 'todos';
 }
+$qConteo = trim((string) ($_GET['q'] ?? ''));
 
-$conteos = mass_ops_conteos();
+$conteosTodos = mass_ops_conteos();
+$conteos = $conteosTodos;
 if ($estado !== 'todos') {
     $conteos = array_values(array_filter(
         $conteos,
         static fn (array $c): bool => (string) ($c['estado'] ?? '') === $estado
     ));
 }
+if ($qConteo !== '') {
+    $needle = mb_strtolower($qConteo);
+    $conteos = array_values(array_filter(
+        $conteos,
+        static function (array $c) use ($needle): bool {
+            return str_contains(mb_strtolower((string) $c['id'] . ' ' . (string) $c['pasillo'] . ' ' . (string) $c['responsable']), $needle);
+        }
+    ));
+}
+$conteosExport = $conteos;
+$opsPager = mass_ops_paginar($conteos, (int) ($_GET['pagina'] ?? 1), 6);
+$conteos = $opsPager['items'];
+$opsQuery = ['estado' => $estado, 'q' => $qConteo];
+$planasConteo = [];
+foreach ($conteosExport as $conteoPlano) {
+    $resumenPlano = mass_ops_conteo_resumen($conteoPlano);
+    $planasConteo[] = [
+        (string) $conteoPlano['id'],
+        (string) $conteoPlano['pasillo'],
+        (string) $conteoPlano['tipo'],
+        (string) $conteoPlano['estado'],
+        count($conteoPlano['lineas']) - (int) $resumenPlano['pendientes'] . '/' . count($conteoPlano['lineas']),
+    ];
+}
+$exportConteo = (string) ($_GET['export'] ?? '');
+$encabezadosConteo = ['Conteo', 'Pasillo', 'Tipo', 'Estado', 'Avance'];
+if ($exportConteo === 'csv') {
+    mass_ops_descargar('conteos.csv', 'text/csv; charset=UTF-8', mass_ops_csv($encabezadosConteo, $planasConteo));
+}
+if ($exportConteo === 'xls') {
+    mass_ops_descargar('conteos.xls', 'application/vnd.ms-excel; charset=UTF-8', mass_ops_xls('Conteos cíclicos', $encabezadosConteo, $planasConteo));
+}
+if ($exportConteo === 'pdf') {
+    echo mass_ops_documento_html('Conteos cíclicos y auditorías', 'Corte ' . mass_ops_hoy(), $encabezadosConteo, $planasConteo);
+    exit;
+}
 $abierto = $conteoId !== '' ? mass_ops_conteo_por_id($conteoId) : null;
 $clases = [
     'pendiente' => 'bajo',
     'en_curso' => 'preparacion',
     'cerrado' => 'ok',
+    'cancelado' => 'retirado',
 ];
 $etiquetas = [
     'pendiente' => 'Pendiente',
     'en_curso' => 'En curso',
     'cerrado' => 'Cerrado',
+    'cancelado' => 'Cancelado',
 ];
+$conteoKpi = ['pendiente' => 0, 'en_curso' => 0, 'cerrado' => 0];
+foreach ($conteosTodos as $conteoKpiFila) {
+    $claveKpi = (string) $conteoKpiFila['estado'];
+    if (isset($conteoKpi[$claveKpi])) {
+        $conteoKpi[$claveKpi]++;
+    }
+}
 
 require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 ?>
 
+<div class="ops-suite">
 <div class="page-toolbar">
   <div>
     <h1 class="admin-title" style="margin:0">Conteos cíclicos &amp; auditorías</h1>
-    <p class="dash-sub">Inicia el conteo del pasillo, registra lo físico y cierra la auditoría. Si hay diferencia, puedes aplicar el conteo a la góndola.</p>
+    <p class="dash-sub">Programa un conteo, registra lo físico y cierra la auditoría. Si hay diferencia, puedes aplicar el conteo a la góndola.</p>
   </div>
-  <div class="filters-inline">
-    <a href="conteos.php" class="<?= $estado === 'todos' ? 'is-active' : '' ?>">Todos</a>
-    <a href="conteos.php?estado=pendiente" class="<?= $estado === 'pendiente' ? 'is-active' : '' ?>">Pendientes</a>
-    <a href="conteos.php?estado=en_curso" class="<?= $estado === 'en_curso' ? 'is-active' : '' ?>">En curso</a>
-    <a href="conteos.php?estado=cerrado" class="<?= $estado === 'cerrado' ? 'is-active' : '' ?>">Cerrados</a>
-  </div>
+  <?php $opsExportTitulo = 'conteos'; require MASS_ROOT . '/frontend/views/admin/partials/ops-export.php'; ?>
 </div>
+<section class="kpi-grid" style="grid-template-columns: repeat(3, 1fr)">
+  <article class="kpi-card"><h3>Pendientes</h3><p class="kpi-value"><?= (int) $conteoKpi['pendiente'] ?></p></article>
+  <article class="kpi-card"><h3>En curso</h3><p class="kpi-value"><?= (int) $conteoKpi['en_curso'] ?></p></article>
+  <article class="kpi-card"><h3>Cerrados</h3><p class="kpi-value"><?= (int) $conteoKpi['cerrado'] ?></p></article>
+</section>
+<form class="ops-filters" method="get" action="conteos.php">
+  <label>Buscar <input type="search" name="q" value="<?= e($qConteo) ?>" placeholder="Pasillo, código o responsable" /></label>
+  <label>Estado
+    <select name="estado">
+      <?php foreach (['todos' => 'Todos', 'pendiente' => 'Pendientes', 'en_curso' => 'En curso', 'cerrado' => 'Cerrados', 'cancelado' => 'Cancelados'] as $valor => $texto): ?>
+        <option value="<?= e($valor) ?>" <?= $estado === $valor ? 'selected' : '' ?>><?= e($texto) ?></option>
+      <?php endforeach; ?>
+    </select>
+  </label>
+  <button type="submit" class="btn-mini">Aplicar</button>
+</form>
+<article class="admin-card ops-detail">
+  <h2>Programar conteo</h2>
+  <form method="post" action="conteos.php" class="ops-form" data-ops-form>
+    <?= csrf_field() ?>
+    <input type="hidden" name="accion" value="crear" />
+    <label>Pasillo <input type="text" name="pasillo" required minlength="4" maxlength="60" placeholder="Pasillo 03 · Bebidas" /></label>
+    <label>Tipo
+      <select name="tipo">
+        <option value="Cíclico">Cíclico</option>
+        <option value="Auditoría">Auditoría</option>
+      </select>
+    </label>
+    <label>SKUs
+      <select name="ids[]" multiple size="4" required aria-label="SKUs del conteo">
+        <?php foreach (mass_ops_inventario() as $skuConteo): ?>
+          <option value="<?= (int) $skuConteo['id'] ?>"><?= e((string) $skuConteo['sku']) ?> · <?= e((string) $skuConteo['nombre']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+    <button type="submit" class="btn-mini">Crear conteo</button>
+  </form>
+</article>
 
 <?php if (($flash ?? '') !== ''): ?>
   <div class="prod-toast prod-toast--page" role="status"><?= e((string) $flash) ?></div>
@@ -116,6 +212,15 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
       <h2><?= e((string) $abierto['id']) ?> · <?= e((string) $abierto['pasillo']) ?></h2>
       <a class="btn-mini ghost" href="conteos.php<?= $estado === 'todos' ? '' : '?estado=' . e($estado) ?>">Volver al listado</a>
     </div>
+    <?php if (in_array((string) $abierto['estado'], ['pendiente', 'en_curso'], true)): ?>
+      <form method="post" action="conteos.php" class="ops-actions" data-ops-form>
+        <?= csrf_field() ?>
+        <input type="hidden" name="accion" value="cancelar" />
+        <input type="hidden" name="id" value="<?= e((string) $abierto['id']) ?>" />
+        <input type="hidden" name="estado" value="<?= e($estado) ?>" />
+        <button type="submit" class="ops-btn">Cancelar conteo</button>
+      </form>
+    <?php endif; ?>
     <div class="ops-kv">
       <div><span>Tipo</span> <strong><?= e((string) $abierto['tipo']) ?></strong></div>
       <div><span>Estado</span> <strong><?= e($etiquetas[(string) $abierto['estado']] ?? (string) $abierto['estado']) ?></strong></div>
@@ -229,7 +334,7 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
         <?php endif; ?>
         <?php foreach ($conteos as $conteo): ?>
           <?php $resumen = mass_ops_conteo_resumen($conteo); ?>
-          <tr>
+          <tr data-ops-row="<?= e(mb_strtolower((string) $conteo['id'] . ' ' . (string) $conteo['pasillo'])) ?>">
             <td><strong><?= e((string) $conteo['id']) ?></strong></td>
             <td><?= e((string) $conteo['pasillo']) ?></td>
             <td><?= e((string) $conteo['tipo']) ?></td>
@@ -251,6 +356,9 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
       </tbody>
     </table>
   </div>
+  <?php require MASS_ROOT . '/frontend/views/admin/partials/ops-pager.php'; ?>
 </article>
+</div>
+<script src="<?= e(mass_asset('assets/js/admin-ops.js')) ?>" defer></script>
 
 <?php require MASS_ROOT . '/frontend/views/admin/partials/footer.php'; ?>
