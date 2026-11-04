@@ -29,6 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
     if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
         $errores[] = 'Sesión inválida. Recarga la página e intenta de nuevo.';
+    } elseif ((string) ($_POST['accion'] ?? '') === 'reset') {
+        mass_ops_config_reset();
+        flash_set('La configuración volvió a los valores de tienda.');
+        redirect('configuracion.php');
     } else {
         $resultado = mass_ops_config_guardar($sticky);
         if ($resultado['ok']) {
@@ -98,8 +102,9 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 
 <article class="admin-card">
   <h2>Parámetros operativos</h2>
-  <form method="post" action="configuracion.php" class="ops-form">
+  <form method="post" action="configuracion.php" class="ops-form" data-ops-form>
     <?= csrf_field() ?>
+    <input type="hidden" name="accion" value="guardar" />
     <label>Umbral de stock bajo (góndola)
       <input type="number" name="umbralBajo" min="1" max="200" required value="<?= e($sticky['umbralBajo']) ?>" />
     </label>
@@ -120,6 +125,26 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
       <button type="submit" class="btn-mini">Guardar configuración</button>
     </div>
   </form>
+  <form method="post" action="configuracion.php" class="ops-actions" data-ops-form>
+    <?= csrf_field() ?>
+    <input type="hidden" name="accion" value="reset" />
+    <button type="submit" class="ops-btn">Restaurar valores de tienda</button>
+  </form>
 </article>
+
+<article class="admin-card">
+  <h2>Historial de cambios</h2>
+  <?php $historial = mass_ops_config_historial(); ?>
+  <?php if ($historial === []): ?>
+    <p class="empty-note">Todavía no hay cambios guardados en esta sesión.</p>
+  <?php else: ?>
+    <ul class="ops-log">
+      <?php foreach ($historial as $evento): ?>
+        <li><time><?= e((string) $evento['cuando']) ?></time> <?= e((string) $evento['resumen']) ?></li>
+      <?php endforeach; ?>
+    </ul>
+  <?php endif; ?>
+</article>
+<script src="<?= e(mass_asset('assets/js/admin-ops.js')) ?>" defer></script>
 
 <?php require MASS_ROOT . '/frontend/views/admin/partials/footer.php'; ?>

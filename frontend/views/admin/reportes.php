@@ -10,14 +10,30 @@ $adminActivo = 'reportes';
 $adminCrumb = 'Reportes y Analítica';
 
 $periodo = (string) ($_GET['periodo'] ?? 'hoy');
-if ((string) ($_GET['export'] ?? '') === 'csv') {
-    header('Content-Type: text/csv; charset=UTF-8');
-    header('Content-Disposition: attachment; filename="reporte-sgc-' . preg_replace('/[^a-z0-9]/', '', $periodo) . '.csv"');
-    echo mass_ops_reporte_csv($periodo);
+$reporte = mass_ops_reporte($periodo);
+$indicadores = [
+    ['Periodo', (string) $reporte['etiqueta']],
+    ['Ventas', number_format((float) $reporte['venta'], 2, '.', '')],
+    ['Ticket promedio', number_format((float) $reporte['ticket'], 2, '.', '')],
+    ['Disponibilidad', number_format((float) $reporte['disponibilidad'], 1, '.', '')],
+    ['Merma unidades', (string) $reporte['mermaUnidades']],
+    ['Merma monto', number_format((float) $reporte['mermaMonto'], 2, '.', '')],
+    ['Conteos abiertos', (string) $reporte['conteosAbiertos']],
+    ['Pedidos activos', (string) $reporte['pedidosActivos']],
+    ['Fuera de SLA', (string) $reporte['fueraSla']],
+];
+$encabezadosReporte = ['Indicador', 'Valor'];
+$exportReporte = (string) ($_GET['export'] ?? '');
+if ($exportReporte === 'csv') {
+    mass_ops_descargar('reporte-sgc.csv', 'text/csv; charset=UTF-8', mass_ops_csv($encabezadosReporte, $indicadores));
+}
+if ($exportReporte === 'xls') {
+    mass_ops_descargar('reporte-sgc.xls', 'application/vnd.ms-excel; charset=UTF-8', mass_ops_xls('Reporte SGC-Mass', $encabezadosReporte, $indicadores));
+}
+if ($exportReporte === 'pdf') {
+    echo mass_ops_documento_html('Reporte y analítica', (string) $reporte['etiqueta'] . ' · ' . mass_ops_hoy(), $encabezadosReporte, $indicadores);
     exit;
 }
-
-$reporte = mass_ops_reporte($periodo);
 $maxVenta = 0.0;
 foreach ($reporte['horaria'] as $punto) {
     $maxVenta = max($maxVenta, (float) $punto['venta'], (float) $punto['objetivo']);
@@ -35,7 +51,9 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
     <a href="reportes.php?periodo=hoy" class="<?= $reporte['periodo'] === 'hoy' ? 'is-active' : '' ?>">Hoy</a>
     <a href="reportes.php?periodo=7d" class="<?= $reporte['periodo'] === '7d' ? 'is-active' : '' ?>">7 días</a>
     <a href="reportes.php?periodo=30d" class="<?= $reporte['periodo'] === '30d' ? 'is-active' : '' ?>">30 días</a>
-    <a href="reportes.php?<?= e(http_build_query(['periodo' => $reporte['periodo'], 'export' => 'csv'])) ?>">Exportar CSV</a>
+    <a href="reportes.php?<?= e(http_build_query(['periodo' => $reporte['periodo'], 'export' => 'csv'])) ?>">CSV</a>
+    <a href="reportes.php?<?= e(http_build_query(['periodo' => $reporte['periodo'], 'export' => 'xls'])) ?>">Excel</a>
+    <a href="reportes.php?<?= e(http_build_query(['periodo' => $reporte['periodo'], 'export' => 'pdf'])) ?>">PDF</a>
   </div>
 </div>
 
@@ -145,6 +163,29 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
         </li>
       <?php endforeach; ?>
     </ol>
+  </article>
+</section>
+
+<section class="mid-row">
+  <article class="admin-card">
+    <h2>Merma por motivo</h2>
+    <?php if (($reporte['motivos'] ?? []) === []): ?>
+      <p class="empty-note">Sin mermas activas.</p>
+    <?php else: ?>
+      <ul class="ops-log">
+        <?php foreach ($reporte['motivos'] as $motivo => $cantidad): ?>
+          <li><strong><?= e((string) $motivo) ?></strong> <?= (int) $cantidad ?> uds</li>
+        <?php endforeach; ?>
+      </ul>
+    <?php endif; ?>
+  </article>
+  <article class="admin-card">
+    <h2>Embudo de recolección</h2>
+    <ul class="ops-log">
+      <li><strong>Preparación</strong> <?= (int) ($reporte['embudo']['preparacion'] ?? 0) ?></li>
+      <li><strong>Por recoger</strong> <?= (int) ($reporte['embudo']['por_recoger'] ?? 0) ?></li>
+      <li><strong>Cerrados</strong> <?= (int) ($reporte['embudo']['cerrados'] ?? 0) ?></li>
+    </ul>
   </article>
 </section>
 
