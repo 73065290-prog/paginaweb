@@ -1614,3 +1614,92 @@ a { color: inherit; }
   .abc-pick,
   .prod-media-row { grid-template-columns: 1fr; }
 }
+
+/* Operaciones del menú WMS: inventario, conteos, mermas, reportes y configuración */
+.ops-alert {
+  margin: 0 0 0.85rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: #fdecea;
+  color: var(--admin-red);
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid #f5c0bc;
+}
+
+.ops-alert ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.ops-detail {
+  margin-bottom: 1rem;
+}
+
+.ops-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.ops-form label,
+.ops-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--admin-muted);
+}
+
+.ops-check {
+  flex-direction: row;
+  align-items: center;
+  color: var(--admin-sidebar);
+  font-size: 0.8rem;
+}
+
+.ops-form input,
+.ops-form select,
+.ops-input {
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  color: var(--admin-sidebar);
+  background: #fff;
+  width: 100%;
+  max-width: 160px;
+}
+
+.ops-form input,
+.ops-form select {
+  max-width: none;
+}
+
+.ops-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.inline-form {
+  display: inline;
+}
+
+.ops-kv {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+}
+
+.ops-kv span {
+  display: block;
+  color: var(--admin-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
