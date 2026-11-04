@@ -159,5 +159,42 @@ $csv = mass_ops_reporte_csv('7d');
 assert_true(str_contains($csv, 'ventas') && str_contains($csv, 'Últimos 7 días'), 'el CSV del reporte incluye periodo y ventas');
 assert_true(mass_ops_reporte('no-existe')['periodo'] === 'hoy', 'un periodo desconocido cae en hoy');
 
+$pagina = mass_ops_paginar(range(1, 20), 2, 8);
+assert_true($pagina['total'] === 20 && $pagina['page'] === 2 && count($pagina['items']) === 8, 'la paginación corta la segunda página');
+$lote = mass_ops_reponer_lote([11]);
+assert_true($lote['ok'] && ($lote['movidas'] ?? 0) === 4, 'el lote repone el café con el stock de trastienda');
+$antesTransfer = mass_ops_inventario_por_id(3);
+$transfer = mass_ops_transferir(3, 'trastienda', '2');
+$despuesTransfer = mass_ops_inventario_por_id(3);
+assert_true($transfer['ok'] && $antesTransfer !== null && $despuesTransfer !== null && (int) $despuesTransfer['gondola'] === (int) $antesTransfer['gondola'] - 2, 'la transferencia devuelve unidades a trastienda');
+assert_true(mass_ops_pedido_actualizar('MASS-04575', 'alta', 'Dejar en cámara')['ok'], 'se guarda prioridad y nota');
+$anotado = mass_ops_pedido_por_codigo('MASS-04575');
+assert_true($anotado !== null && $anotado['prioridad'] === 'alta' && $anotado['nota'] === 'Dejar en cámara', 'la nota queda en el pedido');
+$nuevoConteo = mass_ops_conteo_crear('Pasillo 09 · Snacks', 'Cíclico', [1, 2]);
+assert_true($nuevoConteo['ok'], 'se programa un conteo nuevo');
+assert_true(mass_ops_conteo_cancelar((string) $nuevoConteo['id'])['ok'], 'se cancela el conteo nuevo');
+assert_true((mass_ops_conteo_por_id((string) $nuevoConteo['id'])['estado'] ?? '') === 'cancelado', 'el conteo queda cancelado');
+$baseMerma = mass_ops_inventario_por_id(3);
+$altaMerma = mass_ops_merma_registrar([
+    'producto_id' => '3',
+    'cantidad' => '2',
+    'tipo' => 'merma',
+    'motivo' => 'Rotura',
+    'descontar' => '1',
+]);
+assert_true(mass_ops_merma_anular((string) ($altaMerma['id'] ?? ''))['ok'], 'se anula la merma');
+$devuelta = mass_ops_inventario_por_id(3);
+assert_true($baseMerma !== null && $devuelta !== null && (int) $devuelta['gondola'] === (int) $baseMerma['gondola'], 'anular devuelve el stock a la góndola');
+assert_true(str_starts_with(mass_ops_csv(['SKU'], [['SKU-0001']]), "\xEF\xBB\xBF"), 'el CSV lleva marca UTF-8 para Excel');
+assert_true(mass_ops_config_guardar([
+    'umbralBajo' => '12',
+    'umbralCriticoPiso' => '1',
+    'diasCaducidad' => '4',
+    'slaPickingMin' => '9',
+    'alertasActivas' => '1',
+])['ok'], 'se guarda un umbral para el historial');
+mass_ops_config_reset();
+assert_true(mass_ops_config()['umbralBajo'] === 8 && mass_ops_config_historial() !== [], 'restaurar vuelve al umbral de tienda y deja historial');
+
 echo "\n{$passed} ok, {$failed} fail\n";
 exit($failed > 0 ? 1 : 0);

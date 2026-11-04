@@ -12,6 +12,27 @@ function mass_ops_hoy(): string
     return '2024-10-24';
 }
 
+/**
+ * @return array<int, array{cuando: string, tipo: string, ref: string, detalle: string}>
+ */
+function mass_ops_movimientos(): array
+{
+    $log = $_SESSION['admin_ops_movs'] ?? [];
+    return is_array($log) ? array_values($log) : [];
+}
+
+function mass_ops_movimiento(string $tipo, string $ref, string $detalle): void
+{
+    $log = mass_ops_movimientos();
+    array_unshift($log, [
+        'cuando' => mass_ops_hoy() . ' ' . date('H:i:s'),
+        'tipo' => $tipo,
+        'ref' => $ref,
+        'detalle' => mb_substr(trim($detalle), 0, 180),
+    ]);
+    $_SESSION['admin_ops_movs'] = array_slice($log, 0, 40);
+}
+
 function mass_ops_sku(int $id): string
 {
     return 'SKU-' . str_pad((string) $id, 4, '0', STR_PAD_LEFT);
@@ -81,14 +102,44 @@ function mass_ops_config_guardar(array $data): array
     if ($errores !== []) {
         return ['ok' => false, 'errores' => $errores];
     }
-    $_SESSION['admin_ops_config'] = [
+    $nuevo = [
         'umbralBajo' => $bajo,
         'umbralCriticoPiso' => $crit,
         'diasCaducidad' => $dias,
         'slaPickingMin' => $sla,
         'alertasActivas' => (string) ($data['alertasActivas'] ?? '') === '1',
     ];
+    $_SESSION['admin_ops_config'] = $nuevo;
+    mass_ops_config_registrar('Umbral bajo ' . $bajo . ', crítico ' . $crit . ', caducidad ' . $dias . ' días, SLA ' . $sla . ' min');
     return ['ok' => true, 'errores' => []];
+}
+
+function mass_ops_config_registrar(string $resumen): void
+{
+    $log = $_SESSION['admin_ops_config_log'] ?? [];
+    if (!is_array($log)) {
+        $log = [];
+    }
+    array_unshift($log, [
+        'cuando' => mass_ops_hoy() . ' ' . date('H:i:s'),
+        'resumen' => mb_substr($resumen, 0, 180),
+    ]);
+    $_SESSION['admin_ops_config_log'] = array_slice($log, 0, 12);
+}
+
+/**
+ * @return array<int, array{cuando: string, resumen: string}>
+ */
+function mass_ops_config_historial(): array
+{
+    $log = $_SESSION['admin_ops_config_log'] ?? [];
+    return is_array($log) ? array_values($log) : [];
+}
+
+function mass_ops_config_reset(): void
+{
+    unset($_SESSION['admin_ops_config']);
+    mass_ops_config_registrar('Parámetros restaurados a los valores de tienda.');
 }
 
 function mass_ops_entero(mixed $value, int $min, int $max): ?int
@@ -147,6 +198,16 @@ function mass_ops_estado_stock_label(string $estado): string
  */
 function mass_ops_inventario(): array
 {
+    static $cache = null;
+    static $firma = '';
+    $firmaAhora = json_encode([
+        $_SESSION['admin_ops_stock'] ?? null,
+        $_SESSION['admin_ops_config'] ?? null,
+    ], JSON_UNESCAPED_UNICODE);
+    if (is_array($cache) && $firma === $firmaAhora) {
+        return $cache;
+    }
+
     $filas = mass_admin_gondola();
     $ids = array_map(static fn (array $r): int => (int) $r['id'], $filas);
     foreach (mass_productos() as $p) {
@@ -187,6 +248,8 @@ function mass_ops_inventario(): array
         $row['estado'] = mass_ops_estado_stock($row['gondola'], $row['trastienda']);
         $out[] = $row;
     }
+    $firma = $firmaAhora;
+    $cache = $out;
     return $out;
 }
 
@@ -235,6 +298,7 @@ function mass_ops_reponer(int $id): array
     }
     $mover = min($trastienda, $falta);
     mass_ops_stock_guardar($id, $gondola + $mover, $trastienda - $mover);
+    mass_ops_movimiento('reposición', (string) $row['sku'], $mover . ' uds de trastienda a góndola');
     return ['ok' => true, 'errores' => [], 'movidas' => $mover];
 }
 
@@ -260,6 +324,7 @@ function mass_ops_ajustar(int $id, mixed $gondolaRaw, mixed $trastiendaRaw): arr
         return ['ok' => false, 'errores' => $errores];
     }
     mass_ops_stock_guardar($id, $gondola, $trastienda);
+    mass_ops_movimiento('ajuste', (string) $row['sku'], 'Góndola ' . $gondola . ' · trastienda ' . $trastienda);
     return ['ok' => true, 'errores' => []];
 }
 
@@ -279,6 +344,7 @@ function mass_ops_descontar_gondola(int $id, int $cantidad): array
         return ['ok' => false, 'errores' => ['No hay suficiente stock en góndola para descontar ' . $cantidad . ' unidades.']];
     }
     mass_ops_stock_guardar($id, (int) $row['gondola'] - $cantidad, (int) $row['trastienda']);
+    mass_ops_movimiento('descuento', (string) $row['sku'], $cantidad . ' uds salieron de góndola');
     return ['ok' => true, 'errores' => []];
 }
 
@@ -287,10 +353,6 @@ function mass_ops_descontar_gondola(int $id, int $cantidad): array
  */
 function mass_ops_pedidos(): array
 {
-    $overrides = $_SESSION['admin_ops_pedidos'] ?? [];
-    if (!is_array($overrides)) {
-        $overrides = [];
-    }
     $labels = [
         'preparacion' => 'En preparación',
         'por_recoger' => 'Por recoger',
@@ -302,8 +364,9 @@ function mass_ops_pedidos(): array
     foreach (mass_admin_pedidos() as $pedido) {
         $codigo = strtoupper((string) ($pedido['codigo'] ?? ''));
         $estado = (string) ($pedido['estado'] ?? '');
-        if (isset($overrides[$codigo], $labels[$overrides[$codigo]])) {
-            $estado = (string) $overrides[$codigo];
+        $meta = mass_ops_pedido_meta($codigo);
+        if ($meta['estado'] !== '' && isset($labels[$meta['estado']])) {
+            $estado = $meta['estado'];
             $pedido['estado'] = $estado;
             $pedido['estadoLabel'] = $labels[$estado];
             if (!in_array($estado, ['preparacion', 'por_recoger'], true)) {
@@ -314,9 +377,54 @@ function mass_ops_pedidos(): array
         $pedido['fueraSla'] = (bool) $cfg['alertasActivas']
             && in_array($estado, ['preparacion', 'por_recoger'], true)
             && (int) ($pedido['mins'] ?? 0) > (int) $cfg['slaPickingMin'];
+        $pedido['prioridad'] = $meta['prioridad'] !== '' ? $meta['prioridad'] : ($pedido['fueraSla'] ? 'alta' : 'media');
+        $pedido['nota'] = $meta['nota'];
         $out[] = $pedido;
     }
     return $out;
+}
+
+/**
+ * Acepta el override histórico (string de estado) y el actual (array).
+ *
+ * @return array{estado: string, prioridad: string, nota: string}
+ */
+function mass_ops_pedido_meta(string $codigo): array
+{
+    $raw = $_SESSION['admin_ops_pedidos'][$codigo] ?? null;
+    $estado = '';
+    $prioridad = '';
+    $nota = '';
+    if (is_string($raw)) {
+        $estado = $raw;
+    } elseif (is_array($raw)) {
+        $estado = (string) ($raw['estado'] ?? '');
+        $prioridad = (string) ($raw['prioridad'] ?? '');
+        $nota = (string) ($raw['nota'] ?? '');
+    }
+    if (!in_array($prioridad, ['alta', 'media', 'baja'], true)) {
+        $prioridad = '';
+    }
+    return ['estado' => $estado, 'prioridad' => $prioridad, 'nota' => mb_substr(trim($nota), 0, 180)];
+}
+
+/**
+ * @param array{estado?: string, prioridad?: string, nota?: string} $meta
+ */
+function mass_ops_pedido_meta_guardar(string $codigo, array $meta): void
+{
+    if (!isset($_SESSION['admin_ops_pedidos']) || !is_array($_SESSION['admin_ops_pedidos'])) {
+        $_SESSION['admin_ops_pedidos'] = [];
+    }
+    $prioridad = (string) ($meta['prioridad'] ?? '');
+    if (!in_array($prioridad, ['alta', 'media', 'baja'], true)) {
+        $prioridad = 'media';
+    }
+    $_SESSION['admin_ops_pedidos'][$codigo] = [
+        'estado' => (string) ($meta['estado'] ?? ''),
+        'prioridad' => $prioridad,
+        'nota' => mb_substr(trim((string) ($meta['nota'] ?? '')), 0, 180),
+    ];
 }
 
 function mass_ops_picking_activos(): int
@@ -416,10 +524,10 @@ function mass_ops_pedido_avanzar(string $codigo): array
     if ($siguiente === null) {
         return ['ok' => false, 'errores' => ['Este pedido ya está cerrado.']];
     }
-    if (!isset($_SESSION['admin_ops_pedidos']) || !is_array($_SESSION['admin_ops_pedidos'])) {
-        $_SESSION['admin_ops_pedidos'] = [];
-    }
-    $_SESSION['admin_ops_pedidos'][(string) $pedido['codigo']] = $siguiente;
+    $meta = mass_ops_pedido_meta((string) $pedido['codigo']);
+    $meta['estado'] = $siguiente;
+    mass_ops_pedido_meta_guardar((string) $pedido['codigo'], $meta);
+    mass_ops_movimiento('picking', (string) $pedido['codigo'], 'Pasó a ' . str_replace('_', ' ', $siguiente));
     return ['ok' => true, 'errores' => [], 'estado' => $siguiente];
 }
 
@@ -660,6 +768,7 @@ function mass_ops_conteo_cerrar(string $id, bool $aplicarAjuste): array
         $conteo['resultado'] = $resumen['diferencias'] > 0 ? 'diferencia' : 'cuadrado';
         $lista[$i] = $conteo;
         mass_ops_conteos_guardar($lista);
+        mass_ops_movimiento('conteo', (string) $conteo['id'], 'Cierre ' . (string) $conteo['resultado']);
         return ['ok' => true, 'errores' => [], 'resultado' => (string) $conteo['resultado']];
     }
     return ['ok' => false, 'errores' => ['Conteo no encontrado.']];
@@ -837,6 +946,7 @@ function mass_ops_merma_registrar(array $data): array
         'registrada' => mass_ops_hoy(),
     ]);
     mass_ops_mermas_guardar($lista);
+    mass_ops_movimiento('merma', $nuevoId, $motivo . ' · ' . $cantidad . ' uds');
     return ['ok' => true, 'errores' => [], 'id' => $nuevoId];
 }
 
@@ -863,6 +973,7 @@ function mass_ops_merma_retirar(string $id): array
         $merma['estado'] = 'retirada';
         $lista[$i] = $merma;
         mass_ops_mermas_guardar($lista);
+        mass_ops_movimiento('merma', (string) $merma['id'], 'Retiro de góndola');
         return ['ok' => true, 'errores' => []];
     }
     return ['ok' => false, 'errores' => ['Registro de merma no encontrado.']];
@@ -886,25 +997,36 @@ function mass_ops_reporte(string $periodo): array
     }
     $mermaUnidades = 0;
     $mermaMonto = 0.0;
+    $motivos = [];
     $precios = [];
     foreach (mass_productos() as $producto) {
         $precios[(int) $producto['id']] = (float) $producto['precio'];
     }
     foreach (mass_ops_mermas() as $merma) {
+        if ((string) ($merma['estado'] ?? '') === 'anulada') {
+            continue;
+        }
         $mermaUnidades += (int) $merma['cantidad'];
         $mermaMonto += (int) $merma['cantidad'] * (float) ($precios[(int) $merma['productoId']] ?? 0);
+        $motivo = (string) ($merma['motivo'] ?? 'Otro');
+        $motivos[$motivo] = ($motivos[$motivo] ?? 0) + (int) $merma['cantidad'];
     }
     $conteosAbiertos = 0;
     foreach (mass_ops_conteos() as $conteo) {
-        if ((string) $conteo['estado'] !== 'cerrado') {
+        if (in_array((string) $conteo['estado'], ['pendiente', 'en_curso'], true)) {
             $conteosAbiertos++;
         }
     }
     $fueraSla = 0;
     $activos = 0;
+    $embudo = ['preparacion' => 0, 'por_recoger' => 0, 'cerrados' => 0];
     foreach (mass_ops_pedidos() as $pedido) {
-        if (in_array($pedido['estado'], ['preparacion', 'por_recoger'], true)) {
+        $estadoPedido = (string) $pedido['estado'];
+        if (in_array($estadoPedido, ['preparacion', 'por_recoger'], true)) {
             $activos++;
+            $embudo[$estadoPedido]++;
+        } else {
+            $embudo['cerrados']++;
         }
         if (!empty($pedido['fueraSla'])) {
             $fueraSla++;
@@ -933,8 +1055,12 @@ function mass_ops_reporte(string $periodo): array
         'pedidosActivos' => $activos,
         'fueraSla' => $fueraSla,
         'stock' => $stock,
+        'motivos' => $motivos,
+        'embudo' => $embudo,
     ];
 }
+
+require_once __DIR__ . '/ops_enterprise.php';
 
 function mass_ops_reporte_csv(string $periodo): string
 {
