@@ -85,39 +85,41 @@ La configuración de sources/tests/coverage está en `sonar-project.properties` 
 | Credenciales en texto plano (S2068) | Passwords demo → `password_hash` + `password_verify` (login sigue siendo `123456`) | `includes/functions.php` |
 | Bucles duplicados EAN/nombre | Un solo recorrido del catálogo en validación | `includes/data.php` |
 | `console.log` / `var_dump` / `dd()` | No encontrados en fuentes | — |
-| SQL concatenado | No aplica (sin MySQL de app) | — |
+| SQL concatenado | La aplicación sí usa MySQL/MariaDB con PDO. Los repositorios revisados preparan las consultas (`backend/repositories/ProductoRepository.php`). No hay un informe Sonar de esta fecha que cuente hallazgos | — |
 | Vendor / evidencias / CSS | Excluidos en `sonar-project.properties` | raíz |
 
-## 5. Plantilla de métricas — [COMPLETAR TRAS SONARQUBE]
+## 5. Métricas — pendientes tras el intento del 2026-11-02
+
+Fuente: `PROMTS/evidencias/20-sonarqube-reescaneo.txt`. El análisis no se envió. No se estiman cifras. El 58.30% de `ejecucion-automatizada.txt` es de otra máquina (2026-10-28) y no se anota como cobertura de Sonar.
 
 | Métrica | Valor | Interpretación |
 | --- | --- | --- |
-| Quality Gate | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Bugs | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Vulnerabilities | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Code Smells | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Coverage | [COMPLETAR TRAS SONARQUBE] (referencia local PHPUnit: ~58% líneas `includes/`) | [COMPLETAR TRAS SONARQUBE] |
-| Duplicated Lines (%) | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Maintainability Rating | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Reliability Rating | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
-| Security Rating | [COMPLETAR TRAS SONARQUBE] | [COMPLETAR TRAS SONARQUBE] |
+| Quality Gate | Pendiente. No disponible | No hubo análisis que el servidor pudiera calificar |
+| Bugs | Pendiente. No disponible | Sin informe de issues de esta ejecución |
+| Vulnerabilities | Pendiente. No disponible | Sin informe de issues de esta ejecución |
+| Code Smells | Pendiente. No disponible | Sin informe de issues de esta ejecución |
+| Coverage | Pendiente. No disponible | No se importó Clover de este equipo. Aquí no hay `php_pcov.dll` ni `php_xdebug.dll` |
+| Duplicated Lines (%) | Pendiente. No disponible | Sin análisis |
+| Maintainability Rating | Pendiente. No disponible | Sin análisis |
+| Reliability Rating | Pendiente. No disponible | Sin análisis |
+| Security Rating | Pendiente. No disponible | Sin análisis |
 
-## 6. Ocho preguntas de la guía — [COMPLETAR TRAS SONARQUBE]
+## 6. Ocho preguntas de la guía
 
-1. ¿El Quality Gate pasó o falló? ¿Por qué? — [COMPLETAR TRAS SONARQUBE]
-2. ¿Qué problemas se identificaron? — [COMPLETAR TRAS SONARQUBE]
-3. ¿Cuántos bugs / vulnerabilidades / code smells hay? — [COMPLETAR TRAS SONARQUBE]
-4. ¿Cuál es la cobertura reportada? — [COMPLETAR TRAS SONARQUBE]
-5. ¿Qué partes del código requieren atención? — [COMPLETAR TRAS SONARQUBE]
-6. ¿Qué corregir primero y por qué? — [COMPLETAR TRAS SONARQUBE]
-7. ¿Relación entre las pruebas PHPUnit y el análisis estático? — [COMPLETAR TRAS SONARQUBE]
-8. ¿Qué mejoras concretas propondrías? — [COMPLETAR TRAS SONARQUBE]
+1. ¿El Quality Gate pasó o falló? ¿Por qué? — Pendiente. No se puede responder: el escaneo no llegó al servidor el 2026-11-02 porque no había `SONAR_TOKEN`.
+2. ¿Qué problemas se identificaron? — Ninguno atribuible a este análisis. No hay listado de issues.
+3. ¿Cuántos bugs / vulnerabilidades / code smells hay? — No disponible.
+4. ¿Cuál es la cobertura reportada? — Sonar no reportó cobertura. PHPUnit en este equipo tampoco produjo un porcentaje nuevo.
+5. ¿Qué partes del código requieren atención? — Pendiente. Sin issues no se señala un archivo por una métrica que no existe.
+6. ¿Qué corregir primero y por qué? — Pendiente del informe de Sonar. El bloqueo comprobado para poder medir es la falta de token y de driver de cobertura, no un smell ya clasificado.
+7. ¿Relación entre las pruebas PHPUnit y el análisis estático? — `phpunit.xml` puede generar Clover y `sonar-project.properties` declara esa ruta. En este equipo el Clover no se generó y el escaneo no se envió, así que las dos herramientas todavía no se cruzaron con números.
+8. ¿Qué mejoras concretas propondrías? — No se propone una lista de correcciones de código a partir de un Quality Gate inexistente.
 
-## 7. Lista priorizada de mejoras — [COMPLETAR TRAS SONARQUBE]
+## 7. Lista priorizada de pasos que faltan para tener métricas
 
-1. [COMPLETAR TRAS SONARQUBE]
-2. [COMPLETAR TRAS SONARQUBE]
-3. [COMPLETAR TRAS SONARQUBE]
+1. Definir `SONAR_TOKEN` fuera del repositorio y volver a ejecutar `scripts\scan-sonar.bat`.
+2. Disponer de PCOV o Xdebug en el PHP 8.2.12 de este XAMPP si se quiere un Clover de este árbol. No se instaló en esta revisión.
+3. Copiar al informe solo las cifras que muestre el panel después de ese análisis.
 
 ## 8. Capturas sugeridas (para el informe)
 
@@ -126,3 +128,5 @@ La configuración de sources/tests/coverage está en `sonar-project.properties` 
 3. Pestaña **Coverage** con % y archivos de `includes/`.
 4. Pestaña **Measures** (duplicación, maintainability).
 5. Consola tras `scripts\scan-sonar.bat` (EXECUTION SUCCESS).
+
+Ninguna de estas cinco imágenes está en el repositorio. La pantalla de login de `PROMTS/evidencias/20-sonarqube-login-requerido.png` no las reemplaza. Las capturas N.º 1 a N.º 6 del informe están en [INFORME-FINAL.md](INFORME-FINAL.md) y también siguen pendientes.

@@ -187,11 +187,11 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 <section class="admin-card alerts-card">
   <div class="card-head">
     <h2>Alertas prioritarias de góndola y almacén</h2>
-    <div class="filters-inline" role="tablist">
-      <a href="index.php?alerta=todos" class="<?= $filtroAlerta === 'todos' ? 'is-active' : '' ?>">Todos</a>
-      <a href="index.php?alerta=agotados" class="<?= $filtroAlerta === 'agotados' ? 'is-active' : '' ?>">Agotados</a>
-      <a href="index.php?alerta=critico" class="<?= $filtroAlerta === 'critico' ? 'is-active' : '' ?>">Stock crítico</a>
-      <a href="index.php?alerta=vencer" class="<?= $filtroAlerta === 'vencer' ? 'is-active' : '' ?>">Próximos a vencer</a>
+    <div class="filters-inline">
+      <a href="index.php?alerta=todos" class="<?= $filtroAlerta === 'todos' ? 'is-active' : '' ?>"<?= $filtroAlerta === 'todos' ? ' aria-current="page"' : '' ?>>Todos</a>
+      <a href="index.php?alerta=agotados" class="<?= $filtroAlerta === 'agotados' ? 'is-active' : '' ?>"<?= $filtroAlerta === 'agotados' ? ' aria-current="page"' : '' ?>>Agotados</a>
+      <a href="index.php?alerta=critico" class="<?= $filtroAlerta === 'critico' ? 'is-active' : '' ?>"<?= $filtroAlerta === 'critico' ? ' aria-current="page"' : '' ?>>Stock crítico</a>
+      <a href="index.php?alerta=vencer" class="<?= $filtroAlerta === 'vencer' ? 'is-active' : '' ?>"<?= $filtroAlerta === 'vencer' ? ' aria-current="page"' : '' ?>>Próximos a vencer</a>
     </div>
   </div>
   <div class="table-wrap">

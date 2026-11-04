@@ -5,7 +5,7 @@
 | Modalidad | Funcionalidades cubiertas |
 | --- | --- |
 | **Manual (exploratoria / UI)** | Navegación storefront, modal Agregar/Editar producto, toast de errores vacíos, login visual admin/cliente, dashboard Figma, logout navbar. |
-| **Automatizada (PHPUnit)** | Reglas de negocio, validaciones, auth, carrito/sesión, confirmación de pedido, persistencia admin, filtro catálogo, SQLite lab (P01–P32). |
+| **Automatizada (PHPUnit)** | Reglas de negocio, validaciones, auth, carrito/sesión, confirmación de pedido, persistencia admin del plan, filtro catálogo y SQLite en memoria (P01–P32). La aplicación también puede persistir en MySQL/MariaDB con PDO; P32 no demuestra esa base. |
 
 ## 2. Coincidencias y diferencias
 

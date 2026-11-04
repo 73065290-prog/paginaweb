@@ -1,0 +1,60 @@
+Comprobaciones de teclado, diálogo y toast
+Fecha local: 2026-11-03, aproximadamente 00:05 a 00:11
+Página: http://127.0.0.1/paginaweb/cliente_interfaces/catalogo.php
+Script cargado: /paginaweb/frontend/assets/js/ui.js?v=20261103b
+
+Método: se dispararon eventos keydown de Tab, Shift+Tab y Escape sobre el documento, y se leyó document.activeElement junto con los atributos del diálogo. La tecla Tab enviada por la herramienta del navegador no movió el foco en un intento anterior; por eso esta evidencia usa los eventos que escucha la página, no una pulsación física de Narrador ni del teclado del sistema.
+
+Apertura con clic en #openCart:
+- clase del cajón: cart-drawer open
+- foco: #closeCart ("Cerrar carrito")
+- aria-expanded del botón: true
+- aria-modal: true
+- inert: false
+- aria-hidden: false
+
+Tab desde el último control del diálogo:
+- el foco volvió a #closeCart
+
+Shift+Tab desde el primer control (#closeCart):
+- el foco pasó al enlace "Ir al checkout", que es el último control del diálogo
+
+Escape:
+- el cajón dejó de tener la clase open
+- inert: true
+- aria-expanded: false
+- el foco volvió a #openCart
+
+Cajón cerrado, intento de enfocar un control interior:
+- inert permanece true y el foco no queda dentro del diálogo
+
+Primer intento, antes de la corrección:
+- el navegador seguía con ui.js en caché, sin cartFocusable
+- el clic añadía la clase open y aria-hidden=false, pero inert seguía true, aria-modal era null, aria-expanded false y el foco se quedaba en #openCart
+- después de cargar el script nuevo, Escape cerraba el diálogo pero el foco se quedaba en #closeCart porque inert se aplicaba antes de devolver el foco
+- se corrigió el orden: primero se enfoca el botón que abrió el diálogo y después se marca inert
+- la repetición descrita arriba es la que quedó vigente
+
+Toast de éxito, al agregar "Arroz Extra Grano Largo" desde el catálogo:
+- un solo #toast
+- role=status
+- aria-live=polite
+- aria-atomic=true
+- class show
+- texto: "Producto agregado al carrito"
+- el texto aparece después de la respuesta, no solo al cargar la página
+- el botón del carrito pasó a "Abrir carrito, 2 productos, total S/ 31.80"
+- el cajón nombró por separado Disminuir, Aumentar y Quitar de cada producto
+
+Toast de error, envío de carrito.agregar con id 0 (el servidor rechazó el dato; el carrito siguió en 2 productos):
+- role=alert
+- aria-live=assertive
+- aria-atomic=true
+- class show
+- texto: El campo "id" debe ser un número entero positivo.
+- el significado está en el texto, no solo en el color
+
+El toast se oculta a los 2,4 s. La captura de pantalla posterior ya no muestra el mensaje; la lectura del DOM anterior es la evidencia del anuncio.
+
+Lector de pantalla: no se usó Narrador ni otro lector. El anuncio real a una tecnología de asistencia queda pendiente.
+Visibilidad del foco: el campo de búsqueda muestra un anillo porque su contenedor usa :focus-within. En un enlace enfocado del pedido, getComputedStyle devolvió outline-style none y la captura no muestra un anillo adicional. No se modificó el CSS porque está fuera del alcance.

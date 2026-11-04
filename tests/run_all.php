@@ -9,6 +9,10 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 $failed = 0;
 
+putenv('MASS_USE_DB=0');
+$_ENV['MASS_USE_DB'] = '0';
+$_SERVER['MASS_USE_DB'] = '0';
+
 echo "=== Mass Online · suite completa ===\n\n";
 
 $phpunit = $root . '/vendor/bin/phpunit';

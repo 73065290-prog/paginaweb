@@ -10,7 +10,7 @@ declare(strict_types=1);
         <button type="button">Reporte de Inventario Final</button>
       </div>
     </footer>
-  </div><!-- .admin-main -->
+  </main><!-- .admin-main -->
 </div><!-- .admin-shell -->
 <script src="<?= e(mass_asset('assets/js/admin.js')) ?>"></script>
 </body>

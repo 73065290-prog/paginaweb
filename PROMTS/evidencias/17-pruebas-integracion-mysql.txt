@@ -1,0 +1,332 @@
+================================================================================
+1. IDENTIFICACIÓN DEL PROMPT, INTENT Y BOLT
+================================================================================
+Prompt:      PROMPT 17: Pruebas de integración de repositorios con MySQL real
+Intent:      INT-006
+Bolt:        INT-006-BOLT-006
+HU:          INT-006-HU-17
+Modelo IA:   Claude Opus 5.5
+Fecha:       2026-11-02, hora local UTC-5 (ejecuciones entre 22:41 y 22:50)
+Responsable: cursor12310-sys
+
+================================================================================
+2. ENTORNO
+================================================================================
+- PHP CLI:   C:\xampp\php\php.exe -> PHP 8.2.12 (cli) ZTS x64
+- PHPUnit:   vendor/bin/phpunit -> PHPUnit 11.5.0
+- Servidor:  10.4.32-MariaDB (XAMPP), 127.0.0.1:3306
+- Composer:  NO instalado en el equipo. `composer test` equivale a `@php vendor/bin/phpunit`
+             (composer.json, scripts.test); se ejecutó ese mismo comando con C:\xampp\php\php.exe.
+- Git:       NO instalado en el equipo (igual que en el PROMPT 16): no se pudo ejecutar
+             git status, crear la rama ni hacer el commit.
+- Credenciales de prueba: backend/config/database.test.example.php (valores XAMPP por defecto,
+             usuario root sin contraseña; no es una credencial real). No se creó
+             database.test.local.php. No se registran contraseñas en esta evidencia.
+
+================================================================================
+3. INSPECCIÓN INICIAL
+================================================================================
+- phpunit.xml: suites Unit y Feature; <env MASS_USE_DB=0>; bootstrap tests/bootstrap.php.
+- tests/bootstrap.php: carga vendor/autoload.php (que incluye backend/bootstrap.php,
+  includes/data.php e includes/functions.php) y prepara $_SESSION. No requirió cambios.
+- Repositorios (backend/repositories): obtienen la conexión del singleton estático
+  Database::pdo(), que lee backend/config/database.local.php (dbname=mass_online, desarrollo).
+  No admiten inyección de PDO por constructor.
+  Operaciones realmente implementadas:
+    CategoriaRepository   all()
+    ProductoRepository    all(), find(), create(), update()
+    InventarioRepository  byTienda(), updateStock()
+    CuponRepository       descuento()
+    PedidoRepository      create() (transacción), findByCodigo()
+    TiendaRepository      all(), find()
+    UsuarioRepository     allAuthUsers(), findByIdentifier()
+  Ningún repositorio implementa borrado; las bajas se validaron con SQL directo en
+  mass_online_test comprobando su efecto en los repositorios y las reglas ON DELETE.
+- Pruebas existentes: CatalogoYSqliteLabTest (SQLite en memoria) y MysqlDisponibilidadTest
+  (fuerza MASS_USE_DB=1 y usa la base de desarrollo). No se modificaron.
+
+================================================================================
+4. MECANISMO DE AISLAMIENTO EN mass_online_test
+================================================================================
+tests/Integration/IntegrationTestCase.php:
+  1. Configuración: variables MASS_TEST_DB_* > database.test.local.php > database.test.example.php.
+  2. validarNombreBase(): exige dbname === 'mass_online_test' (exacto) y distinto del dbname de
+     desarrollo (Database::config()). Si no se cumple lanza "BLOQUEO DE SEGURIDAD" y no ejecuta
+     ninguna operación destructiva.
+  3. Conecta sin base, ejecuta CREATE DATABASE IF NOT EXISTS `mass_online_test` y USE.
+  4. Carga database/schema.sql omitiendo CREATE DATABASE y USE; rechaza cualquier sentencia que
+     mencione mass_online o una tabla calificada con otra base.
+  5. Inyecta ese PDO en Database (Reflection sobre propiedades privadas, solo desde las pruebas)
+     y pone MASS_USE_DB=1 durante la prueba; tearDown restaura MASS_USE_DB y Database::reset().
+  6. Antes de cada carga de esquema, limpieza o inserción: SELECT DATABASE() debe ser
+     'mass_online_test' (exigirBaseDePrueba), si no lanza "BLOQUEO DE SEGURIDAD".
+  7. Si el servidor no responde (timeout 3 s), markTestSkipped en todas las pruebas que lo necesitan.
+No se elimina ninguna base de datos: solo se crean/vacían tablas dentro de mass_online_test.
+
+================================================================================
+5. ERRORES ENCONTRADOS DURANTE LA IMPLEMENTACIÓN
+================================================================================
+Primera ejecución de la suite Integration (MySQL encendido): 64 pruebas, 2 fallos, ambos en
+aserciones de las propias pruebas (no en los repositorios):
+  - ConexionBaseDePruebaIntegrationTest::test_esquema_de_prueba_tiene_las_nueve_tablas_utf8mb4
+    MariaDB ordena 'pedidos' antes que 'pedido_detalles' (collation utf8mb4_unicode_ci ignora
+    '_'). Corrección: assertEqualsCanonicalizing.
+  - UsuarioRepositoryIntegrationTest::test_refleja_actualizacion_desactivacion_y_baja
+    comparaba un array asociativo dependiente del orden de claves. Corrección: dos assertSame.
+  También se corrigió un nombre de propiedad escrito con caracteres no ASCII antes de ejecutar.
+Segunda ejecución: 64/64 OK (sección 6.1).
+
+================================================================================
+6. PRUEBAS EJECUTADAS
+================================================================================
+6.1 Suite Integration con MariaDB encendido (22:42:19)
+Comando: php vendor/bin/phpunit --testsuite Integration --testdox
+Resultado: OK (64 tests, 298 assertions)  exit=0
+Salida completa en la sección 10.
+
+6.2 Confirmación de que la conexión usada es mass_online_test
+  - ConexionBaseDePruebaIntegrationTest::test_database_pdo_de_los_repositorios_apunta_a_mass_online_test
+    -> Database::pdo() (la conexión que reciben los 7 repositorios) devuelve SELECT DATABASE()
+       = 'mass_online_test'.  [OK]
+  - ConexionBaseDePruebaIntegrationTest::test_esquema_de_prueba_tiene_las_nueve_tablas_utf8mb4
+    -> 9 tablas InnoDB utf8mb4_unicode_ci y 7 claves foráneas en mass_online_test.  [OK]
+  - BaseDePruebaSeguridadTest (9 pruebas, sin servidor): rechaza mass_online, sgc_tiendas_mass,
+    MASS_ONLINE_TEST, mass_online_test2, '' y el caso dev = test; exige conexión activa.  [OK]
+  - Huella de la base de desarrollo antes (22:41:27) y después de la suite Integration:
+      CHECKSUM TABLE ... EXTENDED de las 9 tablas de mass_online: IDÉNTICO
+      AUTO_INCREMENT / TABLE_ROWS de mass_online:                  IDÉNTICO
+      SHOW DATABASES: única diferencia => se añadió 'mass_online_test'
+    Huella de referencia (antes y después):
+      mass_online.roles 2200577212 | usuarios 936642034 | categorias 1728762766
+      productos 2923307800 | tiendas 3894262171 | inventario 1270345092
+      cupones 1902921554 | pedidos 0 | pedido_detalles 0
+  - Tras la batería completa (6.5): filas con código 'MASS-IT%' en mass_online.pedidos = 0.
+
+6.3 Suite Integration con MySQL inaccesible (puerto cerrado, 22:43)
+Comando: MASS_TEST_DB_PORT=3399 php vendor/bin/phpunit --testsuite Integration
+Resultado:
+  SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.........  64 / 64 (100%)
+  OK, but some tests were skipped!
+  Tests: 64, Assertions: 17, Skipped: 55.   exit=0
+  Motivo (markTestSkipped): "MySQL/MariaDB no disponible en 127.0.0.1:3399 (SQLSTATE[HY000]
+  [2002] No se puede establecer una conexión ya que el equipo de destino denegó expresamente
+  dicha conexión). Suite Integration omitida."
+  Las 9 pruebas de BaseDePruebaSeguridadTest se ejecutan sin servidor.
+
+6.4 MySQL APAGADO (mysqladmin -u root shutdown; procesos mysqld = 0;
+    mysql -e "SELECT 1" -> ERROR 2002 (HY000): Can't connect to MySQL server on 'localhost' (10061))
+  22:44:50  php vendor/bin/phpunit --testsuite Integration
+            OK, but some tests were skipped!  Tests: 64, Assertions: 17, Skipped: 55.  exit=0
+  php vendor/bin/phpunit   (equivalente a composer test)
+            OK, but some tests were skipped!  Tests: 122, Assertions: 373, Skipped: 56.  exit=0
+            (55 Integration + MysqlDisponibilidadTest)
+  php tests/run_all.php
+            auth 16 OK, negocio 38 OK, productos_admin 22 OK, carrito 12 OK, csrf 9 OK,
+            redirect 6 OK -> 103 OK, 0 FAIL   exit=0
+  php scripts/smoke_views.php        -> db=0 ... SMOKE_ROUTES_OK   exit=0
+  php scripts/smoke_auth_logout.php  -> SMOKE_AUTH_OK              exit=0
+  MariaDB se volvió a arrancar: SELECT VERSION() -> 10.4.32-MariaDB
+
+6.5 MySQL ENCENDIDO — batería completa (22:46:18)
+  php vendor/bin/phpunit   (equivalente a composer test)
+            OK (122 tests, 658 assertions)   exit=0   (Unit + Feature + Integration, 0 omitidas)
+  Efecto en mass_online (huella antes/después): cambiaron SOLO pedidos y pedido_detalles
+  (0 -> 3 filas: MASS-TEST293A, MASS-A0EF20, MASS-8947D3). Origen: MysqlDisponibilidadTest
+  (tests/Feature, preexistente) fuerza MASS_USE_DB=1 contra la base de desarrollo y deja la
+  variable activa para las pruebas Feature posteriores (PedidoConfirmacionTest). Ninguna fila
+  'MASS-IT%' de la suite Integration. Se restauró con database/seed.sql y
+  php scripts/verificar_bd.php -> OK=93 ERROR=0 ADVERTENCIA=3, VERIFICACION_BD_OK.
+
+6.6 MySQL ENCENDIDO — suites CLI y smoke tests (22:47:32)
+  php tests/run_all.php   exit=1
+            auth 16 OK, negocio 38 OK, carrito 12 OK, csrf 9 OK, redirect 6 OK;
+            productos_admin_test.php SIN línea de resultado (abortó).
+  php scripts/smoke_views.php        -> db=1, SMOKE_ROUTES_OK   exit=0
+  php scripts/smoke_auth_logout.php  -> SMOKE_AUTH_OK           exit=0
+  Efecto en mass_online: cambiaron productos, pedidos y pedido_detalles.
+  Diagnóstico (php tests/productos_admin_test.php, exit=255):
+    FAIL crear producto OK con reglas / FAIL lista incrementa al crear válido /
+    FAIL producto nuevo visible en catálogo, y
+    PDOException 1062 Duplicate entry '7756987456123' for key 'uq_productos_ean'
+    en ProductoRepository::create() <- ProductoService::crearAdmin() <- tests/productos_admin_test.php:227
+  Causa: con database.local.php activo, las suites CLI usan la base de desarrollo;
+  crearAdmin() persiste el alta en MySQL y la prueba espera la persistencia en sesión; al
+  repetir, el EAN ya existe. Es comportamiento preexistente fuera del alcance (tests/*.php,
+  backend/services). Con MySQL apagado run_all.php pasa 103/103 (6.4).
+  BLOQUEO: la restauración de mass_online tras esta ejecución fue bloqueada por la revisión
+  automática (operación sobre la base de desarrollo, no autorizada en este prompt). La base de
+  desarrollo queda con los productos/pedidos creados por las suites CLI hasta que el usuario
+  autorice reimportar database/seed.sql.
+
+================================================================================
+7. COBERTURA DE backend/repositories
+================================================================================
+Comandos:
+  php vendor/bin/phpunit --testsuite Integration --coverage-text --coverage-filter backend/repositories
+    -> "1) No code coverage driver available"  WARNINGS! Tests: 64, Assertions: 298, Warnings: 1. exit=1
+  php -d extension=pcov -d pcov.enabled=1 ...   (mismo mecanismo que composer test:coverage)
+    -> "Unable to load dynamic library 'pcov' (... php_pcov.dll (No se puede encontrar el módulo
+       especificado))"  pcov=0
+  C:\xampp\php\phpdbg.exe -qrr vendor/bin/phpunit --testsuite Integration --coverage-text ...
+    -> "No code coverage driver available"
+  vendor/phpunit/php-code-coverage/src/Driver: Driver.php, PcovDriver.php, Selector.php,
+    XdebugDriver.php (solo PCOV y Xdebug; phpdbg ya no es compatible).
+  extension_loaded: xdebug=0, pcov=0.
+RESULTADO: el porcentaje de cobertura NO pudo medirse. Requiere instalar PCOV o Xdebug en
+C:\xampp\php\ext, lo que el prompt no autoriza. No se alteraron dependencias.
+
+Inventario manual (NO es una medición de la herramienta): métodos públicos ejercitados por
+pruebas que pasaron en 6.1, incluida la rama "sin conexión":
+  CategoriaRepository   1/1  all
+  ProductoRepository    4/4  all, find, create, update (+ mapRow privado vía find/all)
+  InventarioRepository  2/2  byTienda, updateStock
+  CuponRepository       1/1  descuento
+  PedidoRepository      2/2  create (éxito, rollback por FK, código duplicado), findByCodigo
+  TiendaRepository      2/2  all, find
+  UsuarioRepository     2/2  allAuthUsers, findByIdentifier (BD y fuente explícita)
+  Ramas no ejecutadas identificadas por lectura: UsuarioRepository::allAuthUsers
+  `!class_exists('Database')` y el segundo `if (!$pdo)` tras Database::connected() (inalcanzable).
+
+================================================================================
+8. ARCHIVOS
+================================================================================
+Creados:
+  - PROMTS/17.Pruebas-integracion-repositorios-mysql.md
+  - PROMTS/evidencias/17-pruebas-integracion-mysql.txt
+  - backend/config/database.test.example.php
+  - tests/Integration/IntegrationTestCase.php
+  - tests/Integration/BaseDePruebaSeguridadTest.php
+  - tests/Integration/ConexionBaseDePruebaIntegrationTest.php
+  - tests/Integration/CategoriaRepositoryIntegrationTest.php
+  - tests/Integration/ProductoRepositoryIntegrationTest.php
+  - tests/Integration/InventarioRepositoryIntegrationTest.php
+  - tests/Integration/CuponRepositoryIntegrationTest.php
+  - tests/Integration/PedidoRepositoryIntegrationTest.php
+  - tests/Integration/TiendaRepositoryIntegrationTest.php
+  - tests/Integration/UsuarioRepositoryIntegrationTest.php
+Modificados:
+  - phpunit.xml (suite Integration -> tests/Integration)
+Sin cambios dentro del alcance: tests/bootstrap.php
+Eliminados: ninguno.
+Fuera del alcance: no modificados. Pendiente de autorización: .gitignore para ignorar
+  backend/config/database.test.local.php (hoy NO está ignorado; por eso no se creó).
+
+================================================================================
+9. RESUMEN
+================================================================================
+- Suite Integration registrada en PHPUnit: SÍ (64 pruebas, 9 archivos).
+- Base usada: exclusivamente mass_online_test (verificado por prueba y por huella de mass_online).
+- 7/7 repositorios con pruebas de sus operaciones implementadas: APROBADAS (6.1).
+- Consultas preparadas con comillas, apóstrofes, %, _, \, emoji e intentos de inyección: APROBADAS.
+- Omisión automática sin MySQL: VERIFICADA (puerto cerrado y servidor apagado; 55 skipped, exit 0).
+- composer test (php vendor/bin/phpunit): 122/122 con MySQL; 122 con 56 skipped sin MySQL.
+- run_all.php: 103/103 sin MySQL; con MySQL falla productos_admin_test.php (preexistente).
+- Cobertura: NO medible (sin PCOV/Xdebug); inventario manual 14/14 métodos públicos.
+- Commit/rama: NO realizados (git no instalado).
+- Estado del Bolt INT-006-BOLT-006: pruebas de integración COMPLETADAS Y VERIFICADAS;
+  cobertura porcentual y commit PENDIENTES.
+
+================================================================================
+10. SALIDA COMPLETA — php vendor/bin/phpunit --testsuite Integration --testdox (6.1)
+================================================================================
+PHPUnit 11.5.0 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.12
+Configuration: C:\Users\LENOVO\Downloads\paginaweb (2)\paginaweb\phpunit.xml
+
+................................................................  64 / 64 (100%)
+
+Time: 00:02.729, Memory: 10.00 MB
+
+Base De Prueba Seguridad (Tests\Integration\BaseDePruebaSeguridad)
+ ✔ Configuracion de prueba apunta a mass online test
+ ✔ Acepta solo mass online test distinta de desarrollo
+ ✔ Rechaza cualquier otra base with data set "base de desarrollo"
+ ✔ Rechaza cualquier otra base with data set "otra base"
+ ✔ Rechaza cualquier otra base with data set "mayúsculas"
+ ✔ Rechaza cualquier otra base with data set "sufijo"
+ ✔ Rechaza cualquier otra base with data set "vacía"
+ ✔ Rechaza cualquier otra base with data set "desarrollo configurado como test"
+ ✔ Exige conexion activa a la base de prueba
+
+Categoria Repository Integration (Tests\Integration\CategoriaRepositoryIntegration)
+ ✔ All sin registros devuelve lista vacia
+ ✔ All mapea columnas y ordena por nombre
+ ✔ Conserva comillas apostrofes y caracteres especiales
+ ✔ Refleja actualizacion y eliminacion en mysql
+ ✔ Clave primaria impide ids duplicados
+ ✔ Sin conexion devuelve lista vacia
+
+Conexion Base De Prueba Integration (Tests\Integration\ConexionBaseDePruebaIntegration)
+ ✔ Database pdo de los repositorios apunta a mass online test
+ ✔ Esquema de prueba tiene las nueve tablas utf8mb4
+ ✔ Cada prueba parte de tablas vacias salvo roles
+
+Cupon Repository Integration (Tests\Integration\CuponRepositoryIntegration)
+ ✔ Descuento de cupon activo
+ ✔ Normaliza mayusculas y espacios
+ ✔ Cupon inactivo o inexistente devuelve cero
+ ✔ Consulta preparada con comillas y caracteres especiales
+ ✔ Refleja alta actualizacion desactivacion y baja
+ ✔ Clave primaria impide codigos duplicados
+ ✔ Sin conexion devuelve senal de fallback
+
+Inventario Repository Integration (Tests\Integration\InventarioRepositoryIntegration)
+ ✔ By tienda filtra por tienda une producto y ordena por nombre
+ ✔ By tienda con comillas y caracteres especiales
+ ✔ Update stock actualiza solo la fila indicada
+ ✔ Update stock de combinacion inexistente no crea filas
+ ✔ Restricciones fk y unique del inventario
+ ✔ Eliminar tienda elimina su inventario en cascada
+ ✔ Sin conexion devuelve valores neutros
+
+Pedido Repository Integration (Tests\Integration\PedidoRepositoryIntegration)
+ ✔ Create persiste cabecera y lineas en transaccion
+ ✔ Find by codigo devuelve la fila persistida
+ ✔ Create con valores minimos aplica defaults y tienda vacia como null
+ ✔ Conserva comillas apostrofes y caracteres especiales
+ ✔ Linea con producto inexistente hace rollback completo
+ ✔ Tienda inexistente y codigo duplicado son rechazados
+ ✔ Actualizar y eliminar pedido en mysql
+ ✔ Eliminar usuario o tienda deja el pedido con null
+ ✔ Sin conexion no persiste ni consulta
+
+Producto Repository Integration (Tests\Integration\ProductoRepositoryIntegration)
+ ✔ Create inserta y find devuelve valores persistidos
+ ✔ Create con solo nombre aplica valores por defecto
+ ✔ Create y find conservan comillas apostrofes y caracteres especiales
+ ✔ All devuelve todos ordenados por id
+ ✔ Find inexistente devuelve null
+ ✔ Find mapea badge precio antes y favorito
+ ✔ Update modifica campos y conserva los no editables
+ ✔ Update de id inexistente no crea ni modifica filas
+ ✔ Ean duplicado viola unique en create y update
+ ✔ Eliminar producto propaga cascade y set null
+ ✔ Sin conexion devuelve valores neutros
+
+Tienda Repository Integration (Tests\Integration\TiendaRepositoryIntegration)
+ ✔ All mapea columnas y campos derivados
+ ✔ Find por id existente e inexistente
+ ✔ Conserva comillas apostrofes y caracteres especiales
+ ✔ Refleja actualizacion y eliminacion en mysql
+ ✔ Sin conexion devuelve vacio y null
+
+Usuario Repository Integration (Tests\Integration\UsuarioRepositoryIntegration)
+ ✔ All auth users devuelve activos con su rol
+ ✔ Find by identifier contra bd por usuario alias y mayusculas
+ ✔ Find by identifier con fuente explicita no consulta bd
+ ✔ Comillas apostrofes y caracteres especiales
+ ✔ Refleja actualizacion desactivacion y baja
+ ✔ Restricciones de rol y usuario unico
+ ✔ Sin conexion devuelve vacio
+
+OK (64 tests, 298 assertions)
+
+================================================================================
+11. AUTORIZACIONES SOLICITADAS AL CIERRE
+================================================================================
+Respuesta del usuario: "Ninguno por ahora". Quedan pendientes y sin aplicar:
+  - Reimportar database/seed.sql en mass_online (la base de desarrollo conserva los productos y
+    pedidos creados por tests/run_all.php con MySQL encendido).
+  - Añadir backend/config/database.test.local.php a .gitignore.
+  - Corregir tests/Feature/MysqlDisponibilidadTest.php (escribe en mass_online y deja MASS_USE_DB=1).

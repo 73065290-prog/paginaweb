@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 /* bootstrap vía shim */
+$authController = new AuthController();
 
 $error = '';
 $rol = (string) ($_POST['rol'] ?? $_GET['rol'] ?? 'admin');
@@ -12,42 +13,23 @@ $recordar = isset($_POST['recordar']);
 $flashMsg = $flash ?? '';
 
 // Si ya hay sesión del mismo rol, ir al destino; si es otro rol, cerrar para permitir el cambio
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' && auth_usuario()) {
-    if ($rol === 'admin' && auth_es_admin()) {
-        redirect('index.php');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $estadoRol = $authController->cambioRol($rol);
+    if (($estadoRol['redirect'] ?? null) !== null) {
+        redirect((string) $estadoRol['redirect']);
     }
-    if ($rol === 'cliente' && auth_es_cliente()) {
-        redirect('../cliente_interfaces/index.php');
+    if (($estadoRol['mensaje'] ?? null) !== null) {
+        $flashMsg = (string) $estadoRol['mensaje'];
     }
-    // Cambio admin ↔ cliente: cerrar sesión actual antes de mostrar el login
-    auth_logout();
-    $flashMsg = 'Sesión anterior cerrada. Inicia sesión con el rol seleccionado.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
-        $error = 'Sesión inválida. Recarga la página e intenta de nuevo.';
-    } else {
-    // Al enviar login siempre reemplaza la sesión previa (cambio de administrador/cliente)
-    auth_logout();
-    $resultado = auth_intentar(
-        (string) ($_POST['usuario'] ?? ''),
-        (string) ($_POST['password'] ?? ''),
-        $rol
-    );
-
-    if ($resultado['ok'] && $resultado['usuario']) {
-        auth_login($resultado['usuario'], $recordar);
-        flash_set('Bienvenido, ' . $resultado['usuario']['nombre']);
-        if (($resultado['usuario']['rol'] ?? '') === 'cliente') {
-            redirect('../cliente_interfaces/pedido.php?demo=1');
-        }
-        redirect('index.php');
+    $resLogin = $authController->login($_POST, $rol);
+    if ($resLogin['ok'] && ($resLogin['redirect'] ?? null) !== null) {
+        redirect((string) $resLogin['redirect']);
     }
-
-    $error = implode(' · ', $resultado['errores']);
-    $usuarioVal = (string) ($_POST['usuario'] ?? '');
-    }
+    $error = (string) ($resLogin['error'] ?? '');
+    $usuarioVal = (string) ($resLogin['usuario_input'] ?? '');
 }
 ?>
 <!DOCTYPE html>
@@ -178,4 +160,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <script src="<?= e(mass_asset('assets/js/admin-login.js')) ?>"></script>
 </body>
 </html>
-

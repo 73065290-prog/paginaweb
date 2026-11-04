@@ -1,0 +1,368 @@
+================================================================================
+1. IDENTIFICACIÓN DEL PROMPT, INTENT Y BOLT
+================================================================================
+Prompt:      PROMPT 16: Verificación e importación de database/schema.sql y seed.sql
+Intent:      INT-004
+Bolt:        INT-004-BOLT-003
+HU:          INT-004-HU-16
+Modelo IA:   Claude Opus 5.5
+Fecha:       2026-11-02 (hora local UTC-5, ejecución 22:18–22:30)
+             Nota: PHP CLI de XAMPP usa la zona Europe/Berlin (CET), por eso la salida de
+             verificar_bd.php muestra 2026-11-03 04:xx CET (misma ejecución).
+Responsable: cursor12310-sys
+
+================================================================================
+2. ENTORNO
+================================================================================
+- Sistema:        Windows 10.0.26300
+- PHP CLI:        C:\xampp\php\php.exe -> PHP 8.2.12 (cli) ZTS x64
+- Cliente MySQL:  C:\xampp\mysql\bin\mysql.exe -> Ver 15.1 Distrib 10.4.32-MariaDB
+- Servidor:       10.4.32-MariaDB (XAMPP), arrancado con:
+                  mysqld.exe --defaults-file=C:\xampp\mysql\bin\my.ini --standalone
+- Servidor:       character_set_server=utf8mb4, collation_server=utf8mb4_general_ci,
+                  sql_mode=NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION
+- Credenciales:   backend/config/database.local.php (existente, ignorado por .gitignore):
+                  host=127.0.0.1, port=3306, dbname=mass_online, user=root, pass vacío
+                  (configuración XAMPP por defecto, no es una credencial real). No se modificó.
+- Git:            NO DISPONIBLE. `git` no está en el PATH ni instalado (búsqueda en
+                  Program Files, LocalAppData, GitHubDesktop y D:\). Existe la carpeta .git
+                  pero no se pudo ejecutar `git status`, `git diff`, `git branch` ni commit.
+
+Bases existentes ANTES de importar (SHOW DATABASES / C:\xampp\mysql\data):
+  blog, information_schema, mysql, performance_schema, phpmyadmin, sgc_tiendas_mass, test
+  -> `mass_online` NO existía: la importación no ponía en riesgo datos previos.
+  -> No se tocaron las demás bases.
+
+================================================================================
+3. AUDITORÍA INICIAL (sin modificar archivos)
+================================================================================
+Archivos revisados: database/schema.sql, database/seed.sql, scripts/generate_seed.php,
+includes/data.php, backend/Database.php, backend/config/database.example.php,
+backend/config/database.local.php, backend/services/ProductoService.php (listarAdmin),
+backend/services/AuthService.php (usuariosDemo/usuariosAuth),
+backend/services/CuponService.php (cuponesValidos).
+Nota: `backend/config/database.php` (citado en el prompt) no existe; la conexión está en
+`backend/Database.php` + `backend/config/database.local.php`.
+
+3.1 Tablas (9), claves y relaciones en schema.sql
+  roles           PK id; UNIQUE uq_roles_nombre
+  usuarios        PK id; UNIQUE uq_usuarios_usuario; idx_usuarios_rol;
+                  FK fk_usuarios_rol -> roles.id (RESTRICT)
+  categorias      PK id (VARCHAR)
+  productos       PK id; UNIQUE uq_productos_ean; idx_productos_categoria; idx_productos_nombre
+  tiendas         PK id (VARCHAR)
+  inventario      PK id; UNIQUE uq_inventario_prod_tienda (producto_id,tienda_id); idx_inventario_tienda;
+                  FK fk_inventario_producto -> productos.id (CASCADE)
+                  FK fk_inventario_tienda   -> tiendas.id (CASCADE)
+  cupones         PK codigo
+  pedidos         PK id; UNIQUE uq_pedidos_codigo; idx_pedidos_usuario; idx_pedidos_tienda;
+                  FK fk_pedidos_usuario -> usuarios.id (SET NULL)
+                  FK fk_pedidos_tienda  -> tiendas.id (SET NULL)
+  pedido_detalles PK id; idx_detalles_pedido;
+                  FK fk_detalles_pedido   -> pedidos.id (CASCADE)
+                  FK fk_detalles_producto -> productos.id (SET NULL; índice implícito InnoDB)
+  Todas: ENGINE=InnoDB, utf8mb4 / utf8mb4_unicode_ci.
+  Relaciones lógicas sin FK: productos.categoria ~ categorias.cat_filtro (cat_filtro no es
+  único: 'Abarrotes' y 'Limpieza' se repiten), pedidos.cupon ~ cupones.codigo (admite '').
+
+3.2 Datos demo vs seed
+  - productos: 15 en data.php = 15 en seed; campos WMS (ean, costo=precio*0.68,
+    subcategoria, abc, punto_reorden, stock) provienen de ProductoService::listarAdmin().
+  - categorias 7 = 7; tiendas 4 = 4; cupones 2 = 2 (CuponService); usuarios 4 = 4 (AuthService).
+  - inventario: data.php solo tiene stock por producto para Magdalena -> 15 filas.
+  - tiendas: distancia, estadoLabel, misma, lat, lng solo existen en data.php (no en schema).
+  - mass_filtros_catalogo() declara Abarrotes count=8, pero hay 7 productos Abarrotes
+    (ids 1,2,9,10,11,12,13); la suma de filtros (16) no cuadra con el total (15).
+    includes/data.php está fuera del alcance: se reporta, no se corrige.
+
+3.3 Defectos detectados en scripts/generate_seed.php y seed.sql
+  D1. Generación circular: data.php, ProductoService y AuthService leen de MySQL cuando
+      hay conexión. Con database.local.php activo, el generador regenera el seed desde la
+      propia BD y no desde los datos demo.
+  D2. Seed no reproducible: `DELETE FROM` no reinicia AUTO_INCREMENT y usuarios/inventario
+      se insertaban sin id explícito.
+  D3. Cupones escritos a mano en el generador en lugar de usar CuponService::cuponesValidos().
+  D4. Salida fija a database/seed.sql: no permitía generar en un entorno de prueba aislado.
+  D5. Sin control de error al escribir el archivo.
+
+================================================================================
+4. IMPORTACIÓN INICIAL CON LOS ARCHIVOS ORIGINALES
+================================================================================
+Comandos:
+  cmd /c "C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 < database\schema.sql"
+  cmd /c "C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 < database\seed.sql"
+Resultado:
+  schema exit=0
+  seed exit=0
+  SCHEMATA mass_online: utf8mb4 / utf8mb4_unicode_ci
+  Tablas: categorias, cupones, inventario, pedidos, pedido_detalles, productos, roles,
+          tiendas, usuarios -> 9 tablas, todas InnoDB / utf8mb4_unicode_ci
+  Conteos: roles=2 usuarios=4 categorias=7 productos=15 tiendas=4 inventario=15
+           cupones=2 pedidos=0 pedido_detalles=0
+  Codificación: usuarios.nombre 'Gonzalo Méndez' HEX=476F6E7A616C6F204DC3A96E64657A
+                (é = C3A9, UTF-8 correcto)
+  productos AUTO_INCREMENT=100 (ALTER TABLE del seed aplicado)
+
+================================================================================
+5. ERRORES ENCONTRADOS (REPRODUCIDOS)
+================================================================================
+E1 (D2) Reimportar solo seed.sql original:
+  seed (2da vez) exit=0
+  usuarios ids: 5,6,7,8   (antes 1,2,3,4)
+  inventario ids: MIN=16 MAX=30   (antes 1..15)
+
+E2 (D1) Ejecutar el generador original con database.local.php activo:
+  php scripts/generate_seed.php -> OK wrote .../database/seed.sql (exit=0)
+  SHA256 antes:   DFEC3561C0A3B5124345ED746EA2F7DACAE885541B37BA826214E124C35BBDC9
+  SHA256 después: C656EDF886D9B143A3729F676748337C70AEE139D4AE277E89927C6765486AE1
+  fc: DIFERENTE (9959 -> 9883 bytes). Categorías y tiendas salieron en orden alfabético
+  (orden del repositorio SQL), prueba de que leyó desde MySQL y no de data.php.
+  Se restauró el seed original desde la copia de seguridad (hash DFEC35... verificado).
+
+E3 Falso positivo propio en verificar_bd.php (primera versión):
+  "[ERROR] Textos sin doble codificación (mojibake 'Ã'): 29 filas afectadas".
+  Causa: con utf8mb4_unicode_ci, LIKE '%Ã%' es insensible a acentos y coincide con 'a'.
+  Corrección: LIKE BINARY. Resultado posterior: 0 filas afectadas.
+
+================================================================================
+6. CORRECCIONES REALIZADAS
+================================================================================
+scripts/generate_seed.php
+  - putenv('MASS_USE_DB=0') y $_SESSION = [] antes de cargar data.php: el seed sale siempre
+    de los arrays demo, sin overrides de sesión (D1).
+  - ALTER TABLE usuarios/inventario/pedidos/pedido_detalles AUTO_INCREMENT = 1 tras los DELETE (D2).
+  - INSERT de usuarios e inventario con id explícito 1..n (D2).
+  - Cupones generados desde CuponService::cuponesValidos() (D3).
+  - Argumento opcional de salida: php scripts/generate_seed.php [ruta_salida] (D4).
+  - Mensaje de error y exit 1 si no se puede escribir el archivo (D5).
+database/seed.sql
+  - Regenerado con el generador corregido. SHA256 final:
+    6C3666433A913C463B0B70362782285278297B6ACDF16F6F0731F796078717D7
+  - Diferencias con el original (fc): solo las 4 líneas ALTER TABLE ... AUTO_INCREMENT = 1
+    y las columnas id explícitas en usuarios/inventario. Ningún valor comercial cambió.
+database/schema.sql
+  - Sin cambios: se importa sin errores y sus FK, índices y restricciones son correctos.
+scripts/verificar_bd.php (nuevo)
+README.md
+  - Nueva subsección "Importación y verificación de la base de datos mass_online".
+
+================================================================================
+7. VERIFICACIÓN DEL GENERADOR EN ENTORNO CONTROLADO
+================================================================================
+Comandos:
+  php scripts/generate_seed.php %TEMP%\p16\seed.generado.sql        -> exit=0
+  fc seed.original.sql seed.generado.sql  -> solo difieren AUTO_INCREMENT e ids explícitos
+  Copias temporales con `mass_online` reemplazado por `mass_online_prueba16`:
+  mysql < schema.prueba.sql   -> schema exit=0
+  mysql < seed.prueba.sql     -> seed 1 exit=0
+  mysql < seed.prueba.sql     -> seed 2 (reimport) exit=0
+  usuarios_ids = 1,2,3,4 ; inventario MIN=1 MAX=15   (reproducible, E1 corregido)
+  php scripts/verificar_bd.php --dbname=mass_online_prueba16
+    -> OK=93  ERROR=0  ADVERTENCIA=3  RESULTADO: VERIFICACION_BD_OK  (exit=0)
+  DROP DATABASE mass_online_prueba16  (base temporal creada en esta prueba)
+
+Escritura definitiva:
+  php scripts/generate_seed.php -> OK wrote database/seed.sql (exit=0)
+  fc /b seed.generado.sql database\seed.sql -> SEED_IDENTICO_A_PRUEBA
+
+================================================================================
+8. IMPORTACIÓN FINAL DE mass_online
+================================================================================
+  mysql < database\schema.sql  -> schema exit=0
+  mysql < database\seed.sql    -> seed exit=0
+
+================================================================================
+9. REGRESIÓN DEL PROYECTO
+================================================================================
+9.1 Modo demo (MASS_USE_DB=0, misma condición que la línea base del PROMPT 15)
+  php tests/run_all.php            -> exit=0
+     auth 16 OK, negocio 38 OK, productos_admin 22 OK, carrito 12 OK, csrf 9 OK,
+     redirect 6 OK  (103 OK, 0 FAIL)
+  php vendor/bin/phpunit           -> OK (58 tests, 360 assertions)  exit=0
+  php scripts/smoke_views.php      -> db=0 ... SMOKE_ROUTES_OK  exit=0
+  php scripts/smoke_auth_logout.php-> SMOKE_AUTH_OK  exit=0
+
+9.2 Con MySQL activo (mass_online importada)
+  php scripts/smoke_views.php      -> db=1, 10 vistas dispatch_view=OK status=200,
+                                      SMOKE_ROUTES_OK  exit=0
+  php scripts/smoke_auth_logout.php-> SMOKE_AUTH_OK  exit=0  (login contra usuarios de la BD)
+
+9.3 Hallazgo: las pruebas escriben en mass_online
+  tests/Feature/MysqlDisponibilidadTest.php ejecuta putenv('MASS_USE_DB=1') e inserta un
+  pedido MASS-TEST* sin limpiarlo; como putenv persiste en el proceso, las pruebas de
+  checkout posteriores también persisten pedidos. Tras la regresión había 6 pedidos y
+  6 pedido_detalles en mass_online. verificar_bd.php lo detectó correctamente:
+    [ADVERTENCIA] pedidos          BD=6    demo=0
+    [ADVERTENCIA] pedido_detalles  BD=6    demo=0
+    huérfanos = 0 ; OK=91 ERROR=0 ADVERTENCIA=5 ; VERIFICACION_BD_OK
+  Se reimportó database/seed.sql para volver al estado inicial:
+    seed exit=0 ; pedidos=0 ; detalles=0 ; usuarios_ids=1,2,3,4 ; pedidos AUTO_INCREMENT=1
+  (tests/ está fuera del alcance de este prompt: se reporta como riesgo, no se modifica.)
+
+================================================================================
+10. VERIFICACIÓN AUTOMATIZADA FINAL — php scripts/verificar_bd.php (salida completa)
+================================================================================
+=== Verificación BD Mass Online (scripts/verificar_bd.php) ===
+Fecha: 2026-11-03 04:26:49 CET
+
+== 1. Conexión PDO ==
+[OK]          Conectado a root@127.0.0.1:3306/mass_online (servidor 10.4.32-MariaDB)
+[OK]          Base de datos con charset utf8mb4 (utf8mb4_unicode_ci)
+
+== 2. Tablas y columnas (9 esperadas) ==
+[OK]          roles existe (InnoDB, utf8mb4_unicode_ci, 2 columnas)
+[OK]          usuarios existe (InnoDB, utf8mb4_unicode_ci, 8 columnas)
+[OK]          categorias existe (InnoDB, utf8mb4_unicode_ci, 7 columnas)
+[OK]          productos existe (InnoDB, utf8mb4_unicode_ci, 24 columnas)
+[OK]          tiendas existe (InnoDB, utf8mb4_unicode_ci, 8 columnas)
+[OK]          inventario existe (InnoDB, utf8mb4_unicode_ci, 5 columnas)
+[OK]          cupones existe (InnoDB, utf8mb4_unicode_ci, 3 columnas)
+[OK]          pedidos existe (InnoDB, utf8mb4_unicode_ci, 21 columnas)
+[OK]          pedido_detalles existe (InnoDB, utf8mb4_unicode_ci, 7 columnas)
+
+== 3. Conteo de registros por tabla ==
+[OK]          roles            BD=2    demo=2
+[OK]          usuarios         BD=4    demo=4
+[OK]          categorias       BD=7    demo=7
+[OK]          productos        BD=15   demo=15
+[OK]          tiendas          BD=4    demo=4
+[OK]          inventario       BD=15   demo=15
+[OK]          cupones          BD=2    demo=2
+[OK]          pedidos          BD=0    demo=0
+[OK]          pedido_detalles  BD=0    demo=0
+
+== 4. Comparación de valores con includes/data.php ==
+[OK]          roles: admin=1 y cliente=2
+[OK]          usuarios: 4/4 coinciden (usuario, rol, nombre, cargo, hash demo)
+[OK]          usuarios: ids del seed = 1,2,3,4
+[OK]          categorias: 7/7 coinciden (nombre, badge, count_hint, cat_filtro, img)
+[OK]          tiendas: 4/4 coinciden (nombre, direccion, stock, estado)
+[ADVERTENCIA] tiendas: distancia, estadoLabel, misma, lat y lng existen solo en data.php (no forman parte de schema.sql); distrito, eta e img quedan vacíos en el seed
+[OK]          productos: 15/15 coinciden (21 campos: catálogo de data.php + campos WMS de ProductoService::listarAdmin)
+[OK]          productos: suma de precios demo S/ 175.60 vs BD S/ 175.60
+[OK]          inventario: 15/15 coinciden con stockPiso/stockAlmacen de ProductoService::listarAdmin (tienda magdalena)
+[ADVERTENCIA] inventario: data.php solo define stock por producto para Magdalena; pueblo_libre, san_miguel y brena tienen stock agregado en tiendas.stock pero sin filas por producto (diferencia legítima, no se inventan registros)
+[OK]          cupones: 2/2 coinciden con CuponService::cuponesValidos()
+[OK]          filtro catálogo "todos": 15 productos (data.php indica 15)
+[ADVERTENCIA] filtro catálogo "Abarrotes": BD tiene 7 productos, data.php muestra count=8 (etiqueta fija en mass_filtros_catalogo())
+[OK]          filtro catálogo "Lácteos": 4 productos (data.php indica 4)
+[OK]          filtro catálogo "Frutas": 2 productos (data.php indica 2)
+[OK]          filtro catálogo "Bebidas": 1 productos (data.php indica 1)
+[OK]          filtro catálogo "Limpieza": 1 productos (data.php indica 1)
+
+== 5. Claves foráneas ==
+[OK]          fk_usuarios_rol: usuarios.rol_id -> roles.id ON DELETE RESTRICT
+[OK]          fk_inventario_producto: inventario.producto_id -> productos.id ON DELETE CASCADE
+[OK]          fk_inventario_tienda: inventario.tienda_id -> tiendas.id ON DELETE CASCADE
+[OK]          fk_pedidos_usuario: pedidos.usuario_id -> usuarios.id ON DELETE SET NULL
+[OK]          fk_pedidos_tienda: pedidos.tienda_id -> tiendas.id ON DELETE SET NULL
+[OK]          fk_detalles_pedido: pedido_detalles.pedido_id -> pedidos.id ON DELETE CASCADE
+[OK]          fk_detalles_producto: pedido_detalles.producto_id -> productos.id ON DELETE SET NULL
+[OK]          FOREIGN_KEY_CHECKS de la sesión = 1
+[OK]          FK inventario.producto_id inexistente: rechazado (SQLSTATE 23000, error 1452)
+[OK]          FK inventario.tienda_id inexistente: rechazado (SQLSTATE 23000, error 1452)
+[OK]          FK usuarios.rol_id inexistente: rechazado (SQLSTATE 23000, error 1452)
+[OK]          FK pedido_detalles.pedido_id inexistente: rechazado (SQLSTATE 23000, error 1452)
+[OK]          Borrar rol con usuarios asociados (RESTRICT): rechazado (SQLSTATE 23000, error 1451)
+
+== 6. Índices y restricciones ==
+[OK]          roles: PRIMARY KEY PRIMARY (id)
+[OK]          roles: UNIQUE uq_roles_nombre (nombre)
+[OK]          usuarios: PRIMARY KEY PRIMARY (id)
+[OK]          usuarios: UNIQUE uq_usuarios_usuario (usuario)
+[OK]          usuarios: INDEX idx_usuarios_rol (rol_id)
+[OK]          categorias: PRIMARY KEY PRIMARY (id)
+[OK]          productos: PRIMARY KEY PRIMARY (id)
+[OK]          productos: UNIQUE uq_productos_ean (ean)
+[OK]          productos: INDEX idx_productos_categoria (categoria)
+[OK]          productos: INDEX idx_productos_nombre (nombre)
+[OK]          tiendas: PRIMARY KEY PRIMARY (id)
+[OK]          inventario: PRIMARY KEY PRIMARY (id)
+[OK]          inventario: UNIQUE uq_inventario_prod_tienda (producto_id,tienda_id)
+[OK]          inventario: INDEX idx_inventario_tienda (tienda_id)
+[OK]          cupones: PRIMARY KEY PRIMARY (codigo)
+[OK]          pedidos: PRIMARY KEY PRIMARY (id)
+[OK]          pedidos: UNIQUE uq_pedidos_codigo (codigo)
+[OK]          pedidos: INDEX idx_pedidos_usuario (usuario_id)
+[OK]          pedidos: INDEX idx_pedidos_tienda (tienda_id)
+[OK]          pedido_detalles: PRIMARY KEY PRIMARY (id)
+[OK]          pedido_detalles: INDEX idx_detalles_pedido (pedido_id)
+[OK]          Columna FK usuarios.rol_id indexada
+[OK]          Columna FK inventario.producto_id indexada
+[OK]          Columna FK inventario.tienda_id indexada
+[OK]          Columna FK pedidos.usuario_id indexada
+[OK]          Columna FK pedidos.tienda_id indexada
+[OK]          Columna FK pedido_detalles.pedido_id indexada
+[OK]          Columna FK pedido_detalles.producto_id indexada
+[OK]          UNIQUE productos.ean duplicado: rechazado (SQLSTATE 23000, error 1062)
+[OK]          UNIQUE usuarios.usuario duplicado: rechazado (SQLSTATE 23000, error 1062)
+[OK]          UNIQUE inventario (producto_id, tienda_id) duplicado: rechazado (SQLSTATE 23000, error 1062)
+[OK]          PRIMARY KEY cupones.codigo duplicado: rechazado (SQLSTATE 23000, error 1062)
+[OK]          NOT NULL productos.nombre: rechazado (SQLSTATE 23000, error 1048)
+[OK]          productos AUTO_INCREMENT=101 (> id máximo 15; altas admin no colisionan con el seed)
+
+== 7. Registros huérfanos e integridad lógica ==
+[OK]          usuarios sin rol: 0
+[OK]          inventario sin producto: 0
+[OK]          inventario sin tienda: 0
+[OK]          pedidos con usuario inexistente: 0
+[OK]          pedidos con tienda inexistente: 0
+[OK]          pedido_detalles sin pedido: 0
+[OK]          pedido_detalles con producto inexistente: 0
+[OK]          productos.categoria: todas existen en categorias.cat_filtro (relación lógica, sin FK en schema.sql)
+[OK]          productos sin fila de inventario: 0
+[OK]          pedidos con cupón no registrado en cupones: 0 (relación lógica, sin FK)
+[OK]          stock_tone coherente con stock_piso < punto_reorden en Magdalena
+[OK]          Textos sin doble codificación (mojibake 'Ã'): 0 filas afectadas
+
+== Resumen ==
+OK=93  ERROR=0  ADVERTENCIA=3
+RESULTADO: VERIFICACION_BD_OK
+
+Código de salida: 0
+
+================================================================================
+11. CONTROL DE ALCANCE
+================================================================================
+Archivos creados:
+  - scripts/verificar_bd.php
+  - PROMTS/16.Verificacion-importacion-base-datos.md
+  - PROMTS/16.evidencias-pruebas.txt
+Archivos modificados:
+  - scripts/generate_seed.php
+  - database/seed.sql (regenerado)
+  - README.md (solo se añadió la subsección de importación; no se eliminó contenido)
+Archivos sin cambios dentro del alcance:
+  - database/schema.sql
+Archivos fuera del alcance: no modificados (includes/data.php, backend/**, tests/**,
+  backend/config/database.local.php). Archivos temporales solo en %TEMP%\p16.
+git status / git diff: NO EJECUTADOS (git no instalado en el equipo). Pendiente de
+  ejecutar por el responsable antes del commit.
+
+================================================================================
+12. RESUMEN GENERAL
+================================================================================
+- schema.sql: importado sin errores (exit=0). 9 tablas InnoDB utf8mb4_unicode_ci.
+- seed.sql: importado sin errores (exit=0) y reproducible en reimportaciones.
+- Conteos: roles=2 usuarios=4 categorias=7 productos=15 tiendas=4 inventario=15
+  cupones=2 pedidos=0 pedido_detalles=0 (coinciden con los datos demo).
+- Valores clave: 15/15 productos (21 campos), 7/7 categorías, 4/4 tiendas,
+  15/15 inventario, 2/2 cupones, 4/4 usuarios.
+- Claves foráneas: 7/7 presentes con su regla ON DELETE; 5 escrituras inválidas rechazadas.
+- Índices y restricciones: 21 PRIMARY/UNIQUE/INDEX presentes; 7 columnas FK indexadas;
+  5 violaciones UNIQUE/PK/NOT NULL rechazadas.
+- Huérfanos: 0 en las 7 relaciones; relaciones lógicas coherentes.
+- verificar_bd.php: OK=93 ERROR=0 ADVERTENCIA=3 -> VERIFICACION_BD_OK.
+- Regresión: 103 OK CLI, PHPUnit 58/58, smoke views/auth OK (modo demo y con MySQL).
+- Commit: NO REALIZADO (git no disponible). Push: no aplica.
+- Estado del Bolt INT-004-BOLT-003: verificación técnica COMPLETADA; registro en git
+  PENDIENTE.
+
+================================================================================
+13. AMPLIACIÓN DE ALCANCE AUTORIZADA POR EL USUARIO
+================================================================================
+- PROMTS/README.md: autorizado expresamente tras la entrega. Se añadieron al índice las
+  filas 12, 13, 14, 15 y 16 (Intent, HU, Bolt y archivo de evidencias tomados de la
+  cabecera de cada prompt). No se modificaron las filas existentes.
+- No autorizados (sin cambios): Matriz_de_registro_paginaweb.xlsx y
+  tests/Feature/MysqlDisponibilidadTest.php.

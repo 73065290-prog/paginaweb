@@ -1,0 +1,27 @@
+
+Warning: PHP Startup: Unable to load dynamic library 'pcov' (tried: C:\xampp\php\ext\pcov (No se puede encontrar el módulo especificado), C:\xampp\php\ext\php_pcov.dll (No se puede encontrar el módulo especificado)) in Unknown on line 0
+PHPUnit 11.5.0 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.12
+Configuration: C:\Users\LENOVO\Downloads\paginaweb (2)\paginaweb\phpunit.xml
+
+...............................................................  63 / 130 ( 48%)
+............................................................... 126 / 130 ( 96%)
+....                                                            130 / 130 (100%)
+
+Time: 00:04.118, Memory: 12.00 MB
+
+There was 1 PHPUnit test runner warning:
+
+1) No code coverage driver available
+
+WARNINGS!
+Tests: 130, Assertions: 770, Warnings: 1.
+
+PHP Warning:  PHP Startup: Unable to load dynamic library 'pcov' (tried: C:\xampp\php\ext\pcov (No se puede encontrar el módulo especificado), C:\xampp\php\ext\php_pcov.dll (No se puede encontrar el módulo especificado)) in Unknown on line 0
+
+--- umbral ---
+Fecha: 2026-11-03 05:51:34
+Exit PHPUnit: 1
+Clover: no generado. No hay driver de cobertura (PCOV/Xdebug).
+Umbral: no aplicado. No se fija un porcentaje sin medición.

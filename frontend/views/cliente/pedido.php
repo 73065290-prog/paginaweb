@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 /* bootstrap vía shim */
+$pedidoService = new PedidoService();
+$carritoService = new CarritoService();
 
 $pasoRaw = (string) ($_GET['paso'] ?? '1');
 if ($pasoRaw === 'ok') {
@@ -10,23 +12,23 @@ if ($pasoRaw === 'ok') {
 $paso = max(1, min(3, (int) $pasoRaw));
 
 // Carga demo Figma (solo si canasta vacía)
-if (isset($_GET['demo']) && !carrito_items()) {
+if (isset($_GET['demo']) && !$carritoService->items()) {
     $_SESSION['carrito'] = [
         ['id' => 1, 'cantidad' => 2],
         ['id' => 2, 'cantidad' => 1],
         ['id' => 3, 'cantidad' => 1],
         ['id' => 11, 'cantidad' => 1],
     ];
-    pedido_set(['cupon' => 'CLUBMASS10', 'entrega' => 'retiro', 'tienda_id' => 'magdalena']);
+    $pedidoService->set(['cupon' => 'CLUBMASS10', 'entrega' => 'retiro', 'tienda_id' => 'magdalena']);
     redirect('pedido.php');
 }
 
-$items = carrito_items();
-$resumen = pedido_resumen();
-$pedido = pedido_estado();
+$items = $carritoService->items();
+$resumen = $pedidoService->resumen();
+$pedido = $pedidoService->estado();
 $countItems = count($items);
 $tiendas = mass_tiendas();
-$horarios = mass_horarios_entrega((string) $pedido['entrega']);
+$horarios = $pedidoService->horariosEntrega((string) $pedido['entrega']);
 
 if (($paso === 2 || $paso === 3) && !$items) {
     flash_set('Agrega productos antes de continuar');
@@ -120,7 +122,7 @@ require MASS_ROOT . '/frontend/views/layouts/header.php';
             </div>
           <?php endif; ?>
 
-          <aside class="cart-upsell">
+          <div class="cart-upsell">
             <h2>Completa tu canasta</h2>
             <div class="upsell-grid">
               <?php foreach ($sugeridos as $sug): ?>
@@ -136,12 +138,12 @@ require MASS_ROOT . '/frontend/views/layouts/header.php';
                     <input type="hidden" name="id" value="<?= (int) $sug['id'] ?>" />
                     <input type="hidden" name="cantidad" value="1" />
                     <input type="hidden" name="volver" value="pedido.php" />
-                    <button type="submit" class="btn-add-mini">Agregar</button>
+                    <button type="submit" class="btn-add-mini" aria-label="Agregar <?= e($sug['nombre']) ?> al carrito">Agregar</button>
                   </form>
                 </article>
               <?php endforeach; ?>
             </div>
-          </aside>
+          </div>
         </section>
 
         <aside class="checkout-summary" aria-labelledby="sumTitle">
@@ -228,8 +230,8 @@ require MASS_ROOT . '/frontend/views/layouts/header.php';
             class="entrega-form"
             id="entregaFormPaso2"
             data-modo="<?= e((string) $pedido['entrega']) ?>"
-            data-horarios-retiro="<?= e(json_encode(mass_horarios_entrega('retiro'), JSON_UNESCAPED_UNICODE) ?: '{}') ?>"
-            data-horarios-express="<?= e(json_encode(mass_horarios_entrega('express'), JSON_UNESCAPED_UNICODE) ?: '{}') ?>"
+            data-horarios-retiro="<?= e(json_encode($pedidoService->horariosEntrega('retiro'), JSON_UNESCAPED_UNICODE) ?: '{}') ?>"
+            data-horarios-express="<?= e(json_encode($pedidoService->horariosEntrega('express'), JSON_UNESCAPED_UNICODE) ?: '{}') ?>"
           >
             <?= csrf_field() ?>
             <input type="hidden" name="accion" value="paso3" />

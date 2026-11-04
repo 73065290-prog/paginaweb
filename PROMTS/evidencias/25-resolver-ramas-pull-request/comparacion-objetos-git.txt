@@ -1,0 +1,1059 @@
+pack_objects=207
+git_dir=C:\Users\LENOVO\Downloads\paginaweb (2)\paginaweb\.git
+
+=== EXISTENCIA ===
+main 3a587981005d544cb18118650de64d0f5bca466e has=si
+origin/main 1bd67ba644a35dbe2e8f8bc6304ed890da7ca607 has=si
+origin/main-packed-antiguo a94d2c6625586179cd8acbda250631ea2b28d3b2 has=si
+mejora/carrito-limite-stock 8a69a4715a56d8fbca5eefefd38eee077404cdc7 has=si
+feature/mejoras-admin-qa-cliente 128a41da728506b39b5ed218a058f79f274ef23b has=si
+fix/sonar-a11y-parse-labels 128a41da728506b39b5ed218a058f79f274ef23b has=si
+55ce88d 55ce88d619acb834ac418653168f4d21bca91061 has=si
+eb68b44 eb68b448db9ac91538721fd5319b353cde1a2809 has=si
+41a4bde 41a4bde1272615b44fcd1ca85b430e780433e0d6 has=si
+
+=== COMMITS ===
+
+## main
+3a587981005d tree=e9f9f8441ddd parents=eb68b448db9a
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793153502 -0500
+  ﻿Restaurar la descripcion original del README.
+  
+  Recupera banner, badges, flujos y credenciales; actualiza solo estructura FE/BE y MySQL opcional.
+
+## origin/main
+1bd67ba644a3 tree=bdc58a063c7d parents=3a587981005d
+  author: Kervin-Mansilla <73065290@continental.edu.pe> 1793154224 -0500
+  mejora: separar roles cliente y proveedor con portales propios
+  
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+
+## origin/main-packed-antiguo
+a94d2c662558 tree=ae361593f2f4 parents=19ddfec866f4
+  author: Arny5555 <74355027@continental.edu.pe> 1793149654 -0500
+  fix: rutas relativas Markdown para imágenes del README
+  
+  GitHub marcaba Invalid image source con URLs raw absolutas en HTML;
+  se usan rutas ./docs/img/*.png en sintaxis Markdown.
+  
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+
+## mejora/carrito-limite-stock
+8a69a4715a56 tree=0aa91a2b5d58 parents=19ddfec866f4
+  author: Kervin-Mansilla <73065290@continental.edu.pe> 1793149704 -0500
+  mejora: limitar cantidad del carrito al stock disponible
+  
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+
+## feature/mejoras-admin-qa-cliente
+128a41da7285 tree=64d0cd946c97 parents=282dc999aaea
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150932 -0500
+  ﻿Actualizar clave del proyecto SonarQube a Pagina_Web_V2.
+  
+  Ajusta projectKey y projectName para el nuevo analisis local.
+
+## fix/sonar-a11y-parse-labels
+128a41da7285 tree=64d0cd946c97 parents=282dc999aaea
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150932 -0500
+  ﻿Actualizar clave del proyecto SonarQube a Pagina_Web_V2.
+  
+  Ajusta projectKey y projectName para el nuevo analisis local.
+
+## 55ce88d
+55ce88d619ac tree=83743b4ef785 parents=0177c5deb582
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793153103 -0500
+  ﻿Integrar frontend/backend, MySQL, correccion de logout y prompts.
+  
+  Incluye separacion FE/BE, schema/seed, fix mass_url para cerrar sesion al cambiar de rol, pruebas y carpeta PROMTS.
+
+## eb68b44
+eb68b448db9a tree=facd2127d04c parents=a94d2c662558, 55ce88d619ac
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793153343 -0500
+  ﻿Integrar en main frontend/backend, MySQL, prompts y correccion de logout.
+  
+  Resuelve conflictos con mejoras previas de main (CSRF, carrito, cupones) y conserva shims + PROMTS.
+
+## 41a4bde
+41a4bde12726 tree=64d0cd946c97 parents=cd06ef0b7533
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150962 -0500
+  ﻿Corregir incidencias de SonarQube: accesibilidad y Number.parse.
+  
+  Reemplaza parseFloat/parseInt por Number.parse*, agrega etiquetas accesibles en catalogo, header admin y carrito, incluye el prompt de correccion y actualiza la clave Pagina_Web_V2.
+
+========== RAMA mejora/carrito-limite-stock ==========
+relacion: NO es ancestro de main local
+merge-base main...rama: 19ddfec866f4
+
+-- historial de la rama que no esta en main --
+8a69a4715a56 tree=0aa91a2b5d58 parents=19ddfec866f4
+  author: Kervin-Mansilla <73065290@continental.edu.pe> 1793149704 -0500
+  mejora: limitar cantidad del carrito al stock disponible
+  
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+
+commits_no_en_main=1
+
+-- git diff --stat main...mejora/carrito-limite-stock  (tree merge-base -> punta) --
+archivos=7
+M	MEJORAS.md
+M	cliente_interfaces/carrito.php
+M	cliente_interfaces/producto.php
+M	includes/components/cart-line.php
+M	includes/components/product-card.php
+M	includes/functions.php
+M	tests/carrito_test.php
+
+-- diff de la punta contra su primer padre (el commit propio) --
+archivos=7
+M	MEJORAS.md
+M	cliente_interfaces/carrito.php
+M	cliente_interfaces/producto.php
+M	includes/components/cart-line.php
+M	includes/components/product-card.php
+M	includes/functions.php
+M	tests/carrito_test.php
+
+## patch cliente_interfaces/carrito.php
+--- a/cliente_interfaces/carrito.php
++++ b/cliente_interfaces/carrito.php
+ <?php
+ declare(strict_types=1);
+ 
+ require_once __DIR__ . '/../includes/init.php';
+ 
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+     redirect('pedido.php');
+ }
+ 
+ $accion = (string) ($_POST['accion'] ?? '');
+ $volver = mass_safe_return_url((string) ($_POST['volver'] ?? 'pedido.php'), 'pedido.php');
+ 
+ if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
+     flash_set('Sesión inválida. Recarga la página e intenta de nuevo.');
+     redirect($volver);
+ }
+ 
+ switch ($accion) {
+     case 'agregar':
+         $id = (int) ($_POST['id'] ?? 0);
+         $cantidad = max(1, (int) ($_POST['cantidad'] ?? 1));
++        $antes = 0;
++        foreach (carrito_items() as $it) {
++            if ((int) $it['id'] === $id) {
++                $antes = (int) $it['cantidad'];
++                break;
++            }
++        }
++        $tope = carrito_tope_linea($id);
+         carrito_agregar($id, $cantidad);
++        $despues = $antes;
++        foreach (carrito_items() as $it) {
++            if ((int) $it['id'] === $id) {
++                $despues = (int) $it['cantidad'];
++                break;
++            }
++        }
++        if ($tope > 0 && ($antes + $cantidad) > $tope) {
++            flash_set('Solo hay ' . $tope . ' unidades disponibles — ajustamos tu canasta');
++        } else {
++            flash_set('Producto agregado al carrito');
++        }
+-        flash_set('Producto agregado al carrito');
+         break;
+ 
+     case 'cambiar':
+         $id = (int) ($_POST['id'] ?? 0);
+         $delta = (int) ($_POST['delta'] ?? 0);
+         carrito_cambiar($id, $delta);
+         break;
+ 
+     case 'set_cantidad':
+         $id = (int) ($_POST['id'] ?? 0);
+         $cantidad = (int) ($_POST['cantidad'] ?? 1);
++        $tope = carrito_tope_linea($id);
+         carrito_set_cantidad($id, $cantidad);
++        if ($cantidad > $tope && $tope > 0) {
++            flash_set('Solo hay ' . $tope . ' unidades disponibles — ajustamos tu canasta');
++        }
+         break;
+ 
+     case 'eliminar':
+         carrito_eliminar((int) ($_POST['id'] ?? 0));
+         flash_set('Producto eliminado del carrito');
+         break;
+ 
+     case 'vaciar':
+         carrito_vaciar();
+         flash_set('Canasta vaciada');
+         break;
+ 
+     case 'guardar':
+         carrito_guardar_despues((int) ($_POST['id'] ?? 0));
+         flash_set('Guardado para después');
+         break;
+ 
+     case 'cupon':
+         $codigo = strtoupper(trim((string) ($_POST['cupon'] ?? '')));
+         if ($codigo === '') {
+             pedido_set(['cupon' => '']);
+             flash_set('Cupón quitado');
+         } elseif (pedido_es_cupon_valido($codigo)) {
+             pedido_set(['cupon' => $codigo]);
+             flash_set('Cupón ' . $codigo . ' aplicado (−' . dinero(pedido_descuento_cupon($codigo)) . ')');
+         } else {
+             $validos = implode(' o ', array_keys(pedido_cupones_validos()));
+             flash_set('Cupón no válido — prueba ' . $validos);
+         }
+         break;
+ 
+     case 'entrega':
+         $modo = pedido_normalizar_entrega((string) ($_POST['entrega'] ?? 'retiro'));
+         $extra = ['entrega' => $modo];
+         if ($modo === 'retiro') {
+             $extra['horario'] = 'hoy_tarde';
+         } else {
+             $extra['horario'] = 'hoy_express';
+         }
+         if (!empty($_POST['tienda_id'])) {
+             $extra['tienda_id'] = (string) $_POST['tienda_id'];
+         }
+         pedido_set($extra);
+         flash_set($modo === 'retiro' ? 'Modalidad: Retiro en tienda (GRATIS)' : 'Modalidad: Delivery Express (+S/ 4.90)');
+         break;
+ 
+     case 'paso2':
+         if (!carrito_items()) {
+             flash_set('Agrega productos antes de continuar');
+             $volver = 'pedido.php';
+         } else {
+             $modo = pedido_normalizar_entrega((string) ($_POST['entrega'] ?? pedido_estado()['entrega']));
+             pedido_set([
+                 'entrega' => $modo,
+                 'horario' => $modo === 'express' ? 'hoy_express' : 'hoy_tarde',
+             ]);
+             $volver = 'pedido.php?paso=2';
+         }
+         break;
+ 
+     case 'paso3':
+         $valid = pedido_validar_entrega($_POST);
+         if (!$valid['ok']) {
+             flash_set(implode(' · ', $valid['errores']));
+             $volver = 'pedido.php?paso=2';
+             break;
+         }
+         pedido_set($valid['data']);
+         $volver = 'pedido.php?paso=3';
+         break;
+ 
+     case 'confirmar':
+         if (!carrito_items()) {
+             flash_set('Agrega productos antes de continuar');
+             $volver = 'pedido.php';
+             break;
+         }
+         $orden = pedido_confirmar((string) ($_POST['pago'] ?? 'yape'));
+         if ($orden === null) {
+             flash_set('No se pudo confirmar el pedido');
+             $volver = 'pedido.php';
+             break;
+         }
+         flash_set('Pedido ' . $orden['codigo'] . ' confirmado');
+         $volver = 'confirmacion.php';
+         break;
+ 
+     case 'checkout':
+         if (!carrito_items()) {
+             flash_set('Agrega productos antes de continuar');
+         } else {
+             $volver = 'pedido.php';
+         }
+         break;
+ 
+     default:
+         flash_set('Acción no válida');
+         break;
+ }
+ 
+ redirect($volver);
+ 
+
+## patch includes/components/cart-line.php
+--- a/includes/components/cart-line.php
++++ b/includes/components/cart-line.php
+ <?php
+ declare(strict_types=1);
+ 
+ /** @var array $p */
+ /** @var array $item */
+ $p = $p ?? [];
+ $item = $item ?? [];
+ $qty = max(1, (int) ($item['cantidad'] ?? 1));
+ $precio = (float) ($p['precio'] ?? 0);
+ $antes = !empty($p['precioAntes']) ? (float) $p['precioAntes'] : null;
+ $subtotal = $precio * $qty;
+ $ahorroUn = ($antes !== null && $antes > $precio) ? ($antes - $precio) : 0.0;
+ $tope = !empty($p['tope']) || $qty >= 3 && (int) ($p['id'] ?? 0) === 2;
++$stockMax = carrito_tope_linea((int) ($p['id'] ?? 0));
++$enTopeStock = $stockMax > 0 && $qty >= $stockMax;
+ $badge = $p['badge'] ?? null;
+ $volver = 'pedido.php';
+ ?>
+ <article class="cart-line">
+   <label class="cart-check">
+     <input type="checkbox" checked name="sel[]" value="<?= (int) $p['id'] ?>" />
+   </label>
+   <div class="cart-line-media">
+     <?php if ($badge): ?>
+       <span class="badge <?= e($badge['tone']) ?>"><?= e($badge['text']) ?></span>
+     <?php endif; ?>
+     <a href="producto.php?id=<?= (int) $p['id'] ?>">
+       <img src="<?= e($p['img']) ?>" alt="<?= e($p['nombre']) ?>" />
+     </a>
+   </div>
+   <div class="cart-line-info">
+     <div class="cart-brand"><?= e($p['marca']) ?></div>
+     <h3><a href="producto.php?id=<?= (int) $p['id'] ?>"><?= e($p['nombre']) ?></a></h3>
+     <p class="cart-unit"><?= e($p['unidad']) ?> · SKU-<?= str_pad((string) $p['id'], 4, '0', STR_PAD_LEFT) ?></p>
+     <div class="cart-stock"><i class="<?= e($p['stockTone']) ?>"></i> Stock asegurado en Tienda Magdalena</div>
+     <div class="cart-price-row">
+       <?php if ($antes !== null && $antes > $precio): ?>
+         <span class="price-old"><?= e(dinero($antes)) ?></span>
+         <span class="save-pill">Ahorras <?= e(dinero($ahorroUn)) ?></span>
+       <?php endif; ?>
+       <strong class="price-now"><?= e(dinero($precio)) ?> <small>/ un.</small></strong>
+     </div>
+     <?php if ($tope): ?>
+       <div class="cart-alert">⚠ Tope de abastecimiento barrial — máx. 3 unidades</div>
+     <?php endif; ?>
++    <?php if ($enTopeStock): ?>
++      <div class="cart-alert">⚠ Solo hay <?= (int) $stockMax ?> unidades disponibles</div>
++    <?php endif; ?>
+     <div class="cart-line-actions">
+       <form method="post" action="carrito.php">
+         <?= csrf_field() ?>
+         <input type="hidden" name="accion" value="guardar" />
+         <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
+         <input type="hidden" name="volver" value="<?= e($volver) ?>" />
+         <button type="submit">♡ Guardar para después</button>
+       </form>
+       <form method="post" action="carrito.php">
+         <?= csrf_field() ?>
+         <input type="hidden" name="accion" value="eliminar" />
+         <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
+         <input type="hidden" name="volver" value="<?= e($volver) ?>" />
+         <button type="submit" class="danger">🗑 Eliminar</button>
+       </form>
+     </div>
+   </div>
+   <div class="cart-line-side">
+     <form class="qty cart-qty" method="post" action="carrito.php">
+       <?= csrf_field() ?>
+       <input type="hidden" name="accion" value="set_cantidad" />
+       <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
+       <input type="hidden" name="volver" value="<?= e($volver) ?>" />
+       <button type="submit" name="cantidad" value="<?= max(1, $qty - 1) ?>" aria-label="Menos">−</button>
+       <span><?= $qty ?></span>
++      <button type="submit" name="cantidad" value="<?= min($stockMax > 0 ? $stockMax : 99, $qty + 1) ?>" aria-label="Más" <?= ($tope && $qty >= 3) || $enTopeStock ? 'disabled' : '' ?>>+</button>
+-      <button type="submit" name="cantidad" value="<?= min(99, $qty + 1) ?>" aria-label="Más" <?= $tope && $qty >= 3 ? 'disabled' : '' ?>>+</button>
+     </form>
+     <div class="cart-subtotal">
+       <span>Subtotal</span>
+       <strong><?= e(dinero($subtotal)) ?></strong>
+     </div>
+   </div>
+ </article>
+ 
+
+## patch includes/components/product-card.php
+--- a/includes/components/product-card.php
++++ b/includes/components/product-card.php
+ <?php
+ declare(strict_types=1);
+ 
+ /** @var array $p */
+ $p = $p ?? [];
+ $badge = $p['badge'] ?? null;
++$qtyMax = max(1, carrito_tope_linea((int) ($p['id'] ?? 0)));
+ ?>
+ <article class="product">
+   <a class="product-link" href="producto.php?id=<?= (int) $p['id'] ?>">
+     <div class="product-media">
+       <?php if ($badge): ?>
+         <span class="badge <?= e($badge['tone']) ?>"><?= e($badge['text']) ?></span>
+       <?php endif; ?>
+       <span class="wish <?= !empty($p['favorito']) ? 'active' : '' ?>" aria-hidden="true"><?= !empty($p['favorito']) ? '♥' : '♡' ?></span>
+       <img src="<?= e($p['img']) ?>" alt="<?= e($p['nombre']) ?>" loading="lazy" />
+     </div>
+   </a>
+   <div class="product-body">
+     <div class="stock"><i class="<?= e($p['stockTone']) ?>"></i><span><?= e($p['stockLabel']) ?></span></div>
+     <div class="meta"><?= e($p['marca']) ?> / <?= e($p['categoria']) ?></div>
+     <h3><a class="product-link" href="producto.php?id=<?= (int) $p['id'] ?>"><?= e($p['nombre']) ?></a></h3>
+     <p class="unit"><?= e($p['unidad']) ?></p>
+     <div class="prices">
+       <span class="price-now"><?= e(dinero((float) $p['precio'])) ?></span>
+       <?php if (!empty($p['precioAntes'])): ?>
+         <span class="price-old"><?= e(dinero((float) $p['precioAntes'])) ?></span>
+       <?php endif; ?>
+     </div>
+     <form class="product-actions" method="post" action="carrito.php">
+       <?= csrf_field() ?>
+       <input type="hidden" name="accion" value="agregar" />
+       <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
+       <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>" />
+       <div class="qty">
+         <button type="button" class="qty-minus" aria-label="Menos">−</button>
++        <input type="number" name="cantidad" value="1" min="1" max="<?= (int) $qtyMax ?>" class="qty-input" aria-label="Cantidad" />
+-        <input type="number" name="cantidad" value="1" min="1" max="99" class="qty-input" aria-label="Cantidad" />
+         <button type="button" class="qty-plus" aria-label="Más">+</button>
+       </div>
+       <button class="btn-add" type="submit">🛒 Agregar</button>
+     </form>
+   </div>
+ </article>
+ 
+
+## patch tests/carrito_test.php
+--- a/tests/carrito_test.php
++++ b/tests/carrito_test.php
+ <?php
+ declare(strict_types=1);
+ 
+ /**
+  * Pruebas de límites y operaciones del carrito.
+  *   php tests/carrito_test.php
+  */
+ 
+ session_start();
+ $_SESSION = [];
+ 
+ require_once dirname(__DIR__) . '/includes/data.php';
+ require_once dirname(__DIR__) . '/includes/functions.php';
+ 
+ $_SESSION['carrito'] = [];
+ $_SESSION['guardados'] = [];
+ 
+ $passed = 0;
+ $failed = 0;
+ 
+ function assert_true(bool $cond, string $msg): void
+ {
+     global $passed, $failed;
+     if ($cond) {
+         echo "OK  {$msg}\n";
+         $passed++;
+     } else {
+         echo "FAIL  {$msg}\n";
+         $failed++;
+     }
+ }
+ 
+ echo "=== Carrito Mass Online ===\n";
+ 
+ assert_true(carrito_cantidad_maxima() === 99, 'tope de cantidad = 99');
+ 
+ carrito_agregar(1, 1);
+ assert_true(carrito_total_unidades() === 1, 'agregar 1 unidad');
+ 
+ carrito_agregar(1, 5);
+ assert_true(carrito_total_unidades() === 6, 'suma cantidades del mismo SKU');
+ 
+ carrito_agregar(9999, 1);
+ assert_true(carrito_total_unidades() === 6, 'id inexistente no agrega');
+ 
+ carrito_agregar(1, 0);
+ assert_true(carrito_total_unidades() === 6, 'cantidad 0 no agrega');
+ 
++$tope1 = carrito_tope_linea(1);
++$_SESSION['carrito'] = [['id' => 1, 'cantidad' => max(1, $tope1 - 2)]];
+-$_SESSION['carrito'] = [['id' => 1, 'cantidad' => 95]];
+ carrito_agregar(1, 10);
+ assert_true(
++    (int) carrito_items()[0]['cantidad'] === $tope1,
++    'agregar no supera tope efectivo (stock/99)'
+-    (int) carrito_items()[0]['cantidad'] === 99,
+-    'agregar no supera el tope 99'
+ );
+ 
++$_SESSION['carrito'] = [['id' => 1, 'cantidad' => max(1, $tope1 - 1)]];
+-$_SESSION['carrito'] = [['id' => 1, 'cantidad' => 98]];
+ carrito_cambiar(1, 5);
+ assert_true(
++    (int) carrito_items()[0]['cantidad'] === $tope1,
++    'cambiar (+) respeta tope efectivo'
+-    (int) carrito_items()[0]['cantidad'] === 99,
+-    'cambiar (+) respeta tope 99'
+ );
+ 
+ carrito_set_cantidad(1, 150);
+ assert_true(
++    (int) carrito_items()[0]['cantidad'] === $tope1,
++    'set_cantidad capea al tope efectivo'
+-    (int) carrito_items()[0]['cantidad'] === 99,
+-    'set_cantidad capea a 99'
+ );
+ 
+ carrito_cambiar(1, -200);
+ assert_true(carrito_items() === [], 'cambiar a <=0 elimina la línea');
+ 
+ carrito_agregar(2, 2);
+ carrito_set_cantidad(2, 0);
+ assert_true(carrito_items() === [], 'set_cantidad 0 elimina la línea');
+ 
+ carrito_agregar(1, 3);
+ carrito_agregar(2, 1);
+ carrito_eliminar(1);
+ assert_true(count(carrito_items()) === 1 && (int) carrito_items()[0]['id'] === 2, 'eliminar por id');
+ 
+ carrito_vaciar();
+ assert_true(carrito_items() === [], 'vaciar limpia carrito');
+ 
++$stock1 = producto_stock_disponible(1);
++assert_true($stock1 === 42, 'stock demo producto 1 = 42');
++assert_true(carrito_tope_linea(1) === 42, 'tope línea = min(99, stock)');
++
++$idBajo = 0;
++foreach (mass_productos() as $p) {
++    if (($p['stockTone'] ?? '') === 'bajo') {
++        $idBajo = (int) $p['id'];
++        break;
++    }
++}
++assert_true($idBajo > 0, 'existe producto con stock bajo');
++$stockBajo = producto_stock_disponible($idBajo);
++assert_true($stockBajo === 8, 'stock bajo demo = 8');
++
++$_SESSION['carrito'] = [];
++carrito_agregar($idBajo, 20);
++assert_true(
++    (int) carrito_items()[0]['cantidad'] === $stockBajo,
++    'agregar no supera stock disponible'
++);
++
++$_SESSION['carrito'] = [['id' => $idBajo, 'cantidad' => $stockBajo - 1]];
++carrito_agregar($idBajo, 5);
++assert_true(
++    (int) carrito_items()[0]['cantidad'] === $stockBajo,
++    'sumar no supera stock disponible'
++);
++
++carrito_set_cantidad($idBajo, 99);
++assert_true(
++    (int) carrito_items()[0]['cantidad'] === $stockBajo,
++    'set_cantidad capea al stock'
++);
++
++carrito_cambiar($idBajo, 10);
++assert_true(
++    (int) carrito_items()[0]['cantidad'] === $stockBajo,
++    'cambiar (+) respeta stock'
++);
++
+ echo "\nResultado: {$passed} OK, {$failed} FAIL\n";
+ exit($failed > 0 ? 1 : 0);
+ 
+
+========== RAMA feature/mejoras-admin-qa-cliente ==========
+relacion: NO es ancestro de main local
+merge-base main...rama: cd06ef0b7533
+
+-- historial de la rama que no esta en main --
+128a41da7285 tree=64d0cd946c97 parents=282dc999aaea
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150932 -0500
+  ﻿Actualizar clave del proyecto SonarQube a Pagina_Web_V2.
+  
+  Ajusta projectKey y projectName para el nuevo analisis local.
+
+  282dc999aaea tree=d2e274c5e1b4 parents=cd06ef0b7533
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150495 -0500
+  ﻿Fix Sonar a11y labels and Number.parse* in admin.js.
+  
+  Include the correction prompt and local Sonar project key for Pagina_Web.
+
+commits_no_en_main=2
+
+-- git diff --stat main...feature/mejoras-admin-qa-cliente  (tree merge-base -> punta) --
+archivos=7
+M	.gitignore
+M	assets/js/admin.js
+M	cliente_interfaces/catalogo.php
+A	docs/pruebas/prompt-correccion-sonar-a11y.md
+M	includes/admin/header.php
+M	includes/components/cart-line.php
+M	sonar-project.properties
+
+-- diff de la punta contra su primer padre (el commit propio) --
+archivos=1
+M	sonar-project.properties
+
+## patch sonar-project.properties
+--- a/sonar-project.properties
++++ b/sonar-project.properties
+ # SonarQube — Mass Online (paginaweb)
+ # El estudiante ejecuta sonar-scanner; este archivo solo configura el análisis.
+ # Generar reportes antes: scripts\prepare-sonar.bat  (o composer test:coverage)
+ 
++sonar.projectKey=Pagina_Web_V2
++sonar.projectName=Pagina_Web_V2
+-sonar.projectKey=Pagina_Web
+-sonar.projectName=Pagina_Web
+ sonar.projectVersion=1.1
+ 
+ # --- Servidor Local ---
+ sonar.host.url=http://localhost:9000
+ 
+ # --- Fuentes (producción) ---
+ sonar.sources=includes,admin,cliente_interfaces,assets/js,index.php,logout.php
+ sonar.sourceEncoding=UTF-8
+ 
+ # --- Pruebas ---
+ sonar.tests=tests
+ sonar.test.inclusions=tests/**/*.php
+ 
+ # --- Exclusiones de análisis de código fuente ---
+ sonar.exclusions=\
+   **/vendor/**,\
+   **/node_modules/**,\
+   **/docs/**,\
+   **/.phpunit.cache/**,\
+   **/assets/css/**,\
+   **/assets/img/**,\
+   **/scripts/**
+ 
+ # Layouts/partials de presentación: menos valor en Quality Gate académico
+ sonar.issue.ignore.multicriteria=e1
+ sonar.issue.ignore.multicriteria.e1.ruleKey=php:S1192
+ sonar.issue.ignore.multicriteria.e1.resourceKey=**/includes/data.php
+ 
+ # --- Cobertura PHP (Clover vía PHPUnit + PCOV) ---
+ sonar.php.coverage.reportPaths=docs/pruebas/evidencias/coverage/clover.xml
+ sonar.coverage.exclusions=\
+   **/includes/admin/**,\
+   **/includes/components/**,\
+   **/includes/layouts/**,\
+   **/assets/js/**
+ 
+ # --- Ejecución de pruebas (JUnit) ---
+ sonar.php.tests.reportPath=docs/pruebas/evidencias/junit.xml
+
+========== RAMA fix/sonar-a11y-parse-labels ==========
+relacion: NO es ancestro de main local
+merge-base main...rama: cd06ef0b7533
+
+-- historial de la rama que no esta en main --
+128a41da7285 tree=64d0cd946c97 parents=282dc999aaea
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150932 -0500
+  ﻿Actualizar clave del proyecto SonarQube a Pagina_Web_V2.
+  
+  Ajusta projectKey y projectName para el nuevo analisis local.
+
+  282dc999aaea tree=d2e274c5e1b4 parents=cd06ef0b7533
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793150495 -0500
+  ﻿Fix Sonar a11y labels and Number.parse* in admin.js.
+  
+  Include the correction prompt and local Sonar project key for Pagina_Web.
+
+commits_no_en_main=2
+
+-- git diff --stat main...fix/sonar-a11y-parse-labels  (tree merge-base -> punta) --
+archivos=7
+M	.gitignore
+M	assets/js/admin.js
+M	cliente_interfaces/catalogo.php
+A	docs/pruebas/prompt-correccion-sonar-a11y.md
+M	includes/admin/header.php
+M	includes/components/cart-line.php
+M	sonar-project.properties
+
+-- diff de la punta contra su primer padre (el commit propio) --
+archivos=1
+M	sonar-project.properties
+
+## patch sonar-project.properties
+--- a/sonar-project.properties
++++ b/sonar-project.properties
+ # SonarQube — Mass Online (paginaweb)
+ # El estudiante ejecuta sonar-scanner; este archivo solo configura el análisis.
+ # Generar reportes antes: scripts\prepare-sonar.bat  (o composer test:coverage)
+ 
++sonar.projectKey=Pagina_Web_V2
++sonar.projectName=Pagina_Web_V2
+-sonar.projectKey=Pagina_Web
+-sonar.projectName=Pagina_Web
+ sonar.projectVersion=1.1
+ 
+ # --- Servidor Local ---
+ sonar.host.url=http://localhost:9000
+ 
+ # --- Fuentes (producción) ---
+ sonar.sources=includes,admin,cliente_interfaces,assets/js,index.php,logout.php
+ sonar.sourceEncoding=UTF-8
+ 
+ # --- Pruebas ---
+ sonar.tests=tests
+ sonar.test.inclusions=tests/**/*.php
+ 
+ # --- Exclusiones de análisis de código fuente ---
+ sonar.exclusions=\
+   **/vendor/**,\
+   **/node_modules/**,\
+   **/docs/**,\
+   **/.phpunit.cache/**,\
+   **/assets/css/**,\
+   **/assets/img/**,\
+   **/scripts/**
+ 
+ # Layouts/partials de presentación: menos valor en Quality Gate académico
+ sonar.issue.ignore.multicriteria=e1
+ sonar.issue.ignore.multicriteria.e1.ruleKey=php:S1192
+ sonar.issue.ignore.multicriteria.e1.resourceKey=**/includes/data.php
+ 
+ # --- Cobertura PHP (Clover vía PHPUnit + PCOV) ---
+ sonar.php.coverage.reportPaths=docs/pruebas/evidencias/coverage/clover.xml
+ sonar.coverage.exclusions=\
+   **/includes/admin/**,\
+   **/includes/components/**,\
+   **/includes/layouts/**,\
+   **/assets/js/**
+ 
+ # --- Ejecución de pruebas (JUnit) ---
+ sonar.php.tests.reportPath=docs/pruebas/evidencias/junit.xml
+
+========== DUPLICIDAD 55ce88d vs eb68b44 ==========
+55ce88d es ancestro de main: SI
+eb68b44 es ancestro de main: SI
+trees iguales: NO
+tree 55ce88d=83743b4ef7855c5196715150848328675aed0d3b
+tree eb68b44=facd2127d04c1f6f21cd62d4ebe09a592c5f9839
+padre eb68b44[0]=a94d2c6625586179cd8acbda250631ea2b28d3b2 has=si
+a94d2c662558 tree=ae361593f2f4 parents=19ddfec866f4
+  author: Arny5555 <74355027@continental.edu.pe> 1793149654 -0500
+  fix: rutas relativas Markdown para imágenes del README
+  
+  GitHub marcaba Invalid image source con URLs raw absolutas en HTML;
+  se usan rutas ./docs/img/*.png en sintaxis Markdown.
+  
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+tree padre igual a 55ce88d: NO
+tree padre igual a eb68b44: NO
+padre eb68b44[1]=55ce88d619acb834ac418653168f4d21bca91061 has=si
+55ce88d619ac tree=83743b4ef785 parents=0177c5deb582
+  author: cursor12310-sys <cursor12310-sys@users.noreply.github.com> 1793153103 -0500
+  ﻿Integrar frontend/backend, MySQL, correccion de logout y prompts.
+  
+  Incluye separacion FE/BE, schema/seed, fix mass_url para cerrar sesion al cambiar de rol, pruebas y carpeta PROMTS.
+tree padre igual a 55ce88d: SI
+tree padre igual a eb68b44: NO
+
+archivos que el merge eb68b44 cambia respecto de su primer padre: 122
+M	.gitignore
+A	PROMTS/01.Correccion-de-incidencias-de-SonarQube.md
+A	PROMTS/02.Refactorizacion-frontend-backend-mysql.md
+A	PROMTS/03.Correccion-logout-cambio-de-rol.md
+A	PROMTS/README.md
+M	README.md
+M	admin/index.php
+M	admin/inventario.php
+M	admin/login.php
+M	admin/logout.php
+M	admin/pedidos.php
+M	admin/productos.php
+M	assets/js/admin.js
+A	backend/.htaccess
+A	backend/Database.php
+A	backend/bootstrap.php
+A	backend/config/app.php
+A	backend/config/database.example.php
+A	backend/controllers/AuthController.php
+A	backend/middleware/AuthMiddleware.php
+A	backend/middleware/CsrfMiddleware.php
+A	backend/public/.htaccess
+A	backend/public/index.php
+A	backend/repositories/CategoriaRepository.php
+A	backend/repositories/CuponRepository.php
+A	backend/repositories/InventarioRepository.php
+A	backend/repositories/PedidoRepository.php
+A	backend/repositories/ProductoRepository.php
+A	backend/repositories/TiendaRepository.php
+A	backend/repositories/UsuarioRepository.php
+A	backend/routes/web.php
+A	backend/services/AuthService.php
+A	backend/validators/PedidoValidator.php
+A	backend/validators/ProductoValidator.php
+M	cliente_interfaces/carrito.php
+M	cliente_interfaces/catalogo.php
+M	cliente_interfaces/confirmacion.php
+M	cliente_interfaces/index.php
+M	cliente_interfaces/logout.php
+M	cliente_interfaces/pedido.php
+M	cliente_interfaces/producto.php
+A	composer.json
+A	database/.htaccess
+A	database/schema.sql
+A	database/seed.sql
+A	docs/pruebas/01-plan-de-pruebas.md
+A	docs/pruebas/02-ejecucion-pruebas.md
+A	docs/pruebas/03-pruebas-automatizadas.md
+A	docs/pruebas/04-comparacion-manual-vs-automatizada.md
+A	docs/pruebas/05-guia-sonarqube.md
+A	docs/pruebas/INFORME-FINAL.md
+A	docs/pruebas/evidencias/README.md
+A	docs/pruebas/evidencias/ejecucion-automatizada.txt
+A	docs/pruebas/evidencias/junit.xml
+A	docs/pruebas/evidencias/testdox.html
+A	docs/pruebas/prompt-correccion-sonar-a11y.md
+A	frontend/assets/css/admin-login.css
+A	frontend/assets/css/admin.css
+A	frontend/assets/css/catalogo.css
+A	frontend/assets/css/confirmacion.css
+A	frontend/assets/css/pedido.css
+A	frontend/assets/css/producto.css
+A	frontend/assets/css/styles.css
+A	frontend/assets/css/tokens.css
+A	frontend/assets/img/logo.svg
+A	frontend/assets/js/admin-login.js
+A	frontend/assets/js/admin.js
+A	frontend/assets/js/ui.js
+A	frontend/views/admin/index.php
+A	frontend/views/admin/inventario.php
+A	frontend/views/admin/login.php
+A	frontend/views/admin/logout.php
+A	frontend/views/admin/partials/footer.php
+A	frontend/views/admin/partials/header.php
+A	frontend/views/admin/partials/sidebar.php
+A	frontend/views/admin/pedidos.php
+A	frontend/views/admin/productos.php
+A	frontend/views/cliente/carrito.php
+A	frontend/views/cliente/catalogo.php
+A	frontend/views/cliente/confirmacion.php
+A	frontend/views/cliente/index.php
+A	frontend/views/cliente/logout.php
+A	frontend/views/cliente/pedido.php
+A	frontend/views/cliente/producto.php
+A	frontend/views/components/cart-drawer.php
+A	frontend/views/components/cart-line.php
+A	frontend/views/components/category-card.php
+A	frontend/views/components/navbar.php
+A	frontend/views/components/order-summary-side.php
+A	frontend/views/components/product-card.php
+A	frontend/views/components/store-card.php
+A	frontend/views/components/topbar.php
+A	frontend/views/layouts/footer.php
+A	frontend/views/layouts/header.php
+M	includes/admin/header.php
+M	includes/components/cart-line.php
+M	includes/components/navbar.php
+M	includes/data.php
+M	includes/functions.php
+M	includes/init.php
+A	phpunit.xml
+A	scripts/generate_seed.php
+A	scripts/prepare-sonar.bat
+A	scripts/scan-sonar.bat
+A	scripts/smoke_auth_logout.php
+A	scripts/smoke_views.php
+A	sonar-project.properties
+A	tests/Feature/AuthLogoutCambioRolTest.php
+A	tests/Feature/AuthSesionTest.php
+A	tests/Feature/CarritoSesionTest.php
+A	tests/Feature/CatalogoYSqliteLabTest.php
+A	tests/Feature/MysqlDisponibilidadTest.php
+A	tests/Feature/PedidoConfirmacionTest.php
+A	tests/Feature/ProductoAdminPersistenciaTest.php
+A	tests/Support/SqliteLabStore.php
+A	tests/TestCase.php
+A	tests/Unit/AuthReglasTest.php
+A	tests/Unit/DineroYFormatoTest.php
+A	tests/Unit/PedidoReglasTest.php
+A	tests/Unit/ProductoAdminValidacionTest.php
+A	tests/bootstrap.php
+M	tests/run_all.php
+
+archivos distintos entre el arbol de 55ce88d y el arbol de eb68b44: 35
+M	.htaccess
+A	MEJORAS.md
+M	README.md
+M	assets/css/catalogo.css
+M	assets/js/ui.js
+M	backend/bootstrap.php
+A	docs/img/banner-mass-online.png
+A	docs/img/banner-mass-online.svg
+A	docs/img/logo-mass.png
+A	docs/img/preview-admin.png
+A	docs/img/preview-admin.svg
+A	docs/img/preview-tienda.png
+A	docs/img/preview-tienda.svg
+M	frontend/views/admin/login.php
+M	frontend/views/admin/pedidos.php
+M	frontend/views/admin/productos.php
+M	frontend/views/cliente/carrito.php
+M	frontend/views/cliente/catalogo.php
+M	frontend/views/cliente/pedido.php
+M	frontend/views/cliente/producto.php
+M	frontend/views/components/cart-line.php
+M	includes/components/cart-drawer.php
+M	includes/components/cart-line.php
+M	includes/components/navbar.php
+M	includes/components/product-card.php
+M	includes/functions.php
+M	includes/init.php
+M	includes/layouts/footer.php
+M	includes/layouts/header.php
+M	tests/auth_test.php
+A	tests/carrito_test.php
+A	tests/csrf_test.php
+M	tests/negocio_test.php
+A	tests/redirect_test.php
+M	tests/run_all.php
+
+=== 41a4bde vs 128a41d (sonar key) ===
+archivos distintos 128a41d -> 41a4bde: 0
+---- 128a41d sonar-project.properties blob 03846dbee9 ----
+# SonarQube — Mass Online (paginaweb)
+# El estudiante ejecuta sonar-scanner; este archivo solo configura el análisis.
+# Generar reportes antes: scripts\prepare-sonar.bat  (o composer test:coverage)
+
+sonar.projectKey=Pagina_Web_V2
+sonar.projectName=Pagina_Web_V2
+sonar.projectVersion=1.1
+
+# --- Servidor Local ---
+sonar.host.url=http://localhost:9000
+
+# --- Fuentes (producción) ---
+sonar.sources=includes,admin,cliente_interfaces,assets/js,index.php,logout.php
+sonar.sourceEncoding=UTF-8
+
+# --- Pruebas ---
+sonar.tests=tests
+sonar.test.inclusions=tests/**/*.php
+
+# --- Exclusiones de análisis de código fuente ---
+sonar.exclusions=\
+  **/vendor/**,\
+  **/node_modules/**,\
+  **/docs/**,\
+  **/.phpunit.cache/**,\
+  **/assets/css/**,\
+  **/assets/img/**,\
+  **/scripts/**
+
+# Layouts/partials de presentación: menos valor en Quality Gate académico
+sonar.issue.ignore.multicriteria=e1
+sonar.issue.ignore.multicriteria.e1.ruleKey=php:S1192
+sonar.issue.ignore.multicriteria.e1.resourceKey=**/includes/data.php
+
+# --- Cobertura PHP (Clover vía PHPUnit + PCOV) ---
+sonar.php.coverage.reportPaths=docs/pruebas/evidencias/coverage/clover.xml
+sonar.coverage.exclusions=\
+  **/includes/admin/**,\
+  **/includes/components/**,\
+  **/includes/layouts/**,\
+  **/assets/js/**
+
+# --- Ejecución de pruebas (JUnit) ---
+sonar.php.tests.reportPath=docs/pruebas/evidencias/junit.xml
+---- 41a4bde sonar-project.properties blob 03846dbee9 ----
+# SonarQube — Mass Online (paginaweb)
+# El estudiante ejecuta sonar-scanner; este archivo solo configura el análisis.
+# Generar reportes antes: scripts\prepare-sonar.bat  (o composer test:coverage)
+
+sonar.projectKey=Pagina_Web_V2
+sonar.projectName=Pagina_Web_V2
+sonar.projectVersion=1.1
+
+# --- Servidor Local ---
+sonar.host.url=http://localhost:9000
+
+# --- Fuentes (producción) ---
+sonar.sources=includes,admin,cliente_interfaces,assets/js,index.php,logout.php
+sonar.sourceEncoding=UTF-8
+
+# --- Pruebas ---
+sonar.tests=tests
+sonar.test.inclusions=tests/**/*.php
+
+# --- Exclusiones de análisis de código fuente ---
+sonar.exclusions=\
+  **/vendor/**,\
+  **/node_modules/**,\
+  **/docs/**,\
+  **/.phpunit.cache/**,\
+  **/assets/css/**,\
+  **/assets/img/**,\
+  **/scripts/**
+
+# Layouts/partials de presentación: menos valor en Quality Gate académico
+sonar.issue.ignore.multicriteria=e1
+sonar.issue.ignore.multicriteria.e1.ruleKey=php:S1192
+sonar.issue.ignore.multicriteria.e1.resourceKey=**/includes/data.php
+
+# --- Cobertura PHP (Clover vía PHPUnit + PCOV) ---
+sonar.php.coverage.reportPaths=docs/pruebas/evidencias/coverage/clover.xml
+sonar.coverage.exclusions=\
+  **/includes/admin/**,\
+  **/includes/components/**,\
+  **/includes/layouts/**,\
+  **/assets/js/**
+
+# --- Ejecución de pruebas (JUnit) ---
+sonar.php.tests.reportPath=docs/pruebas/evidencias/junit.xml
+---- main sonar-project.properties blob 03846dbee9 ----
+# SonarQube — Mass Online (paginaweb)
+# El estudiante ejecuta sonar-scanner; este archivo solo configura el análisis.
+# Generar reportes antes: scripts\prepare-sonar.bat  (o composer test:coverage)
+
+sonar.projectKey=Pagina_Web_V2
+sonar.projectName=Pagina_Web_V2
+sonar.projectVersion=1.1
+
+# --- Servidor Local ---
+sonar.host.url=http://localhost:9000
+
+# --- Fuentes (producción) ---
+sonar.sources=includes,admin,cliente_interfaces,assets/js,index.php,logout.php
+sonar.sourceEncoding=UTF-8
+
+# --- Pruebas ---
+sonar.tests=tests
+sonar.test.inclusions=tests/**/*.php
+
+# --- Exclusiones de análisis de código fuente ---
+sonar.exclusions=\
+  **/vendor/**,\
+  **/node_modules/**,\
+  **/docs/**,\
+  **/.phpunit.cache/**,\
+  **/assets/css/**,\
+  **/assets/img/**,\
+  **/scripts/**
+
+# Layouts/partials de presentación: menos valor en Quality Gate académico
+sonar.issue.ignore.multicriteria=e1
+sonar.issue.ignore.multicriteria.e1.ruleKey=php:S1192
+sonar.issue.ignore.multicriteria.e1.resourceKey=**/includes/data.php
+
+# --- Cobertura PHP (Clover vía PHPUnit + PCOV) ---
+sonar.php.coverage.reportPaths=docs/pruebas/evidencias/coverage/clover.xml
+sonar.coverage.exclusions=\
+  **/includes/admin/**,\
+  **/includes/components/**,\
+  **/includes/layouts/**,\
+  **/assets/js/**
+
+# --- Ejecución de pruebas (JUnit) ---
+sonar.php.tests.reportPath=docs/pruebas/evidencias/junit.xml
+
+=== comprobaciones extra ===
+41a4bde ancestro de main: SI
+282dc999 ancestro de main: NO
+cd06ef0 ancestro de main: SI
+19ddfec ancestro de main: buscar
+backend/services/CarritoService.php en main: NO
+backend/services/CuponService.php en main: NO
+.github/workflows/ci.yml en main: NO
+includes/functions.php en main: SI fca0870eea
+ancestros con prefijo 19ddfec: 19ddfec866f44c07086ed774f7aacaf28f1a3bdb
+
+FIN

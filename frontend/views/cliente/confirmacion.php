@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 /* bootstrap vía shim admin|cliente_interfaces */
+$pedidoService = new PedidoService();
 
-$orden = pedido_ultimo();
+$orden = $pedidoService->ultimo();
 
 // Demo Figma: regenera orden según ?modo=retiro|express
 if (isset($_GET['demo'])) {
@@ -15,7 +16,7 @@ if (isset($_GET['demo'])) {
     ];
     $modo = ($_GET['modo'] ?? 'express') === 'retiro' ? 'retiro' : 'express';
     $tiendaDemo = mass_tienda_por_id('magdalena');
-    pedido_set([
+    $pedidoService->set([
         'cupon' => 'CLUBMASS10',
         'entrega' => $modo,
         'tienda_id' => 'magdalena',
@@ -29,7 +30,7 @@ if (isset($_GET['demo'])) {
         'horario' => $modo === 'express' ? 'hoy_express' : 'hoy_tarde',
         'comprobante' => 'boleta',
     ]);
-    $orden = pedido_confirmar('tarjeta');
+    $orden = $pedidoService->confirmar('tarjeta');
 }
 
 if (!$orden) {
@@ -38,13 +39,13 @@ if (!$orden) {
 }
 
 $pedido = $orden['pedido'] ?? [];
-$resumen = $orden['resumen'] ?? pedido_resumen([], $pedido);
-$entrega = pedido_normalizar_entrega((string) ($pedido['entrega'] ?? 'retiro'));
+$resumen = $orden['resumen'] ?? $pedidoService->resumen([], $pedido);
+$entrega = $pedidoService->normalizarEntrega((string) ($pedido['entrega'] ?? 'retiro'));
 $esRetiro = $entrega === 'retiro';
 $tienda = $orden['tienda'] ?? mass_tienda_por_id((string) ($pedido['tienda_id'] ?? 'magdalena'));
-$pasos = pedido_tracking_pasos($entrega, (string) ($orden['estado'] ?? 'gondola'));
+$pasos = $pedidoService->trackingPasos($entrega, (string) ($orden['estado'] ?? 'gondola'));
 $nombre = trim((string) ($pedido['nombre'] ?? 'cliente'));
-$horarios = mass_horarios_entrega($entrega);
+$horarios = $pedidoService->horariosEntrega($entrega);
 $horarioLabel = $horarios[(string) ($pedido['horario'] ?? '')] ?? (string) ($pedido['horario'] ?? '');
 $pagoLabel = match ((string) ($orden['pago'] ?? 'yape')) {
     'tarjeta' => 'Tarjeta · VISA **** 4521',
@@ -223,4 +224,3 @@ require MASS_ROOT . '/frontend/views/layouts/header.php';
 </main>
 
 <?php require MASS_ROOT . '/frontend/views/layouts/footer.php'; ?>
-

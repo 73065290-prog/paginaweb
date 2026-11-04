@@ -1,0 +1,88 @@
+Pruebas de cabeceras HTTP y CSRF del admin
+Fecha local: 2026-11-03 00:24
+PHP: 8.2.12 (C:\xampp\php\php.exe)
+PHPUnit: 11.5.0
+Apache respondió en http://127.0.0.1/paginaweb/admin/login.php
+Base usada por la prueba CSRF: modo demo (MASS_USE_DB=0). Database::connected() fue false después de cada rechazo. No se escribió en mass_online ni en mass_online_test.
+
+composer no está en PATH. composer test no se ejecutó. El equivalente del script de Composer es php vendor/bin/phpunit.
+
+1. php vendor/bin/phpunit
+Comando: C:\xampp\php\php.exe vendor\bin\phpunit
+Resultado: OK (134 tests, 799 assertions). Exit 0.
+La primera corrida de la suite completa falló 4 veces en CsrfAdminProductosTest porque una prueba de integración anterior dejaba MASS_USE_DB distinto de 0. La prueba se corrigió para forzar modo demo y reiniciar Database antes del POST. La repetición quedó en OK.
+
+2. php tests/run_all.php
+Comando: C:\xampp\php\php.exe tests\run_all.php
+Resultado: Resumen fallos=0. Exit 0.
+- PHPUnit: OK (134 tests, 799 assertions)
+- auth_test.php: 16 OK, 0 FAIL. Incluye la comprobación de sesión tras regenerate_id. No se copian líneas con credenciales.
+- negocio_test.php: 38 OK, 0 FAIL
+- productos_admin_test.php: 22 OK, 0 FAIL
+- carrito_test.php: 12 OK, 0 FAIL
+- csrf_test.php: 9 OK, 0 FAIL
+- redirect_test.php: 6 OK, 0 FAIL
+
+3. php scripts/smoke_views.php
+Comando: C:\xampp\php\php.exe scripts\smoke_views.php
+Resultado: SMOKE_ROUTES_OK. Exit 0.
+admin/productos.php figura como GET|POST hacia AdminController::productos. El despacho de la vista respondió status=200.
+
+4. php scripts/smoke_auth_logout.php
+Comando: C:\xampp\php\php.exe scripts\smoke_auth_logout.php
+Resultado: SMOKE_AUTH_OK. Exit 0.
+Escenarios A, B y C de logout y cambio de rol pasaron.
+
+5. tests/Feature/CsrfAdminProductosTest.php
+Comando: C:\xampp\php\php.exe vendor\bin\phpunit tests/Feature/CsrfAdminProductosTest.php
+Resultado: OK (4 tests, 29 assertions). Exit 0.
+
+Endpoint real: admin/productos.php, que despacha AdminController::productos y la vista frontend/views/admin/productos.php.
+El rechazo implementado no es un HTTP 403. La vista deja el mensaje "Sesión inválida. Recarga la página e intenta de nuevo." y no llama a crear ni a guardar.
+
+Alta sin token (accion=crear_producto, sin csrf_token):
+- la respuesta contiene el mensaje de rechazo
+- el nombre de prueba no aparece en el HTML
+- el catálogo no contiene ese EAN ni ese nombre
+- la huella del catálogo (total, extras y overrides de sesión) no cambió
+
+Alta con token inválido (valor fijo de prueba, no un token de sesión):
+- mismo mensaje de rechazo
+- no se creó el registro
+- la huella no cambió
+
+Edición sin token (accion=guardar_producto, id del producto demo 1, nombre distinto):
+- mismo mensaje de rechazo
+- el nombre enviado no aparece en el HTML
+- nombre, EAN y precio del producto 1 quedaron iguales
+- la huella no cambió
+
+Edición con token inválido:
+- mismo mensaje de rechazo
+- nombre y EAN del producto 1 quedaron iguales
+- la huella no cambió
+
+En los cuatro casos Database::connected() fue false.
+
+6. php scripts/verificar_cabeceras.php
+Comando: C:\xampp\php\php.exe scripts\verificar_cabeceras.php
+URL: http://127.0.0.1/paginaweb/admin/login.php
+HTTP 200. Exit 0. RESULTADO aprobado.
+
+Cabecera                        Esperada                                          Recibida                                          Estado
+X-Content-Type-Options          nosniff                                            nosniff                                            presente
+X-Frame-Options                 SAMEORIGIN                                         SAMEORIGIN                                         presente
+Referrer-Policy                 strict-origin-when-cross-origin                    strict-origin-when-cross-origin                    presente
+Permissions-Policy              geolocation=(), microphone=(), camera=()          geolocation=(), microphone=(), camera=()          presente
+
+Esas cuatro son las que define .htaccess dentro de IfModule mod_headers.c. No se modificó .htaccess: los valores ya coincidían y no se debilitó ninguna.
+
+Comprobación de fallo del script:
+Comando: C:\xampp\php\php.exe scripts\verificar_cabeceras.php http://127.0.0.1:9/
+Resultado: ERROR conexion curl: (7) Failed to connect to 127.0.0.1 port 9. RESULTADO fallido. Exit 1.
+
+Limitaciones:
+- Git no está instalado. No hay rama ni commit local.
+- composer test no pudo lanzarse porque Composer no está instalado.
+- La prueba CSRF entra por el front controller en el mismo proceso, con sesión admin de demostración y modo demo. No se hizo un POST HTTP contra Apache, porque esa vía usa la base de desarrollo y un fallo del CSRF habría podido escribir en ella.
+- INT-002-BOLT-007, según el registro del repositorio, es el ARIA del carrito. Este prompt no lo ejecutó.

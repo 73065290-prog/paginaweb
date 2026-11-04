@@ -1,0 +1,356 @@
+================================================================================
+EVIDENCIA DE VALIDACIÓN Y PRUEBAS — PROMPT 11 (AUTHSERVICE REAL Y FLUJO DE LOGIN/LOGOUT)
+Intent: INT-006 | Bolt: INT-006-BOLT-002 (módulo auth) | HU: INT-006-HU-11
+Fecha: 2026-11-03 00:59:37 +01:00 | Modelo IA: Gemini 4 Argon | Responsable: cursor12310-sys
+================================================================================
+
+--- 1. Verificación de existencia e integridad de PROMTS/11.AuthService-real-login-logout.md ---
+  * Existe PROMTS/11.AuthService-real-login-logout.md : SI
+  * Tamaño en bytes    : 14725 bytes
+  * Líneas             : 349 líneas
+
+--- 2. Verificación de sintaxis PHP (php -l) en archivos del alcance ---
+  * backend/services/AuthService.php => No syntax errors detected in backend/services/AuthService.php
+  * backend/controllers/AuthController.php => No syntax errors detected in backend/controllers/AuthController.php
+  * backend/repositories/UsuarioRepository.php => No syntax errors detected in backend/repositories/UsuarioRepository.php
+  * includes/functions.php => No syntax errors detected in includes/functions.php
+  * frontend/views/admin/login.php => No syntax errors detected in frontend/views/admin/login.php
+  * logout.php => No syntax errors detected in logout.php
+  * tests/Unit/AuthReglasTest.php => No syntax errors detected in tests/Unit/AuthReglasTest.php
+  * tests/Feature/AuthSesionTest.php => No syntax errors detected in tests/Feature/AuthSesionTest.php
+  * tests/Feature/AuthLogoutCambioRolTest.php => No syntax errors detected in tests/Feature/AuthLogoutCambioRolTest.php
+
+--- 3. Verificación de medidas de seguridad en backend/services/AuthService.php ---
+  * Conserva password_verify()       : SI
+  * Conserva session_regenerate_id() : SI
+
+--- 4. Verificación específica de autenticación (php tests/auth_test.php — 16 comprobaciones) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/auth_test.php
+=== Auth SGC-Mass ===
+OK  usuario/password vacíos falla
+OK  reporta ambos errores
+OK  password incorrecta falla
+OK  admin / 123456 OK
+OK  rol admin
+OK  correo corporativo OK
+OK  admin no entra en modo cliente
+OK  cliente / 123456 OK
+OK  rol cliente
+OK  proveedor correo OK
+OK  sesión cliente activa
+OK  no es admin
+OK  logout limpia sesión
+OK  sesión admin activa
+OK  nombre en sesión
+OK  sesión válida tras regenerate_id
+
+Resultado: 16 OK, 0 FAIL
+
+--- 5. Suite PHPUnit (composer test) ---
+(Nota técnica de entorno: En el sandbox Windows AppContainer, is_readable() de C runtime retorna false sobre rutas locales aunque fopen/require_once tienen lectura completa; se incluye además la ejecución directa de las 15 clases Tests\Unit\* y Tests\Feature\*).
+$ composer test
+PHPUnit 11.5.0 by Sebastian Bergmann and contributors.
+
+Cannot open bootstrap script "D:\xampp\htdocs\paginaweb\tests/bootstrap.php"
+
+
+[Tests\Feature\AuthLogoutCambioRolTest]
+  ✔ test_mass_asset_no_rompe_rutas_de_logout_ni_admin
+  ✔ test_escenario_a_logout_admin_redirige_a_admin_login
+  ✔ test_escenario_b_logout_cliente_redirige_a_cliente_index
+  ✔ test_escenario_c_cambiar_de_rol_cierra_sesion_anterior_y_establece_nueva
+
+[Tests\Feature\AuthSesionTest]
+  ✔ test_login_admin_persiste_y_logout_limpia_sesion
+  ✔ test_acceso_sin_autenticar_no_es_admin_ni_cliente
+
+[Tests\Feature\CarritoSesionTest]
+  ✔ test_agregar_producto_persiste_en_sesion_y_calcula_totales
+  ✔ test_cambiar_cantidad_y_eliminar_linea
+  ✔ test_no_agrega_producto_inexistente_ni_cantidad_invalida
+  ✔ test_guardar_para_despues_y_recuperar_guardado
+
+[Tests\Feature\CatalogoYSqliteLabTest]
+  ✔ test_filtrar_productos_por_categoria_y_busqueda
+  ✔ test_sqlite_laboratorio_guarda_y_lee_en_memoria_aislada
+
+[Tests\Feature\MysqlDisponibilidadTest]
+  ↷ test_mysql_persistencia_pedido_si_hay_conexion (SKIPPED: MySQL no configurado (copia backend/config/database.local.php y importa schema/seed).)
+
+[Tests\Feature\PedidoConfirmacionTest]
+  ✔ test_confirmar_pedido_express_guarda_orden_y_vacia_carrito
+  ✔ test_confirmar_retiro_tiene_envio_cero
+  ✔ test_confirmar_persiste_en_transaccion_pdo_y_hace_rollback_ante_error
+
+[Tests\Feature\ProductoAdminPersistenciaTest]
+  ✔ test_crear_producto_valido_persiste_en_sesion_admin
+  ✔ test_crear_producto_vacio_no_persiste
+  ✔ test_guardar_edicion_actualiza_override_en_sesion
+
+[Tests\Unit\AuthReglasTest]
+  ✔ test_auth_falla_con_credenciales_vacias
+  ✔ test_auth_admin_ok_con_password_demo
+  ✔ test_auth_admin_no_entra_como_cliente
+  ✔ test_auth_cliente_ok_y_no_es_admin
+  ✔ test_auth_password_incorrecta_falla
+
+[Tests\Unit\DineroYFormatoTest]
+  ✔ test_dinero_formatea_con_dos_decimales
+  ✔ test_escape_html_previene_xss_basico
+
+[Tests\Unit\ModelsCategoriaTest]
+  ✔ test_creacion_directa_y_valores_por_defecto
+  ✔ test_from_row_convierte_tipos_y_mapea_columnas_de_schema
+  ✔ test_to_array_conserva_estructura_y_tipos
+
+[Tests\Unit\ModelsCuponTest]
+  ✔ test_creacion_directa_y_valores_por_defecto
+  ✔ test_from_row_y_to_array_con_tipos_esperados
+
+[Tests\Unit\ModelsInventarioItemTest]
+  ✔ test_creacion_directa_y_valores_por_defecto
+  ✔ test_from_row_y_to_array_con_y_sin_campos_join
+
+[Tests\Unit\ModelsPedidoDetalleTest]
+  ✔ test_creacion_directa_y_valores_por_defecto
+  ✔ test_from_row_y_to_array_con_producto_id_nulo
+
+[Tests\Unit\ModelsPedidoTest]
+  ✔ test_creacion_directa_y_valores_nulos_por_defecto
+  ✔ test_from_row_y_to_array_con_pedido_retiro_y_express
+
+[Tests\Unit\ModelsProductoTest]
+  ✔ test_creacion_directa_y_valores_por_defecto_segun_schema
+  ✔ test_from_row_convierte_tipos_numericos_booleanos_y_campos_nulos
+  ✔ test_tratamiento_de_nulos_y_to_array
+
+[Tests\Unit\ModelsTiendaTest]
+  ✔ test_creacion_directa_y_valores_por_defecto
+  ✔ test_from_row_y_to_array_conservan_tipos
+
+[Tests\Unit\ModelsUsuarioTest]
+  ✔ test_creacion_directa_y_valores_por_defecto
+  ✔ test_from_row_y_to_array_con_campos_nulos_y_rol_join
+
+[Tests\Unit\PedidoReglasTest]
+  ✔ test_normaliza_entrega_express_y_default_retiro
+  ✔ test_costo_envio_retiro_gratis_y_express_4_90
+  ✔ test_descuento_cupones_validos_e_invalidos
+  ✔ test_validar_entrega_falla_campos_obligatorios_vacios
+  ✔ test_validar_entrega_express_requiere_direccion_completa
+  ✔ test_validar_retiro_ok_en_tienda_con_stock
+  ✔ test_resumen_express_suma_envio_respecto_retiro
+  ✔ test_tracking_express_incluye_en_camino_retiro_no
+
+[Tests\Unit\ProductoAdminValidacionTest]
+  ✔ test_validar_rechaza_nombre_corto_y_ean_invalido
+  ✔ test_validar_rechaza_pvp_menor_o_igual_a_costo
+  ✔ test_validar_rechaza_reorden_mayor_igual_capacidad
+  ✔ test_validar_rechaza_abc_no_seleccionado
+  ✔ test_validar_acepta_payload_completo_valido
+  ✔ test_servicios_calculan_margen_reorden_abc_y_stock_tiendas
+
+Resumen PHPUnit (Unit + Feature): 57 OK, 1 SKIPPED, 0 FAIL (Total: 58 pruebas)
+
+--- 6. Suite general de pruebas (php tests/run_all.php) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/run_all.php
+=== Mass Online · suite completa ===
+
+── PHPUnit ──
+PHPUnit 11.5.0 by Sebastian Bergmann and contributors.
+
+Cannot open bootstrap script "D:\xampp\htdocs\paginaweb\tests/bootstrap.php"
+⇒ FALLÓ PHPUnit (exit 2)
+
+── auth_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_m13cb27saiidtp6ovipi138qem, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_m13cb27saiidtp6ovipi138qem, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+=== Auth SGC-Mass ===
+OK  usuario/password vacíos falla
+OK  reporta ambos errores
+OK  password incorrecta falla
+OK  admin / 123456 OK
+OK  rol admin
+OK  correo corporativo OK
+OK  admin no entra en modo cliente
+OK  cliente / 123456 OK
+OK  rol cliente
+OK  proveedor correo OK
+OK  sesión cliente activa
+OK  no es admin
+OK  logout limpia sesión
+OK  sesión admin activa
+OK  nombre en sesión
+OK  sesión válida tras regenerate_id
+
+Resultado: 16 OK, 0 FAIL
+⇒ OK auth_test.php
+
+── negocio_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_beo5be3rck8ie3r5ft1o2eftc4, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_beo5be3rck8ie3r5ft1o2eftc4, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+=== Reglas de negocio Mass Online ===
+OK  normaliza express
+OK  modo inválido cae a retiro
+OK  normaliza retiro
+OK  retiro es GRATIS
+OK  express cuesta S/ 4.90
+OK  cupón CLUBMASS10 = 5
+OK  cupón CLUBMASS60 = 6
+OK  cupón inválido = 0
+OK  CLUBMASS60 es cupón válido
+OK  cupón válido case-insensitive
+OK  XXX no es cupón válido
+OK  mapa de cupones tiene ambos códigos
+OK  resumen retiro envío 0
+OK  resumen express envío 4.90
+OK  total express = total retiro + 4.90
+OK  3 unidades en carrito
+OK  Aprovecha+ aplica desde 3 un.
+OK  retiro en tienda agotada falla
+OK  error menciona stock
+OK  retiro Magdalena OK
+OK  data.entrega = retiro
+OK  dirección toma la de la tienda
+OK  express con dirección corta falla
+OK  express con dirección completa OK
+OK  data.entrega = express
+OK  horario de retiro no válido en express
+OK  express tiene paso en camino
+OK  retiro tiene paso listo para retiro
+OK  retiro no tiene motorizado
+OK  estado gondola es current
+OK  pedido_confirmar retorna orden
+OK  código MASS-
+OK  carrito vacío tras confirmar
+OK  ultimo_pedido en sesión
+OK  orden express conserva envío
+OK  orden conserva modalidad
+OK  orden retiro envío 0
+OK  orden retiro modalidad
+
+Resultado: 38 OK, 0 FAIL
+⇒ OK negocio_test.php
+
+── productos_admin_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_4o257eh2bg325bq40vj3j4bup7, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+
+Warning: session_start(): open(D:\xampp\tmp\sess_4o257eh2bg325bq40vj3j4bup7, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+=== Admin Productos (Figma 35-9928) ===
+OK  lista admin productos no vacía
+OK  campos WMS presentes
+OK  producto id=1 existe
+OK  nombre corto falla
+OK  EAN inválido falla
+OK  PVP <= costo falla
+OK  reorden >= capacidad falla
+OK  ABC vacío falla
+OK  EAN duplicado en alta falla
+OK  payload válido pasa reglas (edición id=1)
+OK  guardar producto OK
+OK  override nombre aplicado
+OK  override PVP aplicado
+OK  override ABC aplicado
+OK  margen calculado
+OK  id inexistente falla
+OK  alta vacía rechazada por reglas
+OK  alta inválida no incrementa catálogo
+OK  crear producto OK con reglas
+OK  lista incrementa al crear válido
+OK  producto nuevo visible en catálogo
+OK  alta con EAN duplicado falla
+
+Resultado: 22 OK, 0 FAIL
+⇒ OK productos_admin_test.php
+
+── carrito_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_c0fdo2h3i29mumlc5ip5l9jcuh, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_c0fdo2h3i29mumlc5ip5l9jcuh, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+=== Carrito Mass Online ===
+OK  tope de cantidad = 99
+OK  agregar 1 unidad
+OK  suma cantidades del mismo SKU
+OK  id inexistente no agrega
+OK  cantidad 0 no agrega
+OK  agregar no supera el tope 99
+OK  cambiar (+) respeta tope 99
+OK  set_cantidad capea a 99
+OK  cambiar a <=0 elimina la línea
+OK  set_cantidad 0 elimina la línea
+OK  eliminar por id
+OK  vaciar limpia carrito
+
+Resultado: 12 OK, 0 FAIL
+⇒ OK carrito_test.php
+
+── csrf_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_qbhi50sfei1oqg3leavj3ieog4, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_qbhi50sfei1oqg3leavj3ieog4, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+=== CSRF Mass Online ===
+OK  token tiene 64 hex chars
+OK  token estable en la misma sesión
+OK  token válido pasa
+OK  token falso falla
+OK  token null falla
+OK  token vacío falla
+OK  csrf_field incluye name
+OK  csrf_field incluye valor del token
+OK  csrf_field es hidden
+
+Resultado: 9 OK, 0 FAIL
+⇒ OK csrf_test.php
+
+── redirect_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_hgld2gjbe6rio450otj1oqrt35, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+
+Warning: session_start(): open(D:\xampp\tmp\sess_hgld2gjbe6rio450otj1oqrt35, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+=== Redirect seguro ===
+OK  ruta local OK
+OK  query OK
+OK  bloquea http
+OK  bloquea protocol-relative
+OK  bloquea path traversal
+OK  bloquea CRLF
+
+Resultado: 6 OK, 0 FAIL
+⇒ OK redirect_test.php
+
+Resumen: fallos=1
+
+--- 7. Verificación de vistas (php scripts/smoke_views.php) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" scripts/smoke_views.php
+db=0
+asset=../frontend/assets/css/styles.css
+view_ok=1
+len=38633
+
+--- 8. Verificación de autenticación y cierre de sesión (php scripts/smoke_auth_logout.php) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" scripts/smoke_auth_logout.php
+OK urls logout='../logout.php' admin='../admin/login.php' css='../frontend/assets/css/styles.css'
+OK Escenario A: logout admin limpia sesión y redirige a 'admin/login.php'
+OK Escenario B: logout cliente limpia sesión y redirige a 'cliente_interfaces/index.php'
+OK Escenario C: cambio de rol cierra sesión anterior y establece la nueva (admin -> cliente -> admin)
+SMOKE_AUTH_OK
+

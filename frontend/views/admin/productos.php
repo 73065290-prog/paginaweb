@@ -8,136 +8,72 @@ $tituloAdmin = 'Administración de Productos — Mass Admin';
 $adminActivo = 'productos';
 $adminCrumb = 'Administración de Productos';
 
+$productoService = new ProductoService();
+$productoValidator = $productoService->validator();
+
 $formErrores = [];
 $postSticky = [];
 
-// Alta / edición (demo en sesión) — al guardar se cierra el modal
+// Alta / edición delegadas a ProductoService
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : null)) {
         $formErrores = ['Sesión inválida. Recarga la página e intenta de nuevo.'];
-        $accion = '';
     } else {
-    $accion = (string) ($_POST['accion'] ?? '');
+        $accion = (string) ($_POST['accion'] ?? '');
 
-    if ($accion === 'guardar_producto') {
-        $idSave = (int) ($_POST['id'] ?? 0);
-        $resultado = mass_admin_producto_guardar($idSave, $_POST);
-        if ($resultado['ok']) {
-            $sku = 'SKU-' . str_pad((string) $resultado['id'], 5, '0', STR_PAD_LEFT);
-            flash_set('Sincronización exitosa: producto ' . $sku . ' actualizado correctamente en el WMS central.');
-            redirect('productos.php');
+        if ($accion === 'guardar_producto') {
+            $idSave = (int) ($_POST['id'] ?? 0);
+            $resultado = $productoService->guardarAdmin($idSave, $_POST);
+            if ($resultado['ok']) {
+                $sku = 'SKU-' . str_pad((string) $resultado['id'], 5, '0', STR_PAD_LEFT);
+                flash_set('Sincronización exitosa: producto ' . $sku . ' actualizado correctamente en el WMS central.');
+                redirect('productos.php');
+            }
+            $formErrores = $resultado['errores'];
+            $_GET['editar'] = (string) $idSave;
+            $postSticky = $_POST;
         }
-        $formErrores = $resultado['errores'];
-        $_GET['editar'] = (string) $idSave;
-        $postSticky = $_POST;
-    }
 
-    if ($accion === 'crear_producto') {
-        $resultado = mass_admin_producto_crear($_POST);
-        if ($resultado['ok']) {
-            $sku = 'SKU-' . str_pad((string) $resultado['id'], 5, '0', STR_PAD_LEFT);
-            flash_set('Producto ' . $sku . ' creado y sincronizado con el WMS central.');
-            redirect('productos.php');
+        if ($accion === 'crear_producto') {
+            $resultado = $productoService->crearAdmin($_POST);
+            if ($resultado['ok']) {
+                $sku = 'SKU-' . str_pad((string) $resultado['id'], 5, '0', STR_PAD_LEFT);
+                flash_set('Producto ' . $sku . ' creado y sincronizado con el WMS central.');
+                redirect('productos.php');
+            }
+            $formErrores = $resultado['errores'];
+            $_GET['nuevo'] = '1';
+            $postSticky = $_POST;
         }
-        $formErrores = $resultado['errores'];
-        $_GET['nuevo'] = '1';
-        $postSticky = $_POST;
-    }
     }
 }
 
-$q = mb_strtolower(trim((string) ($_GET['q'] ?? '')));
-$filtroAbcRaw = strtoupper(trim((string) ($_GET['abc'] ?? '')));
-$filtroAbc = in_array($filtroAbcRaw, ['A', 'B', 'C'], true) ? $filtroAbcRaw : 'todos';
+$q = trim((string) ($_GET['q'] ?? ''));
+$filtroAbcRaw = (string) ($_GET['abc'] ?? 'todos');
 $filtroStock = (string) ($_GET['stock'] ?? 'todos');
-$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
-$porPagina = 8;
+$paginaReq = max(1, (int) ($_GET['pagina'] ?? 1));
 
-$productos = mass_admin_productos();
-
-if ($q !== '') {
-    $productos = array_values(array_filter(
-        $productos,
-        static function (array $p) use ($q): bool {
-            $hay = mb_strtolower($p['nombre'] . ' ' . $p['sku'] . ' ' . $p['ean'] . ' ' . $p['marca'] . ' ' . $p['categoria']);
-            return str_contains($hay, $q);
-        }
-    ));
-}
-
-if ($filtroAbc !== 'todos') {
-    $productos = array_values(array_filter(
-        $productos,
-        static fn (array $p): bool => ($p['abc'] ?? '') === $filtroAbc
-    ));
-}
-
-if (in_array($filtroStock, ['ok', 'bajo', 'critico'], true)) {
-    $productos = array_values(array_filter(
-        $productos,
-        static fn (array $p): bool => ($p['stockTone'] ?? '') === $filtroStock
-    ));
-}
-
-$total = count($productos);
-$totalPaginas = max(1, (int) ceil($total / $porPagina));
-$pagina = min($pagina, $totalPaginas);
-$slice = array_slice($productos, ($pagina - 1) * $porPagina, $porPagina);
+$listado = $productoService->listarAdminFiltrado($q, $filtroAbcRaw, $filtroStock, $paginaReq, 8);
+$slice = $listado['items'];
+$total = $listado['total'];
+$totalPaginas = $listado['totalPaginas'];
+$pagina = $listado['pagina'];
+$filtroAbc = $listado['filtroAbc'];
 
 $modoNuevo = isset($_GET['nuevo']);
 $editarId = (int) ($_GET['editar'] ?? 0);
-$editando = null;
-$esAlta = false;
-
-if ($modoNuevo) {
-    $esAlta = true;
-    $editando = mass_admin_producto_plantilla_nueva();
-    if ($postSticky !== []) {
-        $editando = mass_admin_producto_aplicar_campos($editando, [
-            'nombre' => (string) ($postSticky['nombre'] ?? ''),
-            'ean' => (string) ($postSticky['ean'] ?? ''),
-            'unidad' => (string) ($postSticky['unidad'] ?? ''),
-            'categoria' => (string) ($postSticky['categoria'] ?? ''),
-            'subcategoria' => (string) ($postSticky['subcategoria'] ?? ''),
-            'descripcion' => (string) ($postSticky['descripcion'] ?? ''),
-            'marca' => (string) ($postSticky['marca'] ?? 'MASS'),
-            'precio' => (float) ($postSticky['precio'] ?? 0),
-            'costo' => (float) ($postSticky['costo'] ?? 0),
-            'puntoReorden' => (int) ($postSticky['puntoReorden'] ?? 0),
-            'capacidadGondola' => (int) ($postSticky['capacidadGondola'] ?? 0),
-            'abc' => (string) ($postSticky['abc'] ?? ''),
-            'activo' => !empty($postSticky['activo']) || !empty($postSticky['activo_ui']),
-        ]);
-        $editando['id'] = 0;
-        $editando['esNuevo'] = true;
-    }
-} elseif ($editarId > 0) {
-    $editando = mass_admin_producto_por_id($editarId);
-    if ($editando && $postSticky !== [] && (int) ($_POST['id'] ?? 0) === $editarId) {
-        $editando = mass_admin_producto_aplicar_campos($editando, [
-            'nombre' => (string) ($postSticky['nombre'] ?? $editando['nombre']),
-            'ean' => (string) ($postSticky['ean'] ?? $editando['ean']),
-            'unidad' => (string) ($postSticky['unidad'] ?? $editando['unidad']),
-            'categoria' => (string) ($postSticky['categoria'] ?? $editando['categoria']),
-            'subcategoria' => (string) ($postSticky['subcategoria'] ?? $editando['subcategoria']),
-            'descripcion' => (string) ($postSticky['descripcion'] ?? $editando['descripcion']),
-            'precio' => (float) ($postSticky['precio'] ?? $editando['precio']),
-            'costo' => (float) ($postSticky['costo'] ?? $editando['costo']),
-            'puntoReorden' => (int) ($postSticky['puntoReorden'] ?? $editando['puntoReorden']),
-            'capacidadGondola' => (int) ($postSticky['capacidadGondola'] ?? $editando['capacidadGondola']),
-            'abc' => (string) ($postSticky['abc'] ?? $editando['abc']),
-            'activo' => !empty($postSticky['activo']) || !empty($postSticky['activo_ui']),
-        ]);
-    }
-}
+$modalState = $productoService->prepararModalAdmin($modoNuevo, $editarId, $postSticky, (int) ($_POST['id'] ?? 0));
+$editando = $modalState['editando'];
+$esAlta = $modalState['esAlta'];
 
 $flashLista = (string) ($flash ?? '');
 
 require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 
 $queryBase = static function (array $extra = []) use ($q, $filtroAbc, $filtroStock): string {
+    $qLower = mb_strtolower($q);
     $params = [
-        'q' => $q !== '' ? $q : null,
+        'q' => $qLower !== '' ? $qLower : null,
         'abc' => in_array($filtroAbc, ['A', 'B', 'C'], true) ? $filtroAbc : null,
         'stock' => in_array($filtroStock, ['ok', 'bajo', 'critico'], true) ? $filtroStock : null,
     ];
@@ -197,13 +133,7 @@ $queryBase = static function (array $extra = []) use ($q, $filtroAbc, $filtroSto
           <tr><td colspan="7"><p class="empty-note">Sin productos para este filtro.</p></td></tr>
         <?php endif; ?>
         <?php foreach ($slice as $p): ?>
-          <?php
-            $stockLabel = match ($p['stockTone']) {
-                'bajo' => 'Stock bajo en góndola',
-                'critico' => 'Quiebre / crítico',
-                default => 'Nivel estable',
-            };
-          ?>
+          <?php $stockLabel = $productoService->etiquetaStockGondola((string) $p['stockTone']); ?>
           <tr>
             <td><input type="checkbox" aria-label="Seleccionar <?= e($p['sku']) ?>" /></td>
             <td>
@@ -254,36 +184,8 @@ $queryBase = static function (array $extra = []) use ($q, $filtroAbc, $filtroSto
     $catPath = trim((string) $p['categoria'] . ' > ' . (string) $p['subcategoria'], ' >');
     $cerrarUrl = $queryBase(['editar' => null, 'nuevo' => null, 'pagina' => $pagina]);
     $tituloModal = $esAlta ? 'Agregar producto' : 'Editar producto';
-    $inv = static function (string $campo) use ($formErrores, $p): string {
-        if ($formErrores === []) {
-            return '';
-        }
-        $v = $p[$campo] ?? '';
-        if ($campo === 'ean' && strlen(preg_replace('/\D+/', '', (string) $v) ?? '') !== 13) {
-            return ' is-invalid';
-        }
-        if (in_array($campo, ['precio', 'costo'], true) && (float) $v <= 0) {
-            return ' is-invalid';
-        }
-        if (in_array($campo, ['puntoReorden', 'capacidadGondola'], true) && (int) $v < 1) {
-            return ' is-invalid';
-        }
-        if ($campo === 'descripcion' && mb_strlen(trim((string) $v)) < 10) {
-            return ' is-invalid';
-        }
-        if ($campo === 'nombre' && mb_strlen(trim((string) $v)) < 3) {
-            return ' is-invalid';
-        }
-        if (in_array($campo, ['unidad', 'categoria', 'subcategoria'], true) && trim((string) $v) === '') {
-            return ' is-invalid';
-        }
-        if ($campo === 'precio' && (float) ($p['precio'] ?? 0) > 0 && (float) ($p['costo'] ?? 0) > 0
-            && (float) $p['precio'] <= (float) $p['costo']) {
-            return ' is-invalid';
-        }
-        return '';
-    };
-    $abcInvalido = $formErrores !== [] && !in_array((string) ($p['abc'] ?? ''), ['A', 'B', 'C'], true);
+    $inv = static fn (string $campo): string => $productoValidator->claseCampoInvalido($campo, $p, $formErrores);
+    $abcInvalido = $productoValidator->esAbcInvalido($p, $formErrores);
   ?>
   <div class="prod-modal-backdrop" id="prodModal" role="dialog" aria-modal="true" aria-labelledby="prodModalTitle">
     <div class="prod-modal">
@@ -464,4 +366,3 @@ $queryBase = static function (array $extra = []) use ($q, $filtroAbc, $filtroSto
 <?php endif; ?>
 
 <?php require MASS_ROOT . '/frontend/views/admin/partials/footer.php'; ?>
-

@@ -12,14 +12,18 @@ DELETE FROM cupones;
 DELETE FROM usuarios;
 DELETE FROM roles;
 SET FOREIGN_KEY_CHECKS = 1;
+ALTER TABLE usuarios AUTO_INCREMENT = 1;
+ALTER TABLE inventario AUTO_INCREMENT = 1;
+ALTER TABLE pedidos AUTO_INCREMENT = 1;
+ALTER TABLE pedido_detalles AUTO_INCREMENT = 1;
 
 INSERT INTO roles (id, nombre) VALUES (1, 'admin'), (2, 'cliente');
 
-INSERT INTO usuarios (usuario, password_hash, rol_id, nombre, cargo) VALUES
-('admin.operaciones@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 1, 'Gonzalo Méndez', 'Administrador de Tienda'),
-('admin', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 1, 'Gonzalo Méndez', 'Administrador WMS'),
-('proveedor@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'Ana Proveedor', 'Cliente / Proveedor Pedidos'),
-('cliente', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'Cliente Demo', 'Portal Pedidos');
+INSERT INTO usuarios (id, usuario, password_hash, rol_id, nombre, cargo) VALUES
+(1, 'admin.operaciones@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 1, 'Gonzalo Méndez', 'Administrador de Tienda'),
+(2, 'admin', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 1, 'Gonzalo Méndez', 'Administrador WMS'),
+(3, 'proveedor@mass.pe', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'Ana Proveedor', 'Cliente / Proveedor Pedidos'),
+(4, 'cliente', '$2y$10$MWrE46ay48vQzn7hxxu7bekEQyTK8k1DMfvBt9L3WrBtkmaiQPOVG', 2, 'Cliente Demo', 'Portal Pedidos');
 
 INSERT INTO categorias (id, nombre, badge, badge_tone, count_hint, cat_filtro, img) VALUES
 ('frutas', 'Frutas y Verduras', 'Diario', '', 85, 'Frutas', 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&h=400&fit=crop'),
@@ -57,20 +61,20 @@ INSERT INTO productos (id, nombre, marca, categoria, subcategoria, unidad, descr
 
 ALTER TABLE productos AUTO_INCREMENT = 100;
 
-INSERT INTO inventario (producto_id, tienda_id, stock_piso, stock_almacen) VALUES
-(1, 'magdalena', 42, 24),
-(2, 'magdalena', 42, 24),
-(3, 'magdalena', 42, 24),
-(4, 'magdalena', 8, 4),
-(5, 'magdalena', 42, 24),
-(6, 'magdalena', 42, 24),
-(7, 'magdalena', 42, 24),
-(8, 'magdalena', 42, 24),
-(9, 'magdalena', 42, 24),
-(10, 'magdalena', 42, 24),
-(11, 'magdalena', 42, 24),
-(12, 'magdalena', 42, 24),
-(13, 'magdalena', 42, 24),
-(14, 'magdalena', 42, 24),
-(15, 'magdalena', 8, 4);
+INSERT INTO inventario (id, producto_id, tienda_id, stock_piso, stock_almacen) VALUES
+(1, 1, 'magdalena', 42, 24),
+(2, 2, 'magdalena', 42, 24),
+(3, 3, 'magdalena', 42, 24),
+(4, 4, 'magdalena', 8, 4),
+(5, 5, 'magdalena', 42, 24),
+(6, 6, 'magdalena', 42, 24),
+(7, 7, 'magdalena', 42, 24),
+(8, 8, 'magdalena', 42, 24),
+(9, 9, 'magdalena', 42, 24),
+(10, 10, 'magdalena', 42, 24),
+(11, 11, 'magdalena', 42, 24),
+(12, 12, 'magdalena', 42, 24),
+(13, 13, 'magdalena', 42, 24),
+(14, 14, 'magdalena', 42, 24),
+(15, 15, 'magdalena', 8, 4);
 

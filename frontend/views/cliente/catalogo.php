@@ -80,7 +80,7 @@ require MASS_ROOT . '/frontend/views/layouts/header.php';
 
     <h1 class="catalog-title">Catálogo General de Productos</h1>
 
-    <button class="filters-toggle" id="filtersToggle" type="button">☰ Mostrar filtros</button>
+    <button class="filters-toggle" id="filtersToggle" type="button" aria-expanded="false" aria-controls="filtersPanel">☰ Mostrar filtros</button>
 
     <div class="catalog-layout">
       <aside class="filters" id="filtersPanel" aria-label="Filtros">
@@ -235,11 +235,11 @@ require MASS_ROOT . '/frontend/views/layouts/header.php';
         </div>
 
         <nav class="pagination" aria-label="Paginación">
-          <a class="chip" style="min-width:40px;justify-content:center;<?= $pagina <= 1 ? 'opacity:.4;pointer-events:none' : '' ?>" href="<?= e(catalogo_query(['pagina' => max(1, $pagina - 1)])) ?>">‹</a>
+          <a class="chip" style="min-width:40px;justify-content:center;<?= $pagina <= 1 ? 'opacity:.4;pointer-events:none' : '' ?>" href="<?= e(catalogo_query(['pagina' => max(1, $pagina - 1)])) ?>" aria-label="Página anterior" <?= $pagina <= 1 ? 'aria-disabled="true" tabindex="-1"' : '' ?>>‹</a>
           <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a class="chip <?= $pagina === $i ? 'active' : '' ?>" style="min-width:40px;justify-content:center" href="<?= e(catalogo_query(['pagina' => $i])) ?>"><?= $i ?></a>
+            <a class="chip <?= $pagina === $i ? 'active' : '' ?>" style="min-width:40px;justify-content:center" href="<?= e(catalogo_query(['pagina' => $i])) ?>" aria-label="Página <?= $i ?>" <?= $pagina === $i ? 'aria-current="page"' : '' ?>><?= $i ?></a>
           <?php endfor; ?>
-          <a class="chip" style="min-width:40px;justify-content:center;<?= $pagina >= $totalPages ? 'opacity:.4;pointer-events:none' : '' ?>" href="<?= e(catalogo_query(['pagina' => min($totalPages, $pagina + 1)])) ?>">›</a>
+          <a class="chip" style="min-width:40px;justify-content:center;<?= $pagina >= $totalPages ? 'opacity:.4;pointer-events:none' : '' ?>" href="<?= e(catalogo_query(['pagina' => min($totalPages, $pagina + 1)])) ?>" aria-label="Página siguiente" <?= $pagina >= $totalPages ? 'aria-disabled="true" tabindex="-1"' : '' ?>>›</a>
         </nav>
       </div>
     </div>

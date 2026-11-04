@@ -15,15 +15,17 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
             <directory>includes</directory>
+            <directory>backend</directory>
         </include>
         <exclude>
-            <directory>includes/admin</directory>
-            <directory>includes/components</directory>
-            <directory>includes/layouts</directory>
+            <directory>backend/config</directory>
         </exclude>
     </source>
     <php>

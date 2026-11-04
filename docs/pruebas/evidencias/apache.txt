@@ -1,0 +1,78 @@
+PROMPT 19 — Verificación de protecciones Apache
+Intent: INT-004 | Bolt: INT-004-BOLT-011 | HU: INT-004-HU-19
+Modelo IA: Grok 4.7
+Fecha: 2026-11-02 23:18 (hora local UTC-5; Apache fecha las cabeceras en GMT, 03 Nov 2026 04:18)
+Responsable: cursor12310-sys
+
+Entorno
+- Apache/2.4.58 (Win64) PHP/8.2.12, DocumentRoot C:/xampp/htdocs, AllowOverride All
+- El proyecto se publicó con un enlace de directorio:
+  C:\xampp\htdocs\paginaweb -> c:\Users\LENOVO\Downloads\paginaweb (2)\paginaweb
+- Base usada: http://127.0.0.1/paginaweb
+- No se guardan cuerpos de respuesta ni credenciales.
+
+Comprobación inicial (antes de tocar reglas)
+403 http://127.0.0.1/paginaweb/database/schema.sql
+403 http://127.0.0.1/paginaweb/backend/config/database.local.php
+403 http://127.0.0.1/paginaweb/backend/bootstrap.php
+403 http://127.0.0.1/paginaweb/tests/
+200 http://127.0.0.1/paginaweb/tests/auth_test.php
+El directorio /tests/ ya devolvía 403 por Options -Indexes, pero cada script suelto respondía 200.
+Se añadió en .htaccess de la raíz una regla que deniega ^tests($|/).
+backend/.htaccess y database/.htaccess ya denegaban el acceso y no se modificaron.
+backend/public/index.php sigue en 200 (punto de entrada público).
+
+php scripts/verificar_http.php
+CONTROL http://127.0.0.1/paginaweb/admin/login.php 200
+OK  403 http://127.0.0.1/paginaweb/database/schema.sql
+OK  403 http://127.0.0.1/paginaweb/backend/config/database.local.php
+OK  403 http://127.0.0.1/paginaweb/backend/bootstrap.php
+OK  403 http://127.0.0.1/paginaweb/tests/
+OK  403 http://127.0.0.1/paginaweb/tests/auth_test.php
+RESULTADO fallos=0
+Código de salida: 0
+
+Controles de que la tienda sigue publicada
+200 http://127.0.0.1/paginaweb/admin/login.php
+200 http://127.0.0.1/paginaweb/cliente_interfaces/index.php
+200 http://127.0.0.1/paginaweb/backend/public/index.php
+
+Cabeceras GET (cuerpo descartado; sin Set-Cookie)
+
+curl -s -D - -o NUL http://127.0.0.1/paginaweb/database/schema.sql
+HTTP/1.1 403 Forbidden
+Server: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+Content-Type: text/html; charset=iso-8859-1
+
+curl -s -D - -o NUL http://127.0.0.1/paginaweb/backend/config/database.local.php
+HTTP/1.1 403 Forbidden
+Server: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+Content-Type: text/html; charset=iso-8859-1
+
+curl -s -D - -o NUL http://127.0.0.1/paginaweb/backend/bootstrap.php
+HTTP/1.1 403 Forbidden
+Server: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+Content-Type: text/html; charset=iso-8859-1
+
+curl -s -D - -o NUL http://127.0.0.1/paginaweb/tests/
+HTTP/1.1 403 Forbidden
+Server: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+Content-Type: text/html; charset=iso-8859-1
+
+curl -s -D - -o NUL http://127.0.0.1/paginaweb/tests/auth_test.php
+HTTP/1.1 403 Forbidden
+Server: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+Content-Type: text/html; charset=iso-8859-1
+
+curl -s -o NUL -w "%{http_code}" http://127.0.0.1/paginaweb/admin/login.php
+200
+
+Rutas en la raíz del dominio (el DocumentRoot no es el proyecto)
+404 http://127.0.0.1/database/schema.sql
+404 http://127.0.0.1/backend/bootstrap.php
+404 http://127.0.0.1/tests/
+
+Pendiente
+Git no está instalado: no se creó rama ni el commit
+feat(INT-004-BOLT-011): denegar tests por HTTP y verificar protecciones Apache
+No se hizo push.

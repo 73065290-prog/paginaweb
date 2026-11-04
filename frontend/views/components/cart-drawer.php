@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
-$items = carrito_items();
+$carritoService = new CarritoService();
+$items = $carritoService->items();
 ?>
 <div class="overlay" id="overlay"></div>
-<aside class="cart-drawer" id="cartDrawer" aria-label="Carrito">
+<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Carrito de compras" aria-hidden="true" inert>
   <div class="cart-head">
     <h3>Tu carrito</h3>
-    <button class="close-btn" id="closeCart" type="button" aria-label="Cerrar">×</button>
+    <button class="close-btn" id="closeCart" type="button" aria-label="Cerrar carrito">×</button>
   </div>
   <div class="cart-items" id="cartItems">
     <?php if (!$items): ?>
@@ -22,19 +23,21 @@ $items = carrito_items();
             <p><?= e(dinero((float) $p['precio'])) ?> c/u · x<?= (int) $item['cantidad'] ?></p>
             <div class="qty" style="margin-top:0.3rem">
               <form method="post" action="carrito.php" style="display:inline">
+                <?= csrf_field() ?>
                 <input type="hidden" name="accion" value="cambiar" />
                 <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
                 <input type="hidden" name="delta" value="-1" />
                 <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>" />
-                <button type="submit">−</button>
+                <button type="submit" aria-label="Disminuir cantidad de <?= e($p['nombre']) ?>">−</button>
               </form>
               <span><?= (int) $item['cantidad'] ?></span>
               <form method="post" action="carrito.php" style="display:inline">
+                <?= csrf_field() ?>
                 <input type="hidden" name="accion" value="cambiar" />
                 <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
                 <input type="hidden" name="delta" value="1" />
                 <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>" />
-                <button type="submit">+</button>
+                <button type="submit" aria-label="Aumentar cantidad de <?= e($p['nombre']) ?>">+</button>
               </form>
             </div>
           </div>
@@ -46,7 +49,7 @@ $items = carrito_items();
   <div class="cart-foot">
     <div class="cart-total">
       <span>Total</span>
-      <span id="cartTotal"><?= e(dinero(carrito_total_monto())) ?></span>
+      <span id="cartTotal"><?= e(dinero($carritoService->totalMonto())) ?></span>
     </div>
     <a class="btn btn-naranja" href="pedido.php" style="width: 100%; display: inline-block; text-align: center; text-decoration: none;">
       Ir al checkout

@@ -1,0 +1,21 @@
+Protección de main — Prompt 25
+Fecha: 2026-11-03
+
+Estado aplicado por este prompt: NINGUNO.
+No se afirma que la protección haya quedado activa.
+
+Comprobación:
+  GET https://api.github.com/repos/73065290-prog/paginaweb/branches/main/protection
+  Resultado: 401 Unauthorized.
+
+No hay permiso verificado para leer ni escribir las reglas. El prompt prohíbe publicar en GitHub sin autorización expresa. No se envió ningún cambio de configuración.
+
+Reglas que siguen pendientes, para cuando haya autorización y permisos:
+  - exigir Pull Request antes de integrar en main
+  - exigir al menos una revisión
+  - exigir en verde el workflow de CI
+  - impedir push directo a main
+
+Límite adicional: .github/workflows/ci.yml no está en el commit de main local (3a587981005d544cb18118650de64d0f5bca466e) y no se publicó. Aunque la protección se activara hoy, el check de CI todavía no existe en GitHub.
+
+Captura de la regla activa: pendiente. No hay ejecución ni pantalla que mostrar.

@@ -1,6 +1,12 @@
 DirectoryIndex index.php
 Options -Indexes
 
+# El listado de /tests/ ya cae por Options -Indexes, pero cada .php respondía 200.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^tests($|/) - [F,L]
+</IfModule>
+
 # Cabeceras básicas de seguridad (Apache)
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"

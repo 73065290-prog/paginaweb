@@ -1,0 +1,137 @@
+PROMPT 21 — Cobertura PHPUnit de backend/
+Intent: INT-001
+Bolts: INT-001-BOLT-002, G10 y G11
+HU: INT-001-HU-21
+Fecha local del equipo: 2026-11-02 23:51
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+
+El log de tests/run_coverage.php imprime Fecha: 2026-11-03 05:51:34
+porque date() de este PHP no usa la zona local. El archivo junit.xml
+tiene hora de archivo 2026-11-02 23:51:34.
+
+1. Entorno
+- PHP 8.2.12 (C:\xampp\php\php.exe)
+- PHPUnit 11.5.0 (vendor\bin\phpunit)
+- tests/bootstrap.php existe, es legible y PHPUnit lo abre.
+  No reapareció "Cannot open bootstrap script tests/bootstrap.php".
+- composer no está en el PATH. where.exe composer no lo encuentra.
+  No se descargó Composer ni se agregaron paquetes.
+  vendor\bin\phpunit ya estaba instalado.
+- phpdbg.exe existe, pero PHPUnit 11 solo acepta PCOV o Xdebug.
+  Una ejecución con phpdbg respondió: "No code coverage driver available".
+- No hay php_pcov.dll ni php_xdebug.dll en C:\xampp\php\ext.
+  No se instaló ninguna extensión.
+
+2. Comandos
+composer install
+  Impedimento: composer no está instalado en el equipo.
+  Equivalente no ejecutado. vendor ya contiene PHPUnit 11.5.0.
+
+composer test
+  Impedimento: el comando composer no existe.
+  Equivalente: C:\xampp\php\php.exe vendor\bin\phpunit
+  OK (130 tests, 770 assertions)
+  Time: 00:03.921, Memory: 12.00 MB
+  Exit code: 0
+  errors=0 failures=0 skipped=0
+
+php tests/run_all.php
+  Primera ejecución, sin MASS_USE_DB=0 en los scripts CLI:
+  exit 255 en tests/productos_admin_test.php
+  PDOException 1062 Duplicate entry '7756987456123' for key 'uq_productos_ean'
+  Esa corrida escribió el producto id=1 de mass_online
+  (nombre "Aceite Primor Clásico 900ml", ean 7756123489123).
+  Se revirtió esa fila a los valores de database/seed.sql.
+  El EAN 7756987456123 ya existía; no se borró.
+  Después se forzó MASS_USE_DB=0 en tests/run_all.php y
+  tests/productos_admin_test.php para no volver a escribir en MySQL.
+  Segunda ejecución: Resumen fallos=0. Exit code 0.
+  PHPUnit dentro de run_all: OK (130 tests, 770 assertions).
+
+php scripts/smoke_views.php
+  SMOKE_ROUTES_OK
+  Exit code: 0
+
+php scripts/smoke_auth_logout.php
+  SMOKE_AUTH_OK
+  Exit code: 0
+
+composer test:coverage
+  Impedimento del binario composer. Equivalente: php tests/run_coverage.php
+  PHPUnit: 130 tests, 770 assertions, y 1 warning:
+  "No code coverage driver available"
+  Aviso: no se puede cargar la extensión pcov.
+  Exit code: 1
+  Clover: no generado.
+  Umbral: no aplicado. tests/umbral_cobertura.php devuelve null.
+  No se escribió un porcentaje para hacer pasar el comando.
+
+3. Casos P01-P32
+Siguen en la suite y la ejecución de 130 tests terminó sin fallos.
+P01-P02 DineroYFormatoTest
+P03-P10 PedidoReglasTest
+P11-P15 AuthReglasTest
+P16-P20 ProductoAdminValidacionTest
+P21-P23 CarritoSesionTest
+P24-P25 AuthSesionTest
+P26-P27 PedidoConfirmacionTest
+P28-P30 ProductoAdminPersistenciaTest
+P31-P32 CatalogoYSqliteLabTest
+No se modificaron esos métodos.
+
+4. Casos nuevos
+tests/Unit/ServiciosCoberturaTest.php
+8 tests, 111 assertions, incluidos en los 130.
+Cubren, con MASS_USE_DB=0 y sin escribir en MySQL:
+- ProductoService: catálogo, filtro con acentos, comillas, alta, edición,
+  modal, etiquetas.
+- InventarioService: stock sin conexión, reorden crítico, filtro y etiquetas.
+- AuthService: rol, destinos y cierre al cambiar de rol.
+- CarritoService: tope 99.
+- PedidoService: carrito vacío y código MASS-.
+- CuponService: cupón vacío y código con espacios.
+Los repositorios ya tenían pruebas de integración (CRUD, comillas,
+consultas preparadas y ausencia de conexión) en tests/Integration.
+No se duplicaron.
+
+5. phpunit.xml
+source incluye includes/ y backend/.
+Exclusión única: backend/config (configuración y credenciales, no lógica de negocio).
+Se quitó la exclusión de backend/public: index.php es lógica de la API, no una vista.
+Las pruebas no entran en source.
+
+6. Cobertura
+Global: no disponible.
+backend/: no disponible.
+Motivo: sin PCOV ni Xdebug no hay clover.xml de esta ejecución.
+El clover antiguo (rutas D:\xampp\..., generado 2026-10-27) se eliminó
+al iniciar run_coverage.php para no usarlo como resultado.
+
+7. Umbral
+Valor configurado: null (tests/umbral_cobertura.php).
+Cumplimiento: no evaluado. composer test:coverage / php tests/run_coverage.php
+termina en error si no hay medición. No se bajó ningún número.
+
+8. Reportes
+- junit.xml de esta ejecución (130 tests, 0 fallos):
+  docs/pruebas/evidencias/junit.xml
+  copia: PROMTS/evidencias/21-cobertura-phpunit-backend/junit.xml
+- clover.xml: no generado.
+- Consola:
+  PROMTS/evidencias/21-cobertura-phpunit-backend/run_all.txt
+  PROMTS/evidencias/21-cobertura-phpunit-backend/smoke_views.txt
+  PROMTS/evidencias/21-cobertura-phpunit-backend/smoke_auth_logout.txt
+  PROMTS/evidencias/21-cobertura-phpunit-backend/test_coverage.txt
+  docs/pruebas/evidencias/coverage/consola.txt
+
+9. Git
+git no está instalado. No hay rama ni commit. No hubo push.
+Mensaje pendiente:
+test(INT-001-BOLT-002): cubrir servicios de backend y fijar el comando de cobertura
+
+10. Bolts
+INT-001-BOLT-002: los casos P01-P20 se ejecutaron y pasaron. La parte de
+cobertura medible de backend no está cerrada.
+G10 y G11: no aparecen definidos en PROMTS ni en docs. No se declaran
+completados. La cobertura porcentual no pudo verificarse.

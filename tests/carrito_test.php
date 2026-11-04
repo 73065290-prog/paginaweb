@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Pruebas de límites y operaciones del carrito.
+ * Pruebas de límites y operaciones del carrito (CarritoService + delegadores).
  *   php tests/carrito_test.php
  */
 
@@ -32,54 +32,59 @@ function assert_true(bool $cond, string $msg): void
 
 echo "=== Carrito Mass Online ===\n";
 
-assert_true(carrito_cantidad_maxima() === 99, 'tope de cantidad = 99');
+$carritoService = new CarritoService();
 
-carrito_agregar(1, 1);
-assert_true(carrito_total_unidades() === 1, 'agregar 1 unidad');
+assert_true(
+    $carritoService->cantidadMaxima() === 99 && carrito_cantidad_maxima() === 99,
+    'tope de cantidad = 99'
+);
+
+$carritoService->agregar(1, 1);
+assert_true($carritoService->totalUnidades() === 1 && carrito_total_unidades() === 1, 'agregar 1 unidad');
 
 carrito_agregar(1, 5);
-assert_true(carrito_total_unidades() === 6, 'suma cantidades del mismo SKU');
+assert_true($carritoService->totalUnidades() === 6, 'suma cantidades del mismo SKU');
 
-carrito_agregar(9999, 1);
-assert_true(carrito_total_unidades() === 6, 'id inexistente no agrega');
+$carritoService->agregar(9999, 1);
+assert_true($carritoService->totalUnidades() === 6, 'id inexistente no agrega');
 
-carrito_agregar(1, 0);
-assert_true(carrito_total_unidades() === 6, 'cantidad 0 no agrega');
+$carritoService->agregar(1, 0);
+assert_true($carritoService->totalUnidades() === 6, 'cantidad 0 no agrega');
 
 $_SESSION['carrito'] = [['id' => 1, 'cantidad' => 95]];
-carrito_agregar(1, 10);
+$carritoService->agregar(1, 10);
 assert_true(
-    (int) carrito_items()[0]['cantidad'] === 99,
+    (int) $carritoService->items()[0]['cantidad'] === 99,
     'agregar no supera el tope 99'
 );
 
 $_SESSION['carrito'] = [['id' => 1, 'cantidad' => 98]];
-carrito_cambiar(1, 5);
+$carritoService->cambiar(1, 5);
 assert_true(
     (int) carrito_items()[0]['cantidad'] === 99,
     'cambiar (+) respeta tope 99'
 );
 
-carrito_set_cantidad(1, 150);
+$carritoService->setCantidad(1, 150);
 assert_true(
-    (int) carrito_items()[0]['cantidad'] === 99,
+    (int) $carritoService->items()[0]['cantidad'] === 99,
     'set_cantidad capea a 99'
 );
 
-carrito_cambiar(1, -200);
-assert_true(carrito_items() === [], 'cambiar a <=0 elimina la línea');
+$carritoService->cambiar(1, -200);
+assert_true($carritoService->items() === [], 'cambiar a <=0 elimina la línea');
 
-carrito_agregar(2, 2);
-carrito_set_cantidad(2, 0);
+$carritoService->agregar(2, 2);
+$carritoService->setCantidad(2, 0);
 assert_true(carrito_items() === [], 'set_cantidad 0 elimina la línea');
 
-carrito_agregar(1, 3);
-carrito_agregar(2, 1);
-carrito_eliminar(1);
-assert_true(count(carrito_items()) === 1 && (int) carrito_items()[0]['id'] === 2, 'eliminar por id');
+$carritoService->agregar(1, 3);
+$carritoService->agregar(2, 1);
+$carritoService->eliminar(1);
+assert_true(count($carritoService->items()) === 1 && (int) $carritoService->items()[0]['id'] === 2, 'eliminar por id');
 
-carrito_vaciar();
-assert_true(carrito_items() === [], 'vaciar limpia carrito');
+$carritoService->vaciar();
+assert_true($carritoService->items() === [] && carrito_items() === [], 'vaciar limpia carrito');
 
 echo "\nResultado: {$passed} OK, {$failed} FAIL\n";
 exit($failed > 0 ? 1 : 0);

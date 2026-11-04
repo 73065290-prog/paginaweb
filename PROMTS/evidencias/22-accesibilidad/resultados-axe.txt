@@ -1,0 +1,65 @@
+Validación de accesibilidad — resultados de axe-core
+Fecha local: 2026-11-03, aproximadamente 00:05 a 00:11
+Navegador: pestaña de Cursor (Chromium)
+axe-core: 4.10.3, cargado en la página desde cdnjs solo para la prueba. No se agregó como dependencia del proyecto.
+Lighthouse: no ejecutado. node, npx y lighthouse no están en PATH (where.exe terminó sin encontrarlos).
+Lector de pantalla: no ejecutado.
+
+Conteo: nodos por impacto (critical, serious, moderate, minor). En estas corridas no hubo hallazgos minor.
+
+1. Catálogo inicial, cajón cerrado, antes de las correcciones de esta sesión
+URL: http://127.0.0.1/paginaweb/cliente_interfaces/catalogo.php
+critical 0, serious 11, moderate 2, minor 0
+- color-contrast, serious, 11 nodos (incluye .btn-buscar, enlace de ofertas y migas)
+- heading-order, moderate, 1 nodo (h3 de Filtros)
+- region, moderate, 1 nodo (.topbar)
+Campos sin etiqueta: 0. Identificadores duplicados: 0.
+
+2. Catálogo final, cajón cerrado
+critical 0, serious 9, moderate 1, minor 0
+- color-contrast, serious, 9 nodos, primer objetivo .btn-buscar
+- heading-order, moderate, 1 nodo, h3 de Filtros
+Campos sin etiqueta: 0. Identificadores duplicados: 0.
+Cajón cerrado: inert=true, aria-hidden=true, aria-expanded=false en el botón de abrir.
+
+3. Carrito y pedido, paso 1
+URL solicitada: http://127.0.0.1/paginaweb/cliente_interfaces/carrito.php
+URL real: http://127.0.0.1/paginaweb/cliente_interfaces/pedido.php (la ruta del carrito abre esta página)
+Título: Carrito & Validación — Mass Online
+Antes de corregir el landmark anidado y la región superior:
+critical 0, serious 14, moderate 3
+- color-contrast 14, heading-order 1, landmark-complementary-is-top-level 1 (.cart-upsell), region 1 (.topbar)
+Después:
+critical 0, serious 14, moderate 1, minor 0
+- color-contrast, serious, 14 nodos
+- heading-order, moderate, 1 nodo (h4 del pie)
+Identificadores duplicados: 0. Campos sin etiqueta: 0.
+Líneas: cart-sel-1 y cart-qty-1; cart-sel-2 y cart-qty-2.
+Texto de cantidad de la segunda línea: "Cantidad de Arroz Extra Grano Largo: 1".
+
+4. Pedido, paso 2
+URL: http://127.0.0.1/paginaweb/cliente_interfaces/pedido.php?paso=2
+Título: Entrega o Retiro — Mass Online
+critical 0, serious 7, moderate 1, minor 0
+- color-contrast, serious, 7 nodos
+- heading-order, moderate, 1 nodo (h4 del pie)
+Campos sin etiqueta: 0. Identificadores duplicados: 0.
+
+5. Administración
+URL: http://127.0.0.1/paginaweb/admin/index.php
+Título: Dashboard — Mass Admin
+Antes de quitar role=tablist y de usar main:
+critical 1, serious 17, moderate 7
+- aria-required-children, critical, 1 nodo (.filters-inline con role=tablist y enlaces que no son pestañas)
+- color-contrast, serious, 17
+- heading-order, landmark-no-duplicate-banner, landmark-one-main, landmark-unique, region
+Después:
+critical 0, serious 17, moderate 1, minor 0
+- color-contrast, serious, 17 nodos, primer objetivo .admin-brand > small
+- heading-order, moderate, 1 nodo (h3 "Ventas del día", antes de los h2)
+Identificadores duplicados: 0. Controles de formulario sin nombre: 0.
+Búsqueda: "Buscar por producto, SKU, EAN o nombre".
+Botón de cuenta: "Menú de cuenta Gonzalo Méndez", colapsado.
+Filtro activo "Todos": aria-current=page.
+
+Los hallazgos que quedan dependen de color o del nivel de encabezado. Corregirlos cambia el diseño o exige CSS, y el CSS está fuera del alcance de este prompt.

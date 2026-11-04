@@ -18,11 +18,11 @@
 | --- | --- |
 | **Nombre** | Mass Online — Tiendas Mass (`paginaweb`) |
 | **Objetivo del software** | Tienda en línea y panel admin WMS demo: catálogo, carrito, checkout retiro/express, login SGC, administración de productos. |
-| **Stack** | PHP 8.2 nativo, HTML/CSS/JS, sesiones PHP, Apache (XAMPP). Sin MySQL de producción. |
-| **Persistencia demo** | `$_SESSION` (carrito, auth, overrides de productos). Laboratorio de integración: SQLite `:memory:` solo en pruebas (P32). |
+| **Stack** | PHP 8.2 nativo, HTML/CSS/JS, Apache (XAMPP), PDO contra MySQL/MariaDB cuando el modo es `mysql`. |
+| **Persistencia** | `backend/Database.php`. Modo `mysql`: PDO conectado y los datos van a la base. Modo `demo`: sesión y datos de `includes/data.php`, sin escribir en MySQL (`MASS_USE_DB=0`/`false`, o configuración con `enabled` false). Modo `error`: se pidió MySQL y la conexión falló; no se cambia a demo. P32 sigue siendo SQLite `:memory:` y no prueba `mass_online`. |
 | **Módulos bajo prueba** | Storefront (`cliente_interfaces/`), carrito/pedido/confirmación, auth admin/cliente, dashboard admin, alta/edición de productos con reglas de negocio. |
 | **Entorno** | Windows + XAMPP (`http://localhost/paginaweb/`), CLI PHP 8.2, Composer, PHPUnit 11, PCOV. |
-| **Herramientas de prueba** | PHPUnit 11 (unitarias/feature), PCOV (Clover/HTML), JUnit XML, SQLite lab, scripts `composer test` / `composer test:coverage`. |
+| **Herramientas de prueba** | PHPUnit 11 (el lock de este árbol pide 11.5.50). PCOV generó Clover en la corrida de `D:\xampp` del 2026-10-28. En este XAMPP (`C:\xampp`) no está instalado y no hay Clover nuevo. |
 
 ### 1.1 Objetivos de las pruebas
 
@@ -39,7 +39,7 @@
 | Código en `includes/` estable y accesible vía XAMPP | 32/32 casos ejecutados con veredicto |
 | Composer + PHPUnit instalados (`composer install`) | 0 fallos bloqueantes en lógica crítica |
 | Datos demo disponibles (`admin`/`cliente` · `123456`) | Evidencias en `docs/pruebas/evidencias/` |
-| Extensión `pdo_sqlite` disponible (P32) | Cobertura Clover generada para Sonar |
+| Extensión `pdo_sqlite` disponible (P32) | Cobertura Clover generada para Sonar. En este equipo, el 2026-11-03, ese criterio no se cumple: no hay driver ni `docs/pruebas/evidencias/coverage/clover.xml` |
 
 ---
 
@@ -112,7 +112,7 @@
 | Acceso admin con rol/credencial mala | Fuga de panel | P11–P15, P24–P25 |
 | Sesión contaminada entre pruebas | Falsos positivos/negativos | `TestCase::setUp()` limpia `$_SESSION` |
 | Confundir filtro de catálogo sin flags de stock | Suite en rojo por mal contrato | P31 documenta flags `stock_ok`/`stock_bajo` |
-| No poder evidenciar “BD” sin MySQL | Brecha académica de integración | P32 con SQLite `:memory:` |
+| Tomar el laboratorio SQLite por la base de la aplicación | P32 no demuestra `mass_online` | P32 permanece aislado. La aplicación usa MySQL/MariaDB con PDO cuando `Database::modo()` es `mysql`. Hay pruebas en `tests/Integration` |
 
 ---
 
@@ -181,8 +181,8 @@ Leyenda de **prioridad**: A = Alta · M = Media · B = Baja.
 | Cliente demo | usuario `cliente` · password `123456` |
 | Catálogo | `mass_productos()` en `includes/data.php` |
 | Aislamiento | Cada test reinicia `$_SESSION` en `Tests\TestCase::setUp()` |
-| BD app | No aplica (sin MySQL) |
-| BD lab | SQLite `:memory:` (solo P32) |
+| BD app | MySQL/MariaDB `mass_online` vía PDO si el modo es `mysql`. En demo no se escribe ahí. `phpunit.xml` pone `MASS_USE_DB=0` |
+| BD lab | SQLite `:memory:` (solo P32). No reemplaza a MySQL |
 
 ### Comandos de ejecución previstos
 

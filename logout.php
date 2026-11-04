@@ -3,16 +3,11 @@ declare(strict_types=1);
 
 /**
  * Logout unificado (raíz).
- * Redirige al login admin o a la tienda según el rol activo.
+ * Delega el cierre de sesión y destino en AuthController.
  */
 require_once __DIR__ . '/includes/init.php';
 
-$eraAdmin = auth_es_admin();
-auth_logout();
-flash_set('Sesión cerrada correctamente');
+$authController = new AuthController();
+$resLogout = $authController->logout();
 
-if ($eraAdmin) {
-    redirect('admin/login.php');
-}
-
-redirect('cliente_interfaces/index.php');
+redirect((string) $resLogout['redirect']);

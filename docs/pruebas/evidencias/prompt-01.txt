@@ -1,0 +1,378 @@
+=== Evidencia de verificacion PROMPT 01 (INT-003) ===
+Fecha: 2026-11-01
+Modelo IA: Gemini 4 Argon
+
+--- 1. Verificacion estatica y render de IDs unicos (verify_01.php) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" "C:\Users\GIGABYTE\.gemini\antigravity\brain\17a738c0-7821-4137-9a0d-d8e984c1a547\scratch/verify_01.php"
+assets/js/admin.js bare_parse=0 md5=669e49c99621b32a0930aa4e4cc10028
+frontend/assets/js/admin.js bare_parse=0 md5=669e49c99621b32a0930aa4e4cc10028
+No syntax errors detected in frontend/views/cliente/catalogo.php
+No syntax errors detected in frontend/views/admin/partials/header.php
+No syntax errors detected in frontend/views/components/cart-line.php
+PHP Warning:  session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\init.php on line 9
+
+Warning: session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\init.php on line 9
+PHP Warning:  session_start(): Session cannot be started after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+
+Warning: session_start(): Session cannot be started after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+cart_ids=cart-sel-1,cart-sel-2,cart-sel-3 unique=SI
+cart_fors_match=SI
+
+--- 2. Smoke views (scripts/smoke_views.php) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" scripts/smoke_views.php
+db=0
+asset=../frontend/assets/css/styles.css
+view_ok=1
+len=38652
+
+--- 3. Smoke auth y logout (scripts/smoke_auth_logout.php) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" scripts/smoke_auth_logout.php
+OK login admin
+OK urls logout='../logout.php' css='../frontend/assets/css/styles.css'
+OK logout limpia sesión
+OK cambio a cliente
+SMOKE_AUTH_OK
+
+--- 4. Ejecucion de php tests/run_all.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/run_all.php
+=== Mass Online · suite completa ===
+
+── PHPUnit ──
+PHPUnit 11.5.0 by Sebastian Bergmann and contributors.
+
+Cannot open bootstrap script "D:\xampp\htdocs\paginaweb\tests/bootstrap.php"
+⇒ FALLÓ PHPUnit (exit 2)
+
+── auth_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_hnprdgeuh8so6v8dbd1n7cirek, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_hnprdgeuh8so6v8dbd1n7cirek, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\auth_test.php on line 9
+=== Auth SGC-Mass ===
+OK  usuario/password vacíos falla
+OK  reporta ambos errores
+OK  password incorrecta falla
+OK  admin / 123456 OK
+OK  rol admin
+OK  correo corporativo OK
+OK  admin no entra en modo cliente
+OK  cliente / 123456 OK
+OK  rol cliente
+OK  proveedor correo OK
+OK  sesión cliente activa
+OK  no es admin
+OK  logout limpia sesión
+OK  sesión admin activa
+OK  nombre en sesión
+OK  sesión válida tras regenerate_id
+
+Resultado: 16 OK, 0 FAIL
+⇒ OK auth_test.php
+
+── negocio_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_0v8had58g613go7c1qcd8co9ih, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_0v8had58g613go7c1qcd8co9ih, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\negocio_test.php on line 9
+=== Reglas de negocio Mass Online ===
+OK  normaliza express
+OK  modo inválido cae a retiro
+OK  normaliza retiro
+OK  retiro es GRATIS
+OK  express cuesta S/ 4.90
+OK  cupón CLUBMASS10 = 5
+OK  cupón CLUBMASS60 = 6
+OK  cupón inválido = 0
+OK  CLUBMASS60 es cupón válido
+OK  cupón válido case-insensitive
+OK  XXX no es cupón válido
+OK  mapa de cupones tiene ambos códigos
+OK  resumen retiro envío 0
+OK  resumen express envío 4.90
+OK  total express = total retiro + 4.90
+OK  3 unidades en carrito
+OK  Aprovecha+ aplica desde 3 un.
+OK  retiro en tienda agotada falla
+OK  error menciona stock
+OK  retiro Magdalena OK
+OK  data.entrega = retiro
+OK  dirección toma la de la tienda
+OK  express con dirección corta falla
+OK  express con dirección completa OK
+OK  data.entrega = express
+OK  horario de retiro no válido en express
+OK  express tiene paso en camino
+OK  retiro tiene paso listo para retiro
+OK  retiro no tiene motorizado
+OK  estado gondola es current
+OK  pedido_confirmar retorna orden
+OK  código MASS-
+OK  carrito vacío tras confirmar
+OK  ultimo_pedido en sesión
+OK  orden express conserva envío
+OK  orden conserva modalidad
+OK  orden retiro envío 0
+OK  orden retiro modalidad
+
+Resultado: 38 OK, 0 FAIL
+⇒ OK negocio_test.php
+
+── productos_admin_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_4ho1bvlb8merlg2687mcfotr9d, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+
+Warning: session_start(): open(D:\xampp\tmp\sess_4ho1bvlb8merlg2687mcfotr9d, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\includes\init.php on line 15
+=== Admin Productos (Figma 35-9928) ===
+OK  lista admin productos no vacía
+OK  campos WMS presentes
+OK  producto id=1 existe
+OK  nombre corto falla
+OK  EAN inválido falla
+OK  PVP <= costo falla
+OK  reorden >= capacidad falla
+OK  ABC vacío falla
+OK  EAN duplicado en alta falla
+OK  payload válido pasa reglas (edición id=1)
+OK  guardar producto OK
+OK  override nombre aplicado
+OK  override PVP aplicado
+OK  override ABC aplicado
+OK  margen calculado
+OK  id inexistente falla
+OK  alta vacía rechazada por reglas
+OK  alta inválida no incrementa catálogo
+OK  crear producto OK con reglas
+OK  lista incrementa al crear válido
+OK  producto nuevo visible en catálogo
+OK  alta con EAN duplicado falla
+
+Resultado: 22 OK, 0 FAIL
+⇒ OK productos_admin_test.php
+
+── carrito_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_1k31ojnpv4umss7bt3f4k2phlh, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_1k31ojnpv4umss7bt3f4k2phlh, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\carrito_test.php on line 9
+=== Carrito Mass Online ===
+OK  tope de cantidad = 99
+OK  agregar 1 unidad
+OK  suma cantidades del mismo SKU
+OK  id inexistente no agrega
+OK  cantidad 0 no agrega
+OK  agregar no supera el tope 99
+OK  cambiar (+) respeta tope 99
+OK  set_cantidad capea a 99
+OK  cambiar a <=0 elimina la línea
+OK  set_cantidad 0 elimina la línea
+OK  eliminar por id
+OK  vaciar limpia carrito
+
+Resultado: 12 OK, 0 FAIL
+⇒ OK carrito_test.php
+
+── csrf_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_p677p038j7kljo0e8naqo8qiif, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+
+Warning: session_start(): open(D:\xampp\tmp\sess_p677p038j7kljo0e8naqo8qiif, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\csrf_test.php on line 9
+=== CSRF Mass Online ===
+OK  token tiene 64 hex chars
+OK  token estable en la misma sesión
+OK  token válido pasa
+OK  token falso falla
+OK  token null falla
+OK  token vacío falla
+OK  csrf_field incluye name
+OK  csrf_field incluye valor del token
+OK  csrf_field es hidden
+
+Resultado: 9 OK, 0 FAIL
+⇒ OK csrf_test.php
+
+── redirect_test.php ──
+PHP Warning:  session_start(): open(D:\xampp\tmp\sess_eb4ra36jdocf9s14e2oqf1pe6i, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+PHP Warning:  session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+
+Warning: session_start(): open(D:\xampp\tmp\sess_eb4ra36jdocf9s14e2oqf1pe6i, O_RDWR) failed: Permission denied (13) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+
+Warning: session_start(): Failed to read session data: files (path: D:\xampp\tmp) in D:\xampp\htdocs\paginaweb\tests\redirect_test.php on line 4
+=== Redirect seguro ===
+OK  ruta local OK
+OK  query OK
+OK  bloquea http
+OK  bloquea protocol-relative
+OK  bloquea path traversal
+OK  bloquea CRLF
+
+Resultado: 6 OK, 0 FAIL
+⇒ OK redirect_test.php
+
+Resumen: fallos=1
+
+--- Suite CLI individual: auth_test.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/auth_test.php
+=== Auth SGC-Mass ===
+OK  usuario/password vacíos falla
+OK  reporta ambos errores
+OK  password incorrecta falla
+OK  admin / 123456 OK
+OK  rol admin
+OK  correo corporativo OK
+OK  admin no entra en modo cliente
+OK  cliente / 123456 OK
+OK  rol cliente
+OK  proveedor correo OK
+PHP Warning:  session_regenerate_id(): Session ID cannot be regenerated after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\functions.php on line 606
+
+Warning: session_regenerate_id(): Session ID cannot be regenerated after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\functions.php on line 606
+OK  sesión cliente activa
+OK  no es admin
+OK  logout limpia sesión
+PHP Warning:  session_regenerate_id(): Session ID cannot be regenerated after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\functions.php on line 606
+
+Warning: session_regenerate_id(): Session ID cannot be regenerated after headers have already been sent in D:\xampp\htdocs\paginaweb\includes\functions.php on line 606
+OK  sesión admin activa
+OK  nombre en sesión
+OK  sesión válida tras regenerate_id
+
+Resultado: 16 OK, 0 FAIL
+
+--- Suite CLI individual: negocio_test.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/negocio_test.php
+=== Reglas de negocio Mass Online ===
+OK  normaliza express
+OK  modo inválido cae a retiro
+OK  normaliza retiro
+OK  retiro es GRATIS
+OK  express cuesta S/ 4.90
+OK  cupón CLUBMASS10 = 5
+OK  cupón CLUBMASS60 = 6
+OK  cupón inválido = 0
+OK  CLUBMASS60 es cupón válido
+OK  cupón válido case-insensitive
+OK  XXX no es cupón válido
+OK  mapa de cupones tiene ambos códigos
+OK  resumen retiro envío 0
+OK  resumen express envío 4.90
+OK  total express = total retiro + 4.90
+OK  3 unidades en carrito
+OK  Aprovecha+ aplica desde 3 un.
+OK  retiro en tienda agotada falla
+OK  error menciona stock
+OK  retiro Magdalena OK
+OK  data.entrega = retiro
+OK  dirección toma la de la tienda
+OK  express con dirección corta falla
+OK  express con dirección completa OK
+OK  data.entrega = express
+OK  horario de retiro no válido en express
+OK  express tiene paso en camino
+OK  retiro tiene paso listo para retiro
+OK  retiro no tiene motorizado
+OK  estado gondola es current
+OK  pedido_confirmar retorna orden
+OK  código MASS-
+OK  carrito vacío tras confirmar
+OK  ultimo_pedido en sesión
+OK  orden express conserva envío
+OK  orden conserva modalidad
+OK  orden retiro envío 0
+OK  orden retiro modalidad
+
+Resultado: 38 OK, 0 FAIL
+
+--- Suite CLI individual: productos_admin_test.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/productos_admin_test.php
+=== Admin Productos (Figma 35-9928) ===
+OK  lista admin productos no vacía
+OK  campos WMS presentes
+OK  producto id=1 existe
+OK  nombre corto falla
+OK  EAN inválido falla
+OK  PVP <= costo falla
+OK  reorden >= capacidad falla
+OK  ABC vacío falla
+OK  EAN duplicado en alta falla
+OK  payload válido pasa reglas (edición id=1)
+OK  guardar producto OK
+OK  override nombre aplicado
+OK  override PVP aplicado
+OK  override ABC aplicado
+OK  margen calculado
+OK  id inexistente falla
+OK  alta vacía rechazada por reglas
+OK  alta inválida no incrementa catálogo
+OK  crear producto OK con reglas
+OK  lista incrementa al crear válido
+OK  producto nuevo visible en catálogo
+OK  alta con EAN duplicado falla
+
+Resultado: 22 OK, 0 FAIL
+
+--- Suite CLI individual: carrito_test.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/carrito_test.php
+=== Carrito Mass Online ===
+OK  tope de cantidad = 99
+OK  agregar 1 unidad
+OK  suma cantidades del mismo SKU
+OK  id inexistente no agrega
+OK  cantidad 0 no agrega
+OK  agregar no supera el tope 99
+OK  cambiar (+) respeta tope 99
+OK  set_cantidad capea a 99
+OK  cambiar a <=0 elimina la línea
+OK  set_cantidad 0 elimina la línea
+OK  eliminar por id
+OK  vaciar limpia carrito
+
+Resultado: 12 OK, 0 FAIL
+
+--- Suite CLI individual: csrf_test.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/csrf_test.php
+=== CSRF Mass Online ===
+OK  token tiene 64 hex chars
+OK  token estable en la misma sesión
+OK  token válido pasa
+OK  token falso falla
+OK  token null falla
+OK  token vacío falla
+OK  csrf_field incluye name
+OK  csrf_field incluye valor del token
+OK  csrf_field es hidden
+
+Resultado: 9 OK, 0 FAIL
+
+--- Suite CLI individual: redirect_test.php ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" tests/redirect_test.php
+=== Redirect seguro ===
+OK  ruta local OK
+OK  query OK
+OK  bloquea http
+OK  bloquea protocol-relative
+OK  bloquea path traversal
+OK  bloquea CRLF
+
+Resultado: 6 OK, 0 FAIL
+
+--- 5. PHPUnit (composer test / vendor/bin/phpunit) ---
+$ "D:\xampp\php\php.exe" -d session.save_path="C:\Users\GIGABYTE\AppData\Local\Temp" vendor/bin/phpunit
+PHPUnit 11.5.0 by Sebastian Bergmann and contributors.
+
+Cannot open bootstrap script "D:\xampp\htdocs\paginaweb\tests/bootstrap.php"
+
+--- 6. Intento de re-escaneo SonarQube (scripts\scan-sonar.bat) ---
+$ cmd /c scripts\scan-sonar.bat
+ERROR: define SONAR_TOKEN antes de escanear.
+  set SONAR_TOKEN=tu_token
+

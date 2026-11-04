@@ -15,53 +15,55 @@ if (!csrf_validar(isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : 
     redirect($volver);
 }
 
+$carritoService = new CarritoService();
+$cuponService = new CuponService();
+
 switch ($accion) {
     case 'agregar':
         $id = (int) ($_POST['id'] ?? 0);
         $cantidad = max(1, (int) ($_POST['cantidad'] ?? 1));
-        carrito_agregar($id, $cantidad);
+        $carritoService->agregar($id, $cantidad);
         flash_set('Producto agregado al carrito');
         break;
 
     case 'cambiar':
         $id = (int) ($_POST['id'] ?? 0);
         $delta = (int) ($_POST['delta'] ?? 0);
-        carrito_cambiar($id, $delta);
+        $carritoService->cambiar($id, $delta);
         break;
 
     case 'set_cantidad':
         $id = (int) ($_POST['id'] ?? 0);
         $cantidad = (int) ($_POST['cantidad'] ?? 1);
-        carrito_set_cantidad($id, $cantidad);
+        $carritoService->setCantidad($id, $cantidad);
         break;
 
     case 'eliminar':
-        carrito_eliminar((int) ($_POST['id'] ?? 0));
+        $carritoService->eliminar((int) ($_POST['id'] ?? 0));
         flash_set('Producto eliminado del carrito');
         break;
 
     case 'vaciar':
-        carrito_vaciar();
+        $carritoService->vaciar();
         flash_set('Canasta vaciada');
         break;
 
     case 'guardar':
-        carrito_guardar_despues((int) ($_POST['id'] ?? 0));
+        $carritoService->guardarParaDespues((int) ($_POST['id'] ?? 0));
         flash_set('Guardado para después');
         break;
 
+    case 'recuperar':
+        $carritoService->recuperarGuardado((int) ($_POST['id'] ?? 0));
+        flash_set('Producto devuelto al carrito');
+        break;
+
     case 'cupon':
-        $codigo = strtoupper(trim((string) ($_POST['cupon'] ?? '')));
-        if ($codigo === '') {
-            pedido_set(['cupon' => '']);
-            flash_set('Cupón quitado');
-        } elseif (pedido_es_cupon_valido($codigo)) {
-            pedido_set(['cupon' => $codigo]);
-            flash_set('Cupón ' . $codigo . ' aplicado (−' . dinero(pedido_descuento_cupon($codigo)) . ')');
-        } else {
-            $validos = implode(' o ', array_keys(pedido_cupones_validos()));
-            flash_set('Cupón no válido — prueba ' . $validos);
+        $eval = $cuponService->evaluarAplicacion((string) ($_POST['cupon'] ?? ''));
+        if ($eval['ok']) {
+            pedido_set(['cupon' => $eval['codigo']]);
         }
+        flash_set($eval['mensaje']);
         break;
 
     case 'entrega':
@@ -80,7 +82,7 @@ switch ($accion) {
         break;
 
     case 'paso2':
-        if (!carrito_items()) {
+        if (!$carritoService->items()) {
             flash_set('Agrega productos antes de continuar');
             $volver = 'pedido.php';
         } else {
@@ -105,7 +107,7 @@ switch ($accion) {
         break;
 
     case 'confirmar':
-        if (!carrito_items()) {
+        if (!$carritoService->items()) {
             flash_set('Agrega productos antes de continuar');
             $volver = 'pedido.php';
             break;
@@ -121,7 +123,7 @@ switch ($accion) {
         break;
 
     case 'checkout':
-        if (!carrito_items()) {
+        if (!$carritoService->items()) {
             flash_set('Agrega productos antes de continuar');
         } else {
             $volver = 'pedido.php';

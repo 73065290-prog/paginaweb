@@ -1,0 +1,51 @@
+=== Evidencia de verificacion documental PROMPT 04 (INT-001) ===
+Fecha: 2026-11-01 | HU: INT-001-HU-04 | Modelo IA (documentacion): Gemini 4 Argon (commits originales: No registrado)
+
+--- 1. Verificacion de PROMTS/04.Registro-suite-pruebas-phpunit.md ---
+Existe: SI (13951 bytes)
+Casos P01-P32 documentados en tabla: 32/32 OK
+Bolts INT-001-BOLT-001 a 006 documentados: 6/6 OK
+
+--- 2. Verificacion de referencia en PROMTS/README.md ---
+Referencia a 04.Registro-suite-pruebas-phpunit.md presente: SI
+Numeracion consecutiva en PROMTS/:
+  - PROMTS/01.Correccion-de-incidencias-de-SonarQube.md (4436 bytes)
+  - PROMTS/02.Refactorizacion-frontend-backend-mysql.md (16830 bytes)
+  - PROMTS/03.Correccion-logout-cambio-de-rol.md (4262 bytes)
+  - PROMTS/04.Registro-suite-pruebas-phpunit.md (13951 bytes)
+  - PROMTS/README.md (1341 bytes)
+
+--- 3. Verificacion de commits y URLs en Git ---
+  - Commit 2edeac5 -> 2edeac5590b943e9fd94e375fbf0d6858a104365 | 2026-10-27 19:40:55 -0500 | cursor12310-sys | Add PHPUnit suite, QA docs and SonarQube prep.
+    URL: https://github.com/73065290-prog/paginaweb/commit/2edeac5590b943e9fd94e375fbf0d6858a104365 (Enlazado en PROMTS/04: SI)
+  - Commit cd06ef0 -> cd06ef0b7533097369ba52acab2680e2adb04bea | 2026-10-27 19:59:48 -0500 | cursor12310-sys | ﻿Prepare SonarQube upload and harden demo auth.
+    URL: https://github.com/73065290-prog/paginaweb/commit/cd06ef0b7533097369ba52acab2680e2adb04bea (Enlazado en PROMTS/04: SI)
+
+--- 4. Verificacion de archivos de prueba y documentos QA referenciados ---
+  [OK] composer.json
+  [OK] phpunit.xml
+  [OK] sonar-project.properties
+  [OK] scripts/prepare-sonar.bat
+  [OK] scripts/scan-sonar.bat
+  [OK] tests/bootstrap.php
+  [OK] tests/TestCase.php
+  [OK] tests/Support/SqliteLabStore.php
+  [OK] tests/Unit/DineroYFormatoTest.php
+  [OK] tests/Unit/PedidoReglasTest.php
+  [OK] tests/Unit/AuthReglasTest.php
+  [OK] tests/Unit/ProductoAdminValidacionTest.php
+  [OK] tests/Feature/CarritoSesionTest.php
+  [OK] tests/Feature/AuthSesionTest.php
+  [OK] tests/Feature/PedidoConfirmacionTest.php
+  [OK] tests/Feature/ProductoAdminPersistenciaTest.php
+  [OK] tests/Feature/CatalogoYSqliteLabTest.php
+  [OK] docs/pruebas/01-plan-de-pruebas.md
+  [OK] docs/pruebas/02-ejecucion-pruebas.md
+  [OK] docs/pruebas/03-pruebas-automatizadas.md
+  [OK] docs/pruebas/04-comparacion-manual-vs-automatizada.md
+  [OK] docs/pruebas/05-guia-sonarqube.md
+  [OK] docs/pruebas/INFORME-FINAL.md
+  [OK] docs/pruebas/evidencias/junit.xml
+  [OK] docs/pruebas/evidencias/testdox.html
+  [OK] docs/pruebas/evidencias/ejecucion-automatizada.txt
+Total archivos verificados: 26/26 (TODOS EXISTEN)

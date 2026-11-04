@@ -1,0 +1,232 @@
+================================================================================
+1. IDENTIFICACIÓN
+================================================================================
+Prompt:      PROMPT 18: Retiro del fallback demo y aviso visible de modo demo
+Intent:      INT-004
+Bolts:       INT-004-BOLT-002 y INT-004-BOLT-004
+HU:          INT-004-HU-18
+Modelo IA:   Grok 4.7
+Fecha:       2026-11-02, hora local 22:55–23:10 (UTC-5)
+             PHP CLI de XAMPP usa Europe/Berlin; el log de fallo muestra
+             03-Nov-2026 05:07:34 CET, la misma ejecución.
+Responsable: cursor12310-sys
+
+================================================================================
+2. ENTORNO
+================================================================================
+- PHP CLI:  C:\xampp\php\php.exe -> PHP 8.2.12
+- PHPUnit:  vendor/bin/phpunit -> PHPUnit 11.5.0
+- MariaDB:  10.4.32 (XAMPP), 127.0.0.1:3306, base de desarrollo mass_online
+- Composer: NO instalado. `composer test` se ejecutó como `php vendor/bin/phpunit`
+            (composer.json, scripts.test).
+- Git:      NO instalado. No se creó rama ni commit.
+- Credenciales: no se registran. La conexión local es la de XAMPP (usuario root,
+  sin contraseña de aplicación). No se imprimió la contraseña en el log ni en el aviso.
+
+================================================================================
+3. INSPECCIÓN INICIAL (antes de editar)
+================================================================================
+- MASS_USE_DB ya existía en Database::shouldUseDb():
+  0/false -> no usa MySQL; 1/true -> usa MySQL; si no hay variable, manda config enabled.
+  phpunit.xml fija MASS_USE_DB=0. database.local.php (gitignored) tiene enabled=true,
+  así que sin la variable la app pide MySQL.
+- Database::pdo() guardaba el fallo solo en lastError(). No había logger en el proyecto
+  (ningún error_log, Logger ni archivo de log propio).
+- includes/data.php: mass_categorias(), mass_productos() y mass_tiendas() llamaban al
+  repositorio si Database::connected() y, si no había filas o no había conexión,
+  devolvían los arrays demo. Un fallo de MySQL era indistinguible del modo demo.
+- includes/init.php cargaba bootstrap, data.php y functions.php, y no resolvía el modo.
+- El encabezado admin decía siempre "Sinc: En línea", aunque no hubiera base.
+- Dependencias que siguen necesitando includes/data.php con MASS_USE_DB=0:
+  phpunit, scripts/generate_seed.php, scripts/verificar_bd.php y el modo demo explícito.
+- Datos que el seed NO reemplaza: ficha de producto (rating, galería, combo),
+  mass_filtros_catalogo(), horarios, venta horaria, cola de picking y la ficha
+  visual del usuario admin.
+
+================================================================================
+4. PROMPTS 16 Y 17
+================================================================================
+PROMPT 16 — PROMTS/16.evidencias-pruebas.txt
+  Resultado registrado: OK=93 ERROR=0 ADVERTENCIA=3, RESULTADO: VERIFICACION_BD_OK.
+  Conteos del seed: roles=2 usuarios=4 categorias=7 productos=15 tiendas=4
+  inventario=15 cupones=2 pedidos=0 pedido_detalles=0.
+  Estado: verificado en su evidencia. La base de desarrollo mass_online quedó después
+  con filas de pruebas (el usuario no autorizó reimportar seed.sql en el prompt 17).
+
+PROMPT 17 — PROMTS/evidencias/17-pruebas-integracion-mysql.txt
+  Suite Integration con MySQL activo: OK (64 tests, 298 assertions).
+  Estado: verificado en su evidencia.
+
+Conclusión del paso 5: las evidencias de 16 y 17 son satisfactorias, pero el paso 6
+no autoriza borrar los arrays (ver sección 8).
+
+================================================================================
+5. CAMBIO DE COMPORTAMIENTO
+================================================================================
+MASS_USE_DB controla tres estados, expuestos por Database::modo():
+  demo  — MASS_USE_DB=0 o false. No se intenta MySQL. Se usan los arrays demo.
+  mysql — se pidió MySQL y la conexión está activa. Catálogo, categorías y tiendas
+          salen del repositorio. No se sustituyen por los arrays si la consulta
+          vuelve vacía.
+  error — se pidió MySQL y la conexión falló. No se activan los arrays demo.
+          mass_categorias(), mass_productos() y mass_tiendas() devuelven [].
+
+El fallo se guarda en lastError() y, una sola vez por proceso y por el mismo mensaje,
+en error_log. El texto del log incluye host, puerto, dbname y el mensaje PDO ya saneado
+(password/pass/pwd se reemplazan por [omitido]). El aviso de pantalla no incluye host,
+usuario, contraseña ni el mensaje PDO.
+
+includes/init.php llama a Database::modo() al arrancar para que el fallo quede
+registrado en cualquier página, no solo en el panel.
+
+================================================================================
+6. ESCENARIOS
+================================================================================
+6.1 Modo demo explícito (MASS_USE_DB=0), MySQL encendido
+  modo=demo  connected=0  aviso=demo
+  productos=15 categorias=7 tiendas=4
+  tiene_ean=0 (el array demo no trae la columna ean; la fila de MySQL sí)
+  log de fallo: 0 líneas
+  HTML del encabezado real: búsqueda=1 campana=1 cerrar sesión=1
+  texto "Modo demo"=1  "Sin conexión a MySQL"=0
+  "Sinc: Modo demo"=1  "Sinc: En línea"=0
+  el HTML no contiene password ni 127.0.0.1
+  Navegador http://127.0.0.1:8765 (servidor PHP con MASS_USE_DB=0):
+  login académico al panel, dashboard y admin/productos.php.
+  Barra visible: "Modo demo. La aplicación usa datos de demostración porque así se pidió.
+  No está leyendo la base de datos." role=status.
+  Búsqueda, notificaciones, cuenta y cerrar sesión siguen en el encabezado.
+  El catálogo demo lista 15 SKU (Aceite Vegetal Clásico Primor 900 ml, etc.).
+
+6.2 Modo MySQL con conexión (MASS_USE_DB=1), MariaDB encendido
+  modo=mysql  connected=1  aviso=ninguno
+  database=mass_online
+  productos=16 categorias=7 tiendas=4
+  tiene_ean=1
+  ids de mass_productos() iguales a ProductoRepository::all() = 1
+  log de fallo: 0 líneas
+  HTML: "Modo demo"=0 "Sin conexión a MySQL"=0 "Sinc: En línea"=1
+  búsqueda y cerrar sesión presentes; sin host ni password en el HTML
+  Navegador http://127.0.0.1:8766 (sin MASS_USE_DB; config enabled):
+  mismo panel, sin barra de aviso.
+  Sinc: "En línea (Última actualización: 1m)". Búsqueda y cerrar sesión presentes.
+  Nota: 16 productos, no 15, porque mass_online ya tenía un alta de pruebas anterior.
+  Eso confirma que la lista sale de la base y no del array fijo de 15.
+
+6.3 Modo MySQL con conexión fallida (MariaDB detenido, MASS_USE_DB=1)
+  MariaDB se detuvo y se volvió a arrancar después de esta comprobación
+  (mysqld --defaults-file=C:\xampp\mysql\bin\my.ini --standalone). SELECT 1 posterior: ok.
+  modo=error  connected=0  aviso_tipo=error  titulo="Sin conexión a MySQL"
+  productos=0 categorias=0 tiendas=0
+  fallback_demo=0 (no se devolvieron los 15 productos demo)
+  log_lineas=1  log_no_duplica=1 (una segunda llamada a modo() no volvió a escribir)
+  log_tiene_password=0  log_tiene_dbname=1
+  Línea registrada:
+  Mass Online: fallo de conexión MySQL con MASS_USE_DB activo
+  (host=127.0.0.1 port=3306 dbname=mass_online).
+  SQLSTATE[HY000] [2002] No se puede establecer una conexión ya que el equipo de
+  destino denegó expresamente dicha conexión
+  HTML: role=alert, "Sin conexión a MySQL"=1, "Modo demo"=0,
+  "Sinc: Sin conexión"=1, "Sinc: En línea"=0, búsqueda=1, cerrar sesión=1,
+  sin 127.0.0.1 en el HTML.
+  Saneado de mensajes (Reflection sobre sanearMensaje, sin imprimir el secreto):
+  sanear_oculta=1  sanear_sin_salto=1
+  No se repitió la detención de MariaDB para una captura de navegador: la segunda
+  parada del proceso quedó fuera de alcance. El HTML del encabezado real ya distingue
+  este aviso del modo demo.
+
+================================================================================
+7. PRUEBAS OBLIGATORIAS
+================================================================================
+7.1 php vendor/bin/phpunit   (equivale a composer test)
+    2026-11-02 23:05 aprox.
+    OK (122 tests, 659 assertions)  exit=0
+    Una ejecución previa con --do-not-cache-result (no es el comando de composer test)
+    terminó en 1 fallo: ProductoAdminPersistenciaTest::test_crear_producto_valido_persiste_en_sesion_admin
+    línea 33, esNuevo false. Aislada, esa prueba pasa (1 test, 5 assertions).
+    Causa: sin la caché de defectos, MysqlDisponibilidadTest corre antes y deja
+    MASS_USE_DB=1; crearAdmin persiste en mass_online y el listado admin marca esNuevo=false.
+    Es el comportamiento previo de ProductoService cuando hay conexión, no el aviso nuevo.
+    El comando exigido, con la caché de phpunit.xml, queda en verde.
+
+7.2 php tests/run_all.php
+    PHPUnit interno: OK (122 tests, 659 assertions)
+    auth_test.php 16 OK; negocio_test.php 38 OK; carrito_test.php 12 OK;
+    csrf_test.php 9 OK; redirect_test.php 6 OK
+    productos_admin_test.php: 3 FAIL y luego PDOException 1062
+    Duplicate entry '7756987456123' for key 'uq_productos_ean'
+    exit del script: 1  Resumen: fallos=1
+    Fallo preexistente con MySQL encendido: la prueba escribe en mass_online y el EAN
+    ya existe. No se modificó esa prueba (fuera de alcance).
+
+7.3 php scripts/smoke_views.php
+    exit=0  SMOKE_ROUTES_OK  db=1
+    13 contratos OK; vistas de tienda y admin status 200, incluido admin/index.php.
+
+7.4 php scripts/smoke_auth_logout.php
+    exit=0  SMOKE_AUTH_OK
+    Logout admin, logout cliente y cambio de rol OK.
+
+================================================================================
+8. RETIRO DE DATOS DEMO
+================================================================================
+CONSERVADOS. No se eliminó ningún array ni función de includes/data.php.
+
+Motivo:
+- El modo demo explícito de este prompt, phpunit (MASS_USE_DB=0), generate_seed.php
+  y verificar_bd.php siguen leyendo esos arrays.
+- seed.sql no cubre ficha de producto, filtros, horarios, gráficos del dashboard
+  ni la cola de picking.
+- mass_online no está en el estado limpio del seed (hay productos y pedidos de
+  pruebas; en el prompt 17 no se autorizó reimportar).
+Sí se retiró el fallback silencioso: con MySQL pedido, un fallo o una tabla vacía
+ya no rellena categorías, productos ni tiendas con los arrays demo.
+
+================================================================================
+9. ARCHIVOS
+================================================================================
+Creados:
+  PROMTS/18.Retiro-fallback-demo-aviso-modo-demo.md
+  PROMTS/evidencias/18-retiro-fallback-demo.txt
+Modificados:
+  backend/Database.php
+  includes/data.php
+  includes/init.php
+  frontend/views/admin/partials/header.php
+Eliminados: ninguno
+Fuera de alcance: no se editó ningún otro archivo.
+Matriz_de_registro_paginaweb.xlsx: no actualizada.
+
+================================================================================
+10. BOLTS
+================================================================================
+INT-004-BOLT-002 (brecha G08: modo explícito, aviso y fin del fallback silencioso)
+  COMPLETADO y verificado en los escenarios 6.1, 6.2 y 6.3 y en las pruebas de la sección 7.
+  Commit NO realizado: git no está instalado.
+  Mensaje previsto: feat(INT-004-BOLT-002): modo explicito de datos, aviso admin y log de conexion
+
+INT-004-BOLT-004 (retiro de datos duplicados de includes/data.php; en la matriz,
+  repositorios PDO, que este prompt no autoriza a editar)
+  NO COMPLETADO. Los datos demo se conservaron (sección 8). Los repositorios no se
+  modificaron. El prompt 17 ya los probó contra MySQL real; eso no cierra este retiro.
+
+================================================================================
+11. PENDIENTES Y RIESGOS
+================================================================================
+- Git, rama y los dos commits locales: pendientes (git no instalado). Sin push.
+- Retiro de los arrays demo: pendiente hasta que el modo demo, el generador de seed
+  y verificar_bd.php dejen de depender de ellos, y mass_online coincida con el seed.
+- Siguen cayendo a mapas propios cuando no hay conexión, fuera de esta lista blanca:
+  AuthService::usuariosAuth(), CuponService::descuento() y los fallbacks de
+  ProductoService::listarCategorias()/listarCatalogo() e InventarioService::listarTiendas()
+  si alguien les pasa un array. El catálogo que entra por mass_productos(),
+  mass_categorias() y mass_tiendas() ya no lo hace.
+- Widgets del dashboard (KPIs, venta horaria, cola de picking) siguen siendo datos
+  fijos de presentación. No están en seed.sql y no forman parte del fallback de catálogo.
+- MysqlDisponibilidadTest deja MASS_USE_DB=1 para las pruebas siguientes.
+  Con el orden por defectos de phpunit.xml la suite pasa. Sin esa caché, la prueba
+  de alta admin choca con la base de desarrollo.
+- productos_admin_test.php aborta con EAN duplicado si MySQL está encendido.
+- mass_online sigue con datos de pruebas. No se reimportó seed.sql.
+- El mismo error de conexión se registra una vez por proceso PHP, no en cada petición
+  del mismo worker (static $falloRegistrado y $tried).

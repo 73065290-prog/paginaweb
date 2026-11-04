@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Pruebas de reglas de negocio (retiro vs delivery) — ejecutar:
+ * Pruebas de reglas de negocio (retiro vs delivery y CuponService) — ejecutar:
  *   php tests/negocio_test.php
  */
 
@@ -32,6 +32,8 @@ function assert_true(bool $cond, string $msg): void
 
 echo "=== Reglas de negocio Mass Online ===\n";
 
+$cuponService = new CuponService();
+
 // 1) Normalización modalidad
 assert_true(pedido_normalizar_entrega('express') === 'express', 'normaliza express');
 assert_true(pedido_normalizar_entrega('delivery') === 'retiro', 'modo inválido cae a retiro');
@@ -41,14 +43,26 @@ assert_true(pedido_normalizar_entrega('retiro') === 'retiro', 'normaliza retiro'
 assert_true(pedido_costo_envio('retiro') === 0.0, 'retiro es GRATIS');
 assert_true(pedido_costo_envio('express') === 4.9, 'express cuesta S/ 4.90');
 
-// 3) Cupones
-assert_true(pedido_descuento_cupon('CLUBMASS10') === 5.0, 'cupón CLUBMASS10 = 5');
-assert_true(pedido_descuento_cupon('CLUBMASS60') === 6.0, 'cupón CLUBMASS60 = 6');
-assert_true(pedido_descuento_cupon('XXX') === 0.0, 'cupón inválido = 0');
-assert_true(pedido_es_cupon_valido('CLUBMASS60'), 'CLUBMASS60 es cupón válido');
-assert_true(pedido_es_cupon_valido('clubmass10'), 'cupón válido case-insensitive');
-assert_true(!pedido_es_cupon_valido('XXX'), 'XXX no es cupón válido');
-assert_true(isset(pedido_cupones_validos()['CLUBMASS10'], pedido_cupones_validos()['CLUBMASS60']), 'mapa de cupones tiene ambos códigos');
+// 3) Cupones (CuponService + delegadores)
+assert_true(
+    $cuponService->descuento('CLUBMASS10') === 5.0 && pedido_descuento_cupon('CLUBMASS10') === 5.0,
+    'cupón CLUBMASS10 = 5'
+);
+assert_true(
+    $cuponService->descuento('CLUBMASS60') === 6.0 && pedido_descuento_cupon('CLUBMASS60') === 6.0,
+    'cupón CLUBMASS60 = 6'
+);
+assert_true(
+    $cuponService->descuento('XXX') === 0.0 && pedido_descuento_cupon('XXX') === 0.0,
+    'cupón inválido = 0'
+);
+assert_true($cuponService->esValido('CLUBMASS60') && pedido_es_cupon_valido('CLUBMASS60'), 'CLUBMASS60 es cupón válido');
+assert_true($cuponService->esValido('clubmass10') && pedido_es_cupon_valido('clubmass10'), 'cupón válido case-insensitive');
+assert_true(!$cuponService->esValido('XXX') && !pedido_es_cupon_valido('XXX'), 'XXX no es cupón válido');
+assert_true(
+    isset($cuponService->cuponesValidos()['CLUBMASS10'], pedido_cupones_validos()['CLUBMASS60']),
+    'mapa de cupones tiene ambos códigos'
+);
 
 // 4) Resumen retiro vs express
 $_SESSION['carrito'] = [

@@ -1,0 +1,42 @@
+Estado del repositorio al iniciar el Prompt 25
+Fecha: 2026-11-03
+Ruta: C:\Users\LENOVO\Downloads\paginaweb (2)\paginaweb
+Remoto origin: https://github.com/73065290-prog/paginaweb.git
+
+git.exe: ausente en el PATH y en las carpetas de Git, GitHub Desktop, Cursor y VS Code revisadas.
+No se instaló Git. Las lecturas salen de .git/HEAD, .git/config, .git/packed-refs, refs sueltos, .git/logs/HEAD y los objetos.
+
+HEAD: ref: refs/heads/main
+main local: 3a587981005d544cb18118650de64d0f5bca466e
+  mensaje: Restaurar la descripcion original del README.
+  padre: eb68b448db9ac91538721fd5319b353cde1a2809
+
+origin/main (ref suelta, prevalece sobre packed-refs): 1bd67ba644a35dbe2e8f8bc6304ed890da7ca607
+  mensaje: mejora: separar roles cliente y proveedor con portales propios
+  padre: 3a587981005d544cb18118650de64d0f5bca466e
+  El mismo commit está en origin/mejora/roles-cliente-proveedor.
+  Esa rama no es una de las tres de este prompt. No se sincronizó.
+
+packed-refs todavía nombra origin/main en a94d2c662558. La ref suelta lo sustituye.
+
+Ramas locales relevantes:
+  main                                          3a587981005d
+  master                                        741cf008a50d
+  feature/mejoras-admin-qa-cliente              128a41da7285
+  fix/sonar-a11y-parse-labels                   128a41da7285
+  correccion/sonar-accesibilidad                55ce88d619ac
+
+Ramas remotas del prompt:
+  origin/mejora/carrito-limite-stock            8a69a4715a56
+  origin/feature/mejoras-admin-qa-cliente       128a41da7285
+  origin/fix/sonar-a11y-parse-labels            128a41da7285
+
+Árbol de trabajo: hay cambios locales que no están en 3a58798.
+Comprobado en el árbol de ese commit:
+  backend/services/CarritoService.php   NO
+  backend/services/CuponService.php     NO
+  .github/workflows/ci.yml              NO
+  includes/functions.php                SI, blob fca0870eea
+Esos archivos del trabajo posterior no entran en el commit de este bolt.
+
+No se hizo fetch, pull ni push.

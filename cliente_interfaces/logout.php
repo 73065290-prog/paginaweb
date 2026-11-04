@@ -1,4 +1,6 @@
 <?php
 declare(strict_types=1);
+
 require_once dirname(__DIR__) . '/includes/init.php';
-require MASS_ROOT . '/frontend/views/cliente/logout.php';
+$router = require MASS_ROOT . '/backend/routes/web.php';
+$router->dispatch('cliente_interfaces/logout.php');

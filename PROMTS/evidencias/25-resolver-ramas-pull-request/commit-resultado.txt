@@ -1,0 +1,25 @@
+Commit local del Prompt 25
+Fecha: 2026-11-03
+
+Rama: docs/int-006-bolt-009
+Commit: c0523b9d1b52d6eaa643637ecfcee75ff96bf4f1
+Padre: 3a587981005d544cb18118650de64d0f5bca466e (main local)
+Mensaje: docs(INT-006-BOLT-009): registrar el destino de las ramas pendientes y el flujo de pull request
+
+HEAD sigue en refs/heads/main. main no se movió.
+No hubo push.
+
+Archivos de ese commit, y solo esos:
+  MEJORAS.md
+  PROMTS/25-resolver-ramas-pull-request.md
+  PROMTS/evidencias/25-resolver-ramas-pull-request/commits-55ce88d-eb68b44.txt
+  PROMTS/evidencias/25-resolver-ramas-pull-request/comparacion-objetos-git.txt
+  PROMTS/evidencias/25-resolver-ramas-pull-request/decisiones.txt
+  PROMTS/evidencias/25-resolver-ramas-pull-request/estado-repositorio.txt
+  PROMTS/evidencias/25-resolver-ramas-pull-request/proteccion-main.txt
+  PROMTS/evidencias/25-resolver-ramas-pull-request/pull-requests.txt
+  PROMTS/evidencias/25-resolver-ramas-pull-request/verificacion.txt
+
+Este archivo se escribió después de crear el commit, para guardar el identificador. No forma parte de c0523b9.
+
+git.exe no está instalado. El commit se escribió como objeto Git y la rama como referencia local. La lectura posterior del objeto confirmó el padre, el árbol y que el diff contra main contiene solo las 9 rutas de arriba.

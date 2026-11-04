@@ -2,13 +2,16 @@
 declare(strict_types=1);
 
 /**
- * Conexión PDO singleton. Si falla, la app usa datos demo en sesión/arrays.
+ * Conexión PDO singleton.
+ * MASS_USE_DB=1 (o config enabled sin la variable) usa MySQL.
+ * MASS_USE_DB=0 usa datos demo. Un fallo de conexión no conmuta al modo demo.
  */
 final class Database
 {
     private static ?PDO $pdo = null;
     private static bool $tried = false;
     private static ?string $lastError = null;
+    private static ?string $falloRegistrado = null;
 
     public static function config(): array
     {
@@ -67,7 +70,8 @@ final class Database
             ]);
         } catch (Throwable $e) {
             self::$pdo = null;
-            self::$lastError = $e->getMessage();
+            self::$lastError = self::sanearMensaje($e->getMessage());
+            self::registrarFalloConexion(self::$lastError, $cfg);
         }
         return self::$pdo;
     }
@@ -75,6 +79,48 @@ final class Database
     public static function connected(): bool
     {
         return self::pdo() instanceof PDO;
+    }
+
+    /**
+     * demo: MASS_USE_DB desactiva MySQL.
+     * mysql: la conexión configurada está activa.
+     * error: se pidió MySQL y la conexión falló. No es modo demo.
+     */
+    public static function modo(): string
+    {
+        if (!self::shouldUseDb()) {
+            return 'demo';
+        }
+        if (self::connected()) {
+            return 'mysql';
+        }
+        return 'error';
+    }
+
+    /**
+     * Texto del aviso de administración. Null cuando MySQL está operativo.
+     * No incluye host, usuario, contraseña ni el mensaje interno de PDO.
+     *
+     * @return array{tipo:string,titulo:string,texto:string}|null
+     */
+    public static function avisoAdmin(): ?array
+    {
+        $modo = self::modo();
+        if ($modo === 'demo') {
+            return [
+                'tipo' => 'demo',
+                'titulo' => 'Modo demo',
+                'texto' => 'La aplicación usa datos de demostración porque así se pidió. No está leyendo la base de datos.',
+            ];
+        }
+        if ($modo === 'error') {
+            return [
+                'tipo' => 'error',
+                'titulo' => 'Sin conexión a MySQL',
+                'texto' => 'No se pudo conectar a la base de datos configurada. Los datos demo no se activaron en su lugar.',
+            ];
+        }
+        return null;
     }
 
     public static function lastError(): ?string
@@ -88,5 +134,34 @@ final class Database
         self::$pdo = null;
         self::$tried = false;
         self::$lastError = null;
+        self::$falloRegistrado = null;
+    }
+
+    /**
+     * @param array<string, mixed> $cfg
+     */
+    private static function registrarFalloConexion(string $mensaje, array $cfg): void
+    {
+        $linea = sprintf(
+            'Mass Online: fallo de conexión MySQL con MASS_USE_DB activo (host=%s port=%d dbname=%s). %s',
+            (string) ($cfg['host'] ?? '127.0.0.1'),
+            (int) ($cfg['port'] ?? 3306),
+            (string) ($cfg['dbname'] ?? 'mass_online'),
+            $mensaje
+        );
+        if (self::$falloRegistrado === $linea) {
+            return;
+        }
+        self::$falloRegistrado = $linea;
+        error_log($linea);
+    }
+
+    private static function sanearMensaje(string $mensaje): string
+    {
+        $limpio = preg_replace('/(password|passwd|pwd|pass)\s*[=:]\s*\S+/i', '$1=[omitido]', $mensaje);
+        if (!is_string($limpio)) {
+            $limpio = $mensaje;
+        }
+        return str_replace(["\r", "\n"], ' ', $limpio);
     }
 }

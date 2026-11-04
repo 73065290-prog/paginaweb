@@ -27,15 +27,16 @@ $badge = $p['badge'] ?? null;
       <?php endif; ?>
     </div>
     <form class="product-actions" method="post" action="carrito.php">
+      <?= csrf_field() ?>
       <input type="hidden" name="accion" value="agregar" />
       <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
       <input type="hidden" name="volver" value="<?= e($_SERVER['REQUEST_URI'] ?? 'index.php') ?>" />
       <div class="qty">
-        <button type="button" class="qty-minus" aria-label="Menos">−</button>
-        <input type="number" name="cantidad" value="1" min="1" max="99" class="qty-input" aria-label="Cantidad" />
-        <button type="button" class="qty-plus" aria-label="Más">+</button>
+        <button type="button" class="qty-minus" aria-label="Disminuir cantidad de <?= e($p['nombre']) ?>">−</button>
+        <input type="number" name="cantidad" value="1" min="1" max="99" class="qty-input" aria-label="Cantidad de <?= e($p['nombre']) ?>" />
+        <button type="button" class="qty-plus" aria-label="Aumentar cantidad de <?= e($p['nombre']) ?>">+</button>
       </div>
-      <button class="btn-add" type="submit">🛒 Agregar</button>
+      <button class="btn-add" type="submit" aria-label="Agregar <?= e($p['nombre']) ?> al carrito">🛒 Agregar</button>
     </form>
   </div>
 </article>

@@ -1,0 +1,123 @@
+PROMPT 20 — Reescaneo SonarQube
+Intent: INT-006
+Bolt: INT-006-BOLT-007
+HU: INT-006-HU-20
+Fecha local: 2026-11-02
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+
+Estado del bolt: NO COMPLETADO.
+La configuracion de fuentes se actualizo, pero el analisis de backend/ y frontend/
+no se ejecuto. No hay metricas de Quality Gate verificadas en el panel.
+No se inventaron cifras. No se actualizo Matriz_de_registro_paginaweb.xlsx.
+
+1. Servidor SonarQube
+- Instalacion: C:\Users\LENOVO\sonarqube
+- El JRE embebido (sonarqube-jre, JDK 21.0.12.1 JRE) no arranca Elasticsearch:
+  Module jdk.jlink not found, required by org.elasticsearch.entitlement.
+  Registro: C:\Users\LENOVO\sonarqube\logs\sonar.log (23:28:28).
+- Arranque valido, sin escribir el comando con secretos:
+  SONAR_JAVA_PATH=C:\Users\LENOVO\jdk-21\bin\java.exe
+  C:\Users\LENOVO\sonarqube\bin\windows-x86-64\StartSonar.bat
+- Elasticsearch en marcha: 2026-11-02 23:31:52 (Process[es] is up).
+- Web Server is operational: 2026-11-02 23:34:19. Community Edition.
+- GET http://127.0.0.1:9000/api/system/status
+  HTTP 200
+  {"id":"147B411E-AaFcHgWAYUQ3W8oeAG7p","version":"26.10.0.133078","status":"UP"}
+- GET http://127.0.0.1:9000/api/projects/search
+  HTTP 401
+- Navegador: http://127.0.0.1:9000/ redirige a
+  http://127.0.0.1:9000/sessions/new?return_to=%2F
+  Titulo: Log in. Captura real de esa pantalla (no es el Quality Gate):
+  PROMTS/evidencias/20-sonarqube-login-requerido.png
+
+2. Autenticacion del escaner
+- where.exe sonar-scanner: no esta en PATH.
+  Escanner previsto por scripts\scan-sonar.bat:
+  %USERPROFILE%\sonar-scanner\bin\sonar-scanner.bat
+- Variable de entorno SONAR_TOKEN: no definida (longitud 0).
+- C:\Users\LENOVO\sonar-scanner\conf\sonar-scanner.properties: sin sonar.token.
+- POST /api/authentication/login con el usuario admin y la contraseña de
+  instalacion: HTTP 401. No se genero token. No se escribio ninguna credencial
+  en el repositorio ni en este archivo.
+- scripts\scan-sonar.bat (sin SONAR_TOKEN), desde la raiz del proyecto:
+  ERROR: define SONAR_TOKEN antes de escanear.
+  exit code 1
+- El analisis no llego al servidor. No hay task id ni dashboard del proyecto
+  Pagina_Web_V2 en esta ejecucion. No se comprobo la inclusion de backend/
+  ni de frontend/ en un analisis, porque no hubo analisis.
+
+3. Configuracion vigente (sonar-project.properties)
+- sonar.projectKey=Pagina_Web_V2
+- sonar.sources=includes,backend,frontend,admin,cliente_interfaces,index.php,logout.php
+- sonar.tests=tests
+- sonar.exclusions incluye vendor, node_modules, docs, .phpunit.cache y
+  frontend/assets/img (binarios). tests/ no esta en sonar.sources.
+- sonar.coverage.exclusions: tests, vendor, docs.
+- No hay sonar.issue.ignore. No se ocultaron incidencias ni se cambiaron reglas.
+- El bloque anterior que ignoraba php:S1192 en includes/data.php se retiro
+  al actualizar este archivo.
+
+4. Cobertura
+Comando: scripts\prepare-sonar.bat
+(composer no esta en PATH; el script uso C:\xampp\php\php.exe y vendor\bin\phpunit)
+
+Salida relevante:
+  PHP Warning: Unable to load dynamic library 'pcov'
+  (C:\xampp\php\ext\php_pcov.dll no se puede encontrar).
+  PHPUnit 11.5.0
+  Runtime: PHP 8.2.12
+  Time: 00:06.143, Memory: 12.00 MB
+  1) No code coverage driver available
+  WARNINGS!
+  Tests: 122, Assertions: 659, Warnings: 1.
+  exit code 1
+
+No hay php_pcov.dll ni php_xdebug.dll en C:\xampp\php\ext.
+No se instalaron extensiones: el prompt no autoriza dependencias nuevas.
+
+junit.xml se reescribio en esta ejecucion:
+  fecha de archivo 2026-11-02 23:38:05
+  tests=122 assertions=659 errors=0 failures=0
+
+clover.xml NO se regenero:
+  fecha de archivo 2026-11-02 22:03:19
+  atributo generated del XML: 2026-10-27 19:58:35 (unix 1793149115)
+  solo 3 archivos, rutas de otra maquina:
+    D:\xampp\htdocs\paginaweb\includes\data.php
+    D:\xampp\htdocs\paginaweb\includes\functions.php
+    D:\xampp\htdocs\paginaweb\includes\init.php
+  Ese reporte no corresponde al codigo de este equipo ni a backend/ o frontend/.
+  No se uso como metrica de cobertura.
+
+5. Metricas pedidas para INFORME-FINAL.md
+Fecha del intento: 2026-11-02
+Proyecto configurado: Pagina_Web_V2
+Analisis: no enviado
+Quality Gate: No disponible
+Bugs: No disponible
+Vulnerabilities: No disponible
+Code Smells: No disponible
+Coverage: No disponible
+Duplicated Lines: No disponible
+Maintainability / Reliability / Security: No disponible
+
+6. Incidencias
+- No se corrigio codigo de produccion: no hay informe de issues bloqueantes
+  de este analisis, y corregir PHP o JS quedaria fuera de la lista blanca.
+- Pendiente de autorizacion si se quiere cobertura: instalar PCOV o Xdebug
+  para PHP 8.2.12 de XAMPP (C:\xampp\php\ext). Eso es una dependencia nueva.
+- Pendiente para poder escanear: definir SONAR_TOKEN de un usuario con permiso
+  de analisis en http://127.0.0.1:9000 y volver a ejecutar scripts\scan-sonar.bat.
+  Despues hay que leer las metricas en el panel y sustituir los "No disponible".
+
+7. Git
+- git no esta instalado (where.exe git no lo encuentra).
+- No se creo rama ni commit. No se hizo push.
+- Mensaje pendiente cuando git exista:
+  chore(INT-006-BOLT-007): ampliar fuentes de SonarQube y registrar el bloqueo del reescaneo
+
+8. Archivos de esta evidencia
+- PROMTS/evidencias/20-sonarqube-reescaneo.txt
+- PROMTS/evidencias/20-sonarqube-login-requerido.png
+  (pantalla de login; no muestra Quality Gate ni metricas)

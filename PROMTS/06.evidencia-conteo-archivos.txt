@@ -1,0 +1,186 @@
+================================================================================
+EVIDENCIA DE VERIFICACION DE CONTEO Y COBERTURA DE ARCHIVOS - PROMPT 06
+Intent: INT-004 | Bolt: INT-004-BOLT-001 | HU: INT-004-HU-06
+Fecha de ejecucion: 2026-11-01 23:10:48 -05:00
+Documento verificado: docs/arquitectura/mapa-dependencias.md
+================================================================================
+
+1. COMANDO UTILIZADO (PowerShell Get-ChildItem)
+--------------------------------------------------------------------------------
+$dirs = @('admin', 'assets', 'backend', 'cliente_interfaces', 'database', 'frontend', 'includes', 'scripts', 'tests')
+$rootFiles = Get-ChildItem -Path 'index.php', 'logout.php' -File
+$dirFiles  = Get-ChildItem -Path $dirs -Recurse -File -Include *.php, *.js, *.css
+$allFiles  = @($rootFiles + $dirFiles) | Sort-Object FullName -Unique
+
+2. DIRECTORIOS INSPECCIONADOS
+--------------------------------------------------------------------------------
+- Raiz del proyecto (index.php, logout.php)
+- admin/
+- assets/ (directorio heredado incluido para auditoria de duplicados)
+- backend/
+- cliente_interfaces/
+- database/ (contiene schema.sql y seed.sql; 0 archivos .php/.js/.css)
+- frontend/
+- includes/
+- scripts/
+- tests/
+
+Directorios excluidos con justificacion tecnica:
+- vendor/ (dependencias de terceros instaladas por Composer: PHPUnit 11.5)
+- .phpunit.cache/ y .git/ (metadatos internos de herramientas)
+- docs/pruebas/evidencias/coverage/html/ (reporte HTML autogenerado por PCOV/PHPUnit con 5 .css y 5 .js de plantillas de cobertura que no son codigo fuente del sistema)
+
+3. CONTEO DE ARCHIVOS ENCONTRADOS POR EXTENSION (Get-ChildItem)
+--------------------------------------------------------------------------------
+- Cantidad de archivos PHP (.php) encontrados : 101
+- Cantidad de archivos JS  (.js)  encontrados : 6
+- Cantidad de archivos CSS (.css) encontrados : 16
+- TOTAL DE ARCHIVOS ENCONTRADOS EN ALCANCE    : 123
+
+Desglose por directorio:
+  * Raiz (index.php, logout.php) : 2 PHP
+  * admin/                       : 6 PHP
+  * assets/                      : 3 JS, 8 CSS (11 archivos)
+  * backend/                     : 20 PHP
+  * cliente_interfaces/          : 7 PHP
+  * database/                    : 0 PHP/JS/CSS (2 archivos .sql documentados en Seccion 5)
+  * frontend/assets/             : 3 JS, 8 CSS (11 archivos)
+  * frontend/views/              : 26 PHP
+  * includes/                    : 16 PHP
+  * scripts/                     : 3 PHP (mas 2 .bat documentados en Seccion 5)
+  * tests/                       : 21 PHP
+
+4. COMPARACION CONTRA EL INVENTARIO EN docs/arquitectura/mapa-dependencias.md
+--------------------------------------------------------------------------------
+- Total de archivos encontrados por Get-ChildItem : 123
+- Total de archivos inventariados en Seccion 5    : 123
+- Resultado de la comparacion                     : COINCIDENCIA EXACTA (100% de cobertura verificada: 123 encontrados vs 123 inventariados, 0 omitidos)
+- Archivos pendientes de clasificar               : 0 (Ninguno)
+- Archivos extra inexistentes en disco            : 0 (Ninguno)
+
+5. LISTADO COMPLETO VERIFICADO (123 ARCHIVOS: 101 PHP + 6 JS + 16 CSS)
+--------------------------------------------------------------------------------
+  1. [.php] admin/index.php                                      (    144 bytes)
+  2. [.php] admin/inventario.php                                 (    149 bytes)
+  3. [.php] admin/login.php                                      (    144 bytes)
+  4. [.php] admin/logout.php                                     (    145 bytes)
+  5. [.php] admin/pedidos.php                                    (    146 bytes)
+  6. [.php] admin/productos.php                                  (    148 bytes)
+  7. [.css] assets/css/admin.css                                 (  28963 bytes)
+  8. [.css] assets/css/admin-login.css                           (   7920 bytes)
+  9. [.css] assets/css/catalogo.css                              (   8813 bytes)
+ 10. [.css] assets/css/confirmacion.css                          (   6945 bytes)
+ 11. [.css] assets/css/pedido.css                                (  16127 bytes)
+ 12. [.css] assets/css/producto.css                              (  13620 bytes)
+ 13. [.css] assets/css/styles.css                                (  23590 bytes)
+ 14. [.css] assets/css/tokens.css                                (    541 bytes)
+ 15. [.js ] assets/js/admin.js                                   (   8631 bytes)
+ 16. [.js ] assets/js/admin-login.js                             (   1151 bytes)
+ 17. [.js ] assets/js/ui.js                                      (   9104 bytes)
+ 18. [.php] backend/bootstrap.php                                (    897 bytes)
+ 19. [.php] backend/config/app.php                               (    173 bytes)
+ 20. [.php] backend/config/database.example.php                  (    363 bytes)
+ 21. [.php] backend/config/database.local.php                    (    363 bytes)
+ 22. [.php] backend/controllers/AuthController.php               (    186 bytes)
+ 23. [.php] backend/Database.php                                 (   2679 bytes)
+ 24. [.php] backend/middleware/AuthMiddleware.php                (    615 bytes)
+ 25. [.php] backend/middleware/CsrfMiddleware.php                (   1028 bytes)
+ 26. [.php] backend/public/index.php                             (    316 bytes)
+ 27. [.php] backend/repositories/CategoriaRepository.php         (    826 bytes)
+ 28. [.php] backend/repositories/CuponRepository.php             (    512 bytes)
+ 29. [.php] backend/repositories/InventarioRepository.php        (   1049 bytes)
+ 30. [.php] backend/repositories/PedidoRepository.php            (   3249 bytes)
+ 31. [.php] backend/repositories/ProductoRepository.php          (   5456 bytes)
+ 32. [.php] backend/repositories/TiendaRepository.php            (   1265 bytes)
+ 33. [.php] backend/repositories/UsuarioRepository.php           (    890 bytes)
+ 34. [.php] backend/routes/web.php                               (    918 bytes)
+ 35. [.php] backend/services/AuthService.php                     (    545 bytes)
+ 36. [.php] backend/validators/PedidoValidator.php               (    331 bytes)
+ 37. [.php] backend/validators/ProductoValidator.php             (    444 bytes)
+ 38. [.php] cliente_interfaces/carrito.php                       (    148 bytes)
+ 39. [.php] cliente_interfaces/catalogo.php                      (    149 bytes)
+ 40. [.php] cliente_interfaces/confirmacion.php                  (    153 bytes)
+ 41. [.php] cliente_interfaces/index.php                         (    146 bytes)
+ 42. [.php] cliente_interfaces/logout.php                        (    147 bytes)
+ 43. [.php] cliente_interfaces/pedido.php                        (    147 bytes)
+ 44. [.php] cliente_interfaces/producto.php                      (    149 bytes)
+ 45. [.css] frontend/assets/css/admin.css                        (  30579 bytes)
+ 46. [.css] frontend/assets/css/admin-login.css                  (   7920 bytes)
+ 47. [.css] frontend/assets/css/catalogo.css                     (   8551 bytes)
+ 48. [.css] frontend/assets/css/confirmacion.css                 (   6945 bytes)
+ 49. [.css] frontend/assets/css/pedido.css                       (  16127 bytes)
+ 50. [.css] frontend/assets/css/producto.css                     (  13620 bytes)
+ 51. [.css] frontend/assets/css/styles.css                       (  23590 bytes)
+ 52. [.css] frontend/assets/css/tokens.css                       (    541 bytes)
+ 53. [.js ] frontend/assets/js/admin.js                          (   8631 bytes)
+ 54. [.js ] frontend/assets/js/admin-login.js                    (   1151 bytes)
+ 55. [.js ] frontend/assets/js/ui.js                             (   8986 bytes)
+ 56. [.php] frontend/views/admin/index.php                       (   9806 bytes)
+ 57. [.php] frontend/views/admin/inventario.php                  (   4678 bytes)
+ 58. [.php] frontend/views/admin/login.php                       (   7573 bytes)
+ 59. [.php] frontend/views/admin/logout.php                      (    271 bytes)
+ 60. [.php] frontend/views/admin/partials/footer.php             (    615 bytes)
+ 61. [.php] frontend/views/admin/partials/header.php             (   2949 bytes)
+ 62. [.php] frontend/views/admin/partials/sidebar.php            (   3030 bytes)
+ 63. [.php] frontend/views/admin/pedidos.php                     (   3130 bytes)
+ 64. [.php] frontend/views/admin/productos.php                   (  21961 bytes)
+ 65. [.php] frontend/views/cliente/carrito.php                   (   4242 bytes)
+ 66. [.php] frontend/views/cliente/catalogo.php                  (  10908 bytes)
+ 67. [.php] frontend/views/cliente/confirmacion.php              (  10038 bytes)
+ 68. [.php] frontend/views/cliente/index.php                     (   5822 bytes)
+ 69. [.php] frontend/views/cliente/logout.php                    (    267 bytes)
+ 70. [.php] frontend/views/cliente/pedido.php                    (  18307 bytes)
+ 71. [.php] frontend/views/cliente/producto.php                  (  10795 bytes)
+ 72. [.php] frontend/views/components/cart-drawer.php            (   2509 bytes)
+ 73. [.php] frontend/views/components/cart-line.php              (   3640 bytes)
+ 74. [.php] frontend/views/components/category-card.php          (    627 bytes)
+ 75. [.php] frontend/views/components/navbar.php                 (   4363 bytes)
+ 76. [.php] frontend/views/components/order-summary-side.php     (   1159 bytes)
+ 77. [.php] frontend/views/components/product-card.php           (   1996 bytes)
+ 78. [.php] frontend/views/components/store-card.php             (   1122 bytes)
+ 79. [.php] frontend/views/components/topbar.php                 (    488 bytes)
+ 80. [.php] frontend/views/layouts/footer.php                    (   2743 bytes)
+ 81. [.php] frontend/views/layouts/header.php                    (    974 bytes)
+ 82. [.php] includes/admin/footer.php                            (    594 bytes)
+ 83. [.php] includes/admin/header.php                            (   2886 bytes)
+ 84. [.php] includes/admin/sidebar.php                           (   2937 bytes)
+ 85. [.php] includes/components/cart-drawer.php                  (   2645 bytes)
+ 86. [.php] includes/components/cart-line.php                    (   3719 bytes)
+ 87. [.php] includes/components/category-card.php                (    627 bytes)
+ 88. [.php] includes/components/navbar.php                       (   4619 bytes)
+ 89. [.php] includes/components/order-summary-side.php           (   1159 bytes)
+ 90. [.php] includes/components/product-card.php                 (   2023 bytes)
+ 91. [.php] includes/components/store-card.php                   (   1122 bytes)
+ 92. [.php] includes/components/topbar.php                       (    488 bytes)
+ 93. [.php] includes/data.php                                    (  45717 bytes)
+ 94. [.php] includes/functions.php                               (  27007 bytes)
+ 95. [.php] includes/init.php                                    (   1557 bytes)
+ 96. [.php] includes/layouts/footer.php                          (   2819 bytes)
+ 97. [.php] includes/layouts/header.php                          (   1071 bytes)
+ 98. [.php] index.php                                            (     91 bytes)
+ 99. [.php] logout.php                                           (    380 bytes)
+100. [.php] scripts/generate_seed.php                            (   5821 bytes)
+101. [.php] scripts/smoke_auth_logout.php                        (   3585 bytes)
+102. [.php] scripts/smoke_views.php                              (    523 bytes)
+103. [.php] tests/auth_test.php                                  (   2418 bytes)
+104. [.php] tests/bootstrap.php                                  (    715 bytes)
+105. [.php] tests/carrito_test.php                               (   2196 bytes)
+106. [.php] tests/csrf_test.php                                  (   1315 bytes)
+107. [.php] tests/Feature/AuthLogoutCambioRolTest.php            (   3230 bytes)
+108. [.php] tests/Feature/AuthSesionTest.php                     (    837 bytes)
+109. [.php] tests/Feature/CarritoSesionTest.php                  (   1181 bytes)
+110. [.php] tests/Feature/CatalogoYSqliteLabTest.php             (   1688 bytes)
+111. [.php] tests/Feature/MysqlDisponibilidadTest.php            (   1993 bytes)
+112. [.php] tests/Feature/PedidoConfirmacionTest.php             (   2234 bytes)
+113. [.php] tests/Feature/ProductoAdminPersistenciaTest.php      (   2785 bytes)
+114. [.php] tests/negocio_test.php                               (   6525 bytes)
+115. [.php] tests/productos_admin_test.php                       (   7251 bytes)
+116. [.php] tests/redirect_test.php                              (   1045 bytes)
+117. [.php] tests/run_all.php                                    (   1354 bytes)
+118. [.php] tests/Support/SqliteLabStore.php                     (   1817 bytes)
+119. [.php] tests/TestCase.php                                   (    682 bytes)
+120. [.php] tests/Unit/AuthReglasTest.php                        (   1425 bytes)
+121. [.php] tests/Unit/DineroYFormatoTest.php                    (    546 bytes)
+122. [.php] tests/Unit/PedidoReglasTest.php                      (   4030 bytes)
+123. [.php] tests/Unit/ProductoAdminValidacionTest.php           (   2689 bytes)
+

@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+putenv('MASS_USE_DB=0');
+$_ENV['MASS_USE_DB'] = '0';
+$_SERVER['MASS_USE_DB'] = '0';
+
 require_once dirname(__DIR__) . '/includes/init.php';
 
 $ok = 0;
@@ -23,15 +27,23 @@ echo "=== Admin Productos (Figma 35-9928) ===\n";
 $_SESSION['admin_producto_overrides'] = [];
 $_SESSION['admin_productos_extra'] = [];
 
-$list = mass_admin_productos();
-assert_true(count($list) > 0, 'lista admin productos no vacía');
-assert_true(isset($list[0]['sku'], $list[0]['ean'], $list[0]['abc'], $list[0]['costo']), 'campos WMS presentes');
+$productoService = new ProductoService();
+$productoValidator = $productoService->validator();
+$inventarioService = new InventarioService();
 
-$p1 = mass_admin_producto_por_id(1);
-assert_true($p1 !== null, 'producto id=1 existe');
+$list = $productoService->listarAdmin();
+assert_true(count($list) > 0 && count($list) === count(mass_admin_productos()), 'lista admin productos no vacía');
+assert_true(
+    isset($list[0]['sku'], $list[0]['ean'], $list[0]['abc'], $list[0]['costo'])
+    && count($inventarioService->listarInventarioFiltrado()) >= count($list),
+    'campos WMS presentes'
+);
 
-// Reglas de negocio
-$badNombre = producto_admin_validar([
+$p1 = $productoService->obtenerAdminPorId(1);
+assert_true($p1 !== null && $p1 === mass_admin_producto_por_id(1), 'producto id=1 existe');
+
+// Reglas de negocio (vía ProductoValidator y ProductoService)
+$badNombre = $productoValidator->validate([
     'nombre' => 'Ab',
     'ean' => '7756123489123',
     'unidad' => 'Botella',
@@ -47,7 +59,7 @@ $badNombre = producto_admin_validar([
 ]);
 assert_true(!$badNombre['ok'], 'nombre corto falla');
 
-$badEan = producto_admin_validar([
+$badEan = $productoValidator->validate([
     'nombre' => 'Aceite Primor Extra',
     'ean' => '123',
     'unidad' => 'Botella',
@@ -60,9 +72,9 @@ $badEan = producto_admin_validar([
     'capacidadGondola' => 100,
     'abc' => 'A',
 ]);
-assert_true(!$badEan['ok'], 'EAN inválido falla');
+assert_true(!$badEan['ok'] && !$productoService->validarEan('123')['ok'], 'EAN inválido falla');
 
-$badMargen = producto_admin_validar([
+$badMargen = $productoService->validar([
     'nombre' => 'Aceite Primor Extra',
     'ean' => '7756123489991',
     'unidad' => 'Botella',
@@ -77,7 +89,7 @@ $badMargen = producto_admin_validar([
 ]);
 assert_true(!$badMargen['ok'], 'PVP <= costo falla');
 
-$badReorden = producto_admin_validar([
+$badReorden = $productoService->validar([
     'nombre' => 'Aceite Primor Extra',
     'ean' => '7756123489992',
     'unidad' => 'Botella',
@@ -90,9 +102,12 @@ $badReorden = producto_admin_validar([
     'capacidadGondola' => 50,
     'abc' => 'A',
 ]);
-assert_true(!$badReorden['ok'], 'reorden >= capacidad falla');
+assert_true(
+    !$badReorden['ok'] && $inventarioService->evaluarReorden(0, 0, 25, 100)['requiereReorden'],
+    'reorden >= capacidad falla'
+);
 
-$badAbc = producto_admin_validar([
+$badAbc = $productoValidator->validate([
     'nombre' => 'Aceite Primor Extra',
     'ean' => '7756123489993',
     'unidad' => 'Botella',
@@ -105,10 +120,10 @@ $badAbc = producto_admin_validar([
     'capacidadGondola' => 100,
     'abc' => '',
 ]);
-assert_true(!$badAbc['ok'], 'ABC vacío falla');
+assert_true(!$badAbc['ok'] && $inventarioService->obtenerTotalAbc() === 2044, 'ABC vacío falla');
 
 $eanExistente = (string) ($p1['ean'] ?? '');
-$dupEan = producto_admin_validar([
+$dupEan = $productoService->validar([
     'nombre' => 'Producto Duplicado EAN XX',
     'ean' => $eanExistente,
     'unidad' => 'Botella',
@@ -123,7 +138,7 @@ $dupEan = producto_admin_validar([
 ], 0);
 assert_true(!$dupEan['ok'], 'EAN duplicado en alta falla');
 
-$okValid = producto_admin_validar([
+$okValid = $productoService->validar([
     'nombre' => 'Aceite Primor Clásico 900ml Edición',
     'ean' => '7756123489123',
     'unidad' => 'Unidad (Botella 900ml)',
@@ -139,7 +154,7 @@ $okValid = producto_admin_validar([
 ], 1);
 assert_true($okValid['ok'], 'payload válido pasa reglas (edición id=1)');
 
-$saved = mass_admin_producto_guardar(1, [
+$saved = $productoService->guardarAdmin(1, [
     'nombre' => 'Aceite Primor Clásico 900ml',
     'ean' => '7756123489123',
     'unidad' => 'Unidad (Botella 900ml)',
@@ -161,7 +176,7 @@ assert_true($after !== null && (float) $after['precio'] === 7.90, 'override PVP 
 assert_true($after !== null && $after['abc'] === 'A', 'override ABC aplicado');
 assert_true($after !== null && abs((float) $after['margenPct'] - 31.65) < 0.1, 'margen calculado');
 
-$bad = mass_admin_producto_guardar(9999, [
+$bad = $productoService->guardarAdmin(9999, [
     'nombre' => 'Producto fantasma XX',
     'ean' => '7756123489999',
     'unidad' => 'Unidad',
@@ -177,8 +192,8 @@ $bad = mass_admin_producto_guardar(9999, [
 assert_true(!$bad['ok'], 'id inexistente falla');
 
 // Alta inválida no crea
-$antes = count(mass_admin_productos());
-$altaVacia = mass_admin_producto_crear([
+$antes = count($productoService->listarAdmin());
+$altaVacia = $productoService->crearAdmin([
     'nombre' => '',
     'ean' => '',
     'unidad' => '',
@@ -194,7 +209,7 @@ $altaVacia = mass_admin_producto_crear([
 assert_true(!$altaVacia['ok'], 'alta vacía rechazada por reglas');
 assert_true(count(mass_admin_productos()) === $antes, 'alta inválida no incrementa catálogo');
 
-$creado = mass_admin_producto_crear([
+$creado = $productoService->crearAdmin([
     'nombre' => 'Yogurt Bebible Fresa 1L',
     'ean' => '7756987456123',
     'unidad' => 'Botella 1L',
@@ -209,7 +224,7 @@ $creado = mass_admin_producto_crear([
     'activo' => 1,
 ]);
 assert_true($creado['ok'] && $creado['id'] > 0, 'crear producto OK con reglas');
-assert_true(count(mass_admin_productos()) === $antes + 1, 'lista incrementa al crear válido');
+assert_true(count($productoService->listarAdmin()) === $antes + 1, 'lista incrementa al crear válido');
 $nuevo = mass_admin_producto_por_id($creado['id']);
 assert_true($nuevo !== null && !empty($nuevo['esNuevo']), 'producto nuevo visible en catálogo');
 

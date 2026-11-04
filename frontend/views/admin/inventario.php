@@ -8,48 +8,12 @@ $tituloAdmin = 'Inventario & Góndolas — Mass Admin';
 $adminActivo = 'inventario';
 $adminCrumb = 'Inventario & Góndolas';
 
-$q = mb_strtolower(trim((string) ($_GET['q'] ?? '')));
+$inventarioService = new InventarioService();
+
+$q = trim((string) ($_GET['q'] ?? ''));
 $estado = (string) ($_GET['estado'] ?? 'todos');
-$filas = mass_admin_gondola();
-
-// Enriquecer con catálogo completo para vista inventario
-$extra = [];
-$idsGondola = array_column($filas, 'id');
-foreach (mass_productos() as $p) {
-    if (in_array((int) $p['id'], $idsGondola, true)) {
-        continue;
-    }
-    $extra[] = [
-        'id' => (int) $p['id'],
-        'nombre' => $p['nombre'],
-        'sku' => 'SKU-' . str_pad((string) $p['id'], 4, '0', STR_PAD_LEFT),
-        'img' => $p['img'],
-        'marca' => $p['marca'],
-        'gondola' => $p['stockTone'] === 'bajo' ? 5 : 20,
-        'trastienda' => $p['stockTone'] === 'bajo' ? 3 : 15,
-        'estado' => $p['stockTone'] === 'bajo' ? 'bajo' : 'ok',
-    ];
-}
-$filas = array_merge($filas, $extra);
-
-if ($q !== '') {
-    $filas = array_values(array_filter(
-        $filas,
-        static function (array $r) use ($q): bool {
-            $hay = mb_strtolower($r['nombre'] . ' ' . $r['sku'] . ' ' . $r['marca']);
-            return str_contains($hay, $q);
-        }
-    ));
-}
-
-if (in_array($estado, ['ok', 'bajo', 'critico'], true)) {
-    $filas = array_values(array_filter(
-        $filas,
-        static fn (array $r): bool => ($r['estado'] ?? '') === $estado
-    ));
-}
-
-$kpis = mass_admin_kpis();
+$filas = $inventarioService->listarInventarioFiltrado($q, $estado);
+$kpis = $inventarioService->obtenerKpis();
 
 require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 ?>
@@ -112,11 +76,7 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
             <td><strong><?= (int) $row['gondola'] + (int) $row['trastienda'] ?></strong></td>
             <td>
               <span class="status-pill <?= e($row['estado']) ?>">
-                <?= match ($row['estado']) {
-                    'ok' => 'Stock OK',
-                    'bajo' => 'Bajo',
-                    default => 'Crítico',
-                } ?>
+                <?= e($inventarioService->etiquetaEstado((string) $row['estado'])) ?>
               </span>
             </td>
             <td>
@@ -134,4 +94,3 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 </article>
 
 <?php require MASS_ROOT . '/frontend/views/admin/partials/footer.php'; ?>
-

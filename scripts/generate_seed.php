@@ -3,7 +3,15 @@ declare(strict_types=1);
 
 /**
  * Genera database/seed.sql a partir de los datos demo actuales.
+ *
+ * Uso: php scripts/generate_seed.php [ruta_salida]
+ * Sin argumento escribe database/seed.sql.
  */
+
+// Los helpers demo leen de MySQL cuando hay conexión; el seed debe salir siempre de los arrays demo.
+putenv('MASS_USE_DB=0');
+$_SESSION = [];
+
 require dirname(__DIR__) . '/includes/data.php';
 require dirname(__DIR__) . '/includes/functions.php';
 
@@ -38,17 +46,23 @@ $out[] = 'DELETE FROM cupones;';
 $out[] = 'DELETE FROM usuarios;';
 $out[] = 'DELETE FROM roles;';
 $out[] = 'SET FOREIGN_KEY_CHECKS = 1;';
+$out[] = 'ALTER TABLE usuarios AUTO_INCREMENT = 1;';
+$out[] = 'ALTER TABLE inventario AUTO_INCREMENT = 1;';
+$out[] = 'ALTER TABLE pedidos AUTO_INCREMENT = 1;';
+$out[] = 'ALTER TABLE pedido_detalles AUTO_INCREMENT = 1;';
 $out[] = '';
 $out[] = "INSERT INTO roles (id, nombre) VALUES (1, 'admin'), (2, 'cliente');";
 $out[] = '';
 
 $hash = mass_demo_password_hash();
-$out[] = 'INSERT INTO usuarios (usuario, password_hash, rol_id, nombre, cargo) VALUES';
+$out[] = 'INSERT INTO usuarios (id, usuario, password_hash, rol_id, nombre, cargo) VALUES';
 $userRows = [];
+$userId = 0;
 foreach (mass_usuarios_auth() as $u) {
     $rolId = ($u['rol'] ?? '') === 'admin' ? 1 : 2;
     $userRows[] = sprintf(
-        '(%s, %s, %d, %s, %s)',
+        '(%d, %s, %s, %d, %s, %s)',
+        ++$userId,
         sql_str((string) $u['usuario']),
         sql_str($hash),
         $rolId,
@@ -94,7 +108,11 @@ foreach (mass_tiendas() as $t) {
 $out[] = implode(",\n", $storeRows) . ';';
 $out[] = '';
 
-$out[] = "INSERT INTO cupones (codigo, descuento_fijo, activo) VALUES ('CLUBMASS10', 5.00, 1), ('CLUBMASS60', 6.00, 1);";
+$cuponRows = [];
+foreach ((new CuponService())->cuponesValidos() as $codigo => $descuento) {
+    $cuponRows[] = sprintf('(%s, %s, 1)', sql_str((string) $codigo), sql_dec($descuento));
+}
+$out[] = 'INSERT INTO cupones (codigo, descuento_fijo, activo) VALUES ' . implode(', ', $cuponRows) . ';';
 $out[] = '';
 
 $adminById = [];
@@ -140,13 +158,15 @@ $out[] = '';
 $out[] = 'ALTER TABLE productos AUTO_INCREMENT = 100;';
 $out[] = '';
 
-$out[] = 'INSERT INTO inventario (producto_id, tienda_id, stock_piso, stock_almacen) VALUES';
+$out[] = 'INSERT INTO inventario (id, producto_id, tienda_id, stock_piso, stock_almacen) VALUES';
 $invRows = [];
+$invId = 0;
 foreach (mass_productos() as $p) {
     $id = (int) $p['id'];
     $a = $adminById[$id] ?? [];
     $invRows[] = sprintf(
-        "(%d, 'magdalena', %d, %d)",
+        "(%d, %d, 'magdalena', %d, %d)",
+        ++$invId,
         $id,
         (int) ($a['stockPiso'] ?? 20),
         (int) ($a['stockAlmacen'] ?? 40)
@@ -155,6 +175,9 @@ foreach (mass_productos() as $p) {
 $out[] = implode(",\n", $invRows) . ';';
 $out[] = '';
 
-$path = dirname(__DIR__) . '/database/seed.sql';
-file_put_contents($path, implode("\n", $out) . "\n");
+$path = isset($argv[1]) && $argv[1] !== '' ? $argv[1] : dirname(__DIR__) . '/database/seed.sql';
+if (file_put_contents($path, implode("\n", $out) . "\n") === false) {
+    fwrite(STDERR, "ERROR no se pudo escribir {$path}\n");
+    exit(1);
+}
 echo "OK wrote {$path}\n";

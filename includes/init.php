@@ -52,3 +52,5 @@ if (!empty($_SESSION['flash'])) {
 } else {
     $flash = '';
 }
+
+Database::modo();

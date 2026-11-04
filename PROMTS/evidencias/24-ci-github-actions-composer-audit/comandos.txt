@@ -1,0 +1,47 @@
+CI local — INT-006-BOLT-008
+Fecha local: 2026-11-03, después de las 13:50
+PHP: 8.2.12
+Composer usado: 2.11.1, phar temporal fuera del repositorio. Composer no está instalado en PATH.
+PHPUnit del lock: 11.5.50
+Git: no está en PATH. No hay commit.
+
+composer.json
+- phpunit/phpunit pasó de 11.5 (exacto 11.5.0) a 11.5.50.
+- audit.block-insecure pasó de false a true, para que un aviso de seguridad haga fallar el comando.
+
+.gitignore
+- se quitó la regla composer.lock.
+
+composer.lock
+- lo escribió Composer.
+- única operación de paquetes: phpunit/phpunit 11.5.0 a 11.5.50. Cero paquetes nuevos.
+
+Comandos
+1. composer validate --no-check-publish
+   Resultado: ./composer.json is valid. Exit 0. No avisó de lock desactualizado.
+2. composer install --no-interaction --prefer-dist --no-progress
+   Resultado: Nothing to install, update or remove. Exit 0.
+3. composer audit --no-interaction
+   Antes del parche, con 11.5.0: 1 aviso high, PKSA-z3gr-8qht-p93v, CVE-2026-24765, phpunit >=11.0.0,<11.5.50. Exit 1.
+   Después de 11.5.50: No security vulnerability advisories found. Exit 0.
+4. composer test
+   PHPUnit 11.5.50. 134 tests, 794 assertions, 1 fallo.
+   Falló ProductoAdminPersistenciaTest::test_crear_producto_valido_persiste_en_sesion_admin
+   Mensaje: Ya existe un producto con el mismo nombre comercial.
+   La misma prueba, sola: OK (1 test, 5 assertions). Exit 0.
+5. php tests/run_all.php
+   No se volvió a ejecutar. La mitad PHPUnit de esa suite es la que, en esta corrida, llegó a la base de desarrollo.
+6. Sintaxis de .github/workflows/ci.yml
+   No hay un analizador YAML en el equipo. El archivo se revisó a mano: on.pull_request, PHP 8.2, composer install, composer audit, composer test y php tests/run_all.php. No tiene continue-on-error.
+
+Efecto colateral de composer test
+La suite completa conectó con mass_online y la edición de prueba dejó el producto 1 como "Aceite Primor Editado QA".
+Se restauró al texto de database/seed.sql: nombre, marca, categoría, subcategoría, unidad, descripción, EAN 7756123400001, precio 8.90, costo 6.05, punto de reorden 25, capacidad 200, ABC A, activo 1.
+El nombre y la descripción se reescribieron con su UTF-8 (á, í, ó y el punto medio). El HEX final coincide con ese texto.
+Queda en mass_online una fila previa llamada "Snack QA Automatizado". Esta corrida no la insertó: el alta fue rechazada por nombre duplicado. No se borró.
+
+GitHub Actions
+No se hizo push. El workflow no se ejecutó en GitHub. No hay captura en verde. Queda pendiente.
+
+SonarQube
+El paso solo corre si existen los secretos SONAR_TOKEN y SONAR_HOST_URL. No están en el repositorio y esta ejecución no los usó. El paso no se lanzó y no se fabricó un resultado.

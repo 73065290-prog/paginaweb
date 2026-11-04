@@ -1,0 +1,114 @@
+PROMPT 27 — codificación UTF-8
+Fecha: 2026-11-03
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+Intent: INT-001
+HU: INT-001-HU-27
+
+Bolts
+INT-001-BOLT-005: correcciones de codificación del alcance verificadas. El commit local solo incluye esos archivos.
+G21: no aparece definido en PROMTS ni en docs. No se marca completado y el commit no lo da por terminado.
+
+Alcance revisado
+- sonar-project.properties
+- tests/bootstrap.php
+- PROMTS/*.md (29 archivos)
+- docs/** textos: md, txt, html, css, js, svg y el resto de extensiones de texto. Total de textos revisados: 71.
+- 6 archivos de docs no se trataron como texto (imágenes PNG). No se convirtieron.
+
+Detección
+Archivos con problema antes de corregir:
+1. docs/img/banner-mass-online.svg — UTF-8 inválido. Bytes sueltos de Windows-1252 (á, ·).
+2. docs/img/preview-admin.svg — UTF-8 inválido. Windows-1252 (ó, í, ñ, é, ·, ²).
+3. docs/img/preview-tienda.svg — UTF-8 inválido. Windows-1252 (á, ·).
+4. docs/pruebas/evidencias/ejecucion-automatizada.txt — UTF-16 LE con BOM FF FE.
+5. docs/pruebas/evidencias/prompt-04.txt — UTF-8 con un U+FEFF interior, copiado de un mensaje de commit. No está en el árbol de main.
+
+Sin problema de codificación, y por eso no se editaron:
+- sonar-project.properties. El texto de trabajo y el de main son UTF-8. Se leen «análisis», «producción» y «vía». La diferencia con main es de contenido posterior (fuentes de Sonar), no de mojibake.
+- tests/bootstrap.php. UTF-8. Se lee «sesión». La diferencia con main tampoco es de codificación.
+- PROMTS/03.Correccion-logout-cambio-de-rol.md. El título actual es UTF-8:
+  # PROMPT 03: Corrección de logout y cambio de rol admin y cliente
+  El byte de «ó» es C3 B3. No había un carácter de reemplazo.
+  El título guardado en main es otro texto, también UTF-8:
+  # PROMPT: Corrección de logout y cambio de rol (admin ↔ cliente)
+  No se reescribió ese commit ni se volvió a tocar el archivo.
+
+Correcciones
+- Los tres SVG se convirtieron de Windows-1252 a UTF-8 sin BOM. Se conservaron los saltos de línea.
+  Textos comprobados después: «SGC-MASS · DEMO PHP», «Catálogo · Carrito · Checkout · Inventario · Pedidos», «Magdalena · monitoreo de góndola y picking», «Venta del día», «Alertas de góndola», «Arroz Costeño · quiebre», «Café Altomayo · reorden», «más cerca de ti», «Ver catálogo».
+  El byte B2 quedó como «²» en «² 3.4%». Es el carácter que ya estaba en el archivo.
+- ejecucion-automatizada.txt pasó de UTF-16 LE a UTF-8 sin BOM. Empieza por «PHPUnit 11.5.0 by Sebastian Bergmann». Hex inicial 50485055. 1206 bytes → 602.
+- prompt-04.txt: se quitó el único U+FEFF. La línea queda «Prepare SonarQube upload and harden demo auth.» El commit cd06ef0 no se modificó.
+
+Segunda pasada
+71 textos del alcance, 0 con BOM, 0 con UTF-8 inválido y 0 con las secuencias de mojibake buscadas (C3 83, C3 82).
+
+.editorconfig
+Existe en la raíz.
+root = true
+[*]
+charset = utf-8
+Sin reglas de indentación ni de fin de línea. El archivo es UTF-8 sin BOM.
+
+Mensajes de commit
+Se leyeron 42 commits alcanzables desde main. No se reescribió ninguno.
+Seis mensajes empiezan con U+FEFF (EF BB BF) dentro del objeto commit. No es un problema de visualización:
+- 3a587981005d544cb18118650de64d0f5bca466e Restaurar la descripcion original del README.
+- eb68b448db9ac91538721fd5319b353cde1a2809 Integrar en main frontend/backend, MySQL, prompts y correccion de logout.
+- 55ce88d619acb834ac418653168f4d21bca91061 Integrar frontend/backend, MySQL, correccion de logout y prompts.
+- 0177c5deb58202b15d794d967b864ff31e0099c6 Agregar carpeta permanente PROMTS con el prompt 01 de SonarQube.
+- 41a4bde1272615b44fcd1ca85b430e780433e0d6 Corregir incidencias de SonarQube: accesibilidad y Number.parse.
+- cd06ef0b7533097369ba52acab2680e2adb04bea Prepare SonarQube upload and harden demo auth.
+Los mensajes nuevos de este trabajo se escriben en UTF-8 sin BOM.
+
+Pruebas
+MySQL en 127.0.0.1:3306 rechazó la conexión (SQLSTATE HY000 2002). No hubo escritura en mass_online durante esta corrida. Composer no está en el PATH. Se usó el phar temporal ya existente, Composer, con C:\xampp\php\php.exe.
+
+1. composer test
+   PHPUnit 11.5.50. PHP 8.2.12.
+   Tests: 134, Assertions: 500, Failures: 3, Skipped: 56.
+   Tiempo: 00:05.862. Exit 1.
+   Fallos:
+   - PedidoConfirmacionTest::test_confirmar_retiro_tiene_envio_cero
+     «Selecciona una tienda Mass para el retiro». false no es true.
+   - PedidoConfirmacionTest::test_confirmar_persiste_en_transaccion_pdo_y_hace_rollback_ante_error
+     null no es array.
+   - PedidoConfirmacionTest::test_confirmar_pedido_express_guarda_orden_y_vacia_carrito
+     null no es array.
+   56 pruebas se omitieron. El log también muestra un fallo de conexión con MASS_USE_DB activo.
+
+2. php tests/run_all.php
+   Exit 1. Resumen: fallos=1, por PHPUnit.
+   PHPUnit 11.5.50. Tests: 134, Assertions: 498, Failures: 4, Skipped: 56. Tiempo 00:05.827.
+   Fallos, en este orden de ejecución:
+   - CarritoSesionTest::test_agregar_producto_persiste_en_sesion_y_calcula_totales
+   - CarritoSesionTest::test_cambiar_cantidad_y_eliminar_linea
+   - CarritoSesionTest::test_guardar_para_despues_y_recuperar_guardado
+   - CatalogoYSqliteLabTest::test_filtrar_productos_por_categoria_y_busqueda
+   Suites CLI:
+   - auth_test.php: 16 OK, 0 FAIL
+   - negocio_test.php: 38 OK, 0 FAIL
+   - productos_admin_test.php: 22 OK, 0 FAIL
+   - carrito_test.php: 12 OK, 0 FAIL
+   - csrf_test.php: 9 OK, 0 FAIL
+   - redirect_test.php: 6 OK, 0 FAIL
+
+3. php scripts/smoke_views.php
+   Exit 0, pero no llegó a imprimir SMOKE_ROUTES_OK.
+   Llegó a dispatch_view de catálogo (status 200, 17135 bytes) y después redirect() ejecutó exit desde includes/functions.php:294, con el aviso de headers already sent.
+   db=0. view_ok=1. 13 contratos de ruta en OK. No se presenta como smoke completo.
+
+4. php scripts/smoke_auth_logout.php
+   SMOKE_AUTH_OK. Exit 0.
+   Escenarios A, B y C en OK. También registró el fallo de conexión a MySQL antes de esas comprobaciones.
+
+Estos fallos de PHPUnit ocurren con el servidor MySQL apagado. No se cambiaron pruebas ni código PHP en este prompt.
+
+Git
+No hubo push. No hubo rebase, amend ni cambio de mensajes existentes.
+HEAD se deja en main.
+Rama: fix/int-001-bolt-005
+Commit: c157713e0b40176f16d310a467461c272f65e033
+Mensaje sin BOM: fix(INT-001-BOLT-005): guardar los textos del alcance en UTF-8 sin BOM
+Esta identificación se escribió después de crear el objeto. El commit no contiene estas tres líneas.

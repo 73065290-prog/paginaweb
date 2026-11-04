@@ -1,16 +1,22 @@
 <?php
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/backend/bootstrap.php';
+require_once dirname(__DIR__) . '/backend/repositories/InventarioRepository.php';
+require_once dirname(__DIR__) . '/backend/validators/ProductoValidator.php';
+require_once dirname(__DIR__) . '/backend/services/ProductoService.php';
+require_once dirname(__DIR__) . '/backend/services/InventarioService.php';
+
 /**
  * Datos demo Tiendas Mass (equivalente al diseño Figma).
  */
 function mass_categorias(): array
 {
-    if (class_exists('CategoriaRepository') && Database::connected()) {
-        $rows = (new CategoriaRepository())->all();
-        if ($rows !== []) {
-            return $rows;
+    if (Database::shouldUseDb()) {
+        if (!Database::connected() || !class_exists('CategoriaRepository')) {
+            return [];
         }
+        return (new CategoriaRepository())->all();
     }
 
     return [
@@ -82,11 +88,11 @@ function mass_categorias(): array
 
 function mass_productos(): array
 {
-    if (class_exists('ProductoRepository') && Database::connected()) {
-        $rows = (new ProductoRepository())->all();
-        if ($rows !== []) {
-            return $rows;
+    if (Database::shouldUseDb()) {
+        if (!Database::connected() || !class_exists('ProductoRepository')) {
+            return [];
         }
+        return (new ProductoRepository())->all();
     }
 
     return [
@@ -323,11 +329,11 @@ function mass_filtros_catalogo(): array
 
 function mass_tiendas(): array
 {
-    if (class_exists('TiendaRepository') && Database::connected()) {
-        $rows = (new TiendaRepository())->all();
-        if ($rows !== []) {
-            return $rows;
+    if (Database::shouldUseDb()) {
+        if (!Database::connected() || !class_exists('TiendaRepository')) {
+            return [];
         }
+        return (new TiendaRepository())->all();
     }
 
     return [
@@ -384,12 +390,7 @@ function mass_tiendas(): array
 
 function mass_tienda_por_id(string $id): ?array
 {
-    foreach (mass_tiendas() as $t) {
-        if (($t['id'] ?? '') === $id) {
-            return $t;
-        }
-    }
-    return null;
+    return (new InventarioService())->obtenerTiendaPorId($id);
 }
 
 /** Horarios según modalidad. */
@@ -522,36 +523,11 @@ function mass_producto_detalle(int $id): ?array
     return array_merge($base, $extra);
 }
 
-/** Dashboard admin — Figma node 20-8275 (demo sin MySQL). */
+
+/** Dashboard admin — delega en InventarioService (con fallback demo). */
 function mass_admin_kpis(): array
 {
-    // Dashboard Figma 30-9174 — KPIs principales + métricas auxiliares
-    return [
-        'ventaDia' => 482910.50,
-        'ventaTrend' => 3.4,
-        'pedidosCurso' => 142,
-        'pedidosPicking' => 64,
-        'pedidosRuta' => 38,
-        'pedidosListos' => 40,
-        'stockCritico' => 28,
-        'quiebresGondola' => 6,
-        'sugerenciaOc' => 19,
-        'conteosPasillos' => 3,
-        'mermaPct' => 0.82,
-        'mermaMonto' => 3850.00,
-        'inventarioTotal' => 3450000.00,
-        // Compatibilidad páginas legacy
-        'ventaNeta' => 482910.50,
-        'boletas' => 184,
-        'ticketPromedio' => 100.27,
-        'pickingPct' => 72,
-        'tiempoPromedioMin' => 14.2,
-        'disponibilidad' => 96.4,
-        'disponibilidadEstado' => 'Óptimo',
-        'aprovechamiento' => 1420.50,
-        'mermaEvitada' => 890.00,
-        'mermaProyectada' => 320.00,
-    ];
+    return (new InventarioService())->obtenerKpis();
 }
 
 function mass_admin_venta_horaria(): array
@@ -570,37 +546,22 @@ function mass_admin_venta_horaria(): array
 
 function mass_admin_canales(): array
 {
-    // Reutilizado como Clasificación ABC (Figma 30-9174)
-    return [
-        ['id' => 'a', 'nombre' => 'Clase A · Alta rotación', 'pct' => 21, 'skus' => 432, 'color' => '#006b45'],
-        ['id' => 'b', 'nombre' => 'Clase B · Rotación media', 'pct' => 26, 'skus' => 526, 'color' => '#ff8a3d'],
-        ['id' => 'c', 'nombre' => 'Clase C · Baja rotación', 'pct' => 53, 'skus' => 1086, 'color' => '#f5c542'],
-    ];
+    return (new InventarioService())->obtenerClasificacionAbc();
 }
 
 function mass_admin_abc_total(): int
 {
-    return 2044;
+    return (new InventarioService())->obtenerTotalAbc();
 }
 
 function mass_admin_stock_global(): array
 {
-    return [
-        ['id' => 'normal', 'label' => 'Normal / Saludable', 'cantidad' => 1824, 'color' => '#006b45'],
-        ['id' => 'bajo', 'label' => 'Stock bajo', 'cantidad' => 202, 'color' => '#ff8a3d'],
-        ['id' => 'agotado', 'label' => 'Agotado / Quiebre', 'cantidad' => 18, 'color' => '#e53935'],
-    ];
+    return (new InventarioService())->obtenerStockGlobal();
 }
 
 function mass_admin_top_rotacion(): array
 {
-    return [
-        ['nombre' => 'Aceite Vegetal Primor 1L', 'unidades' => 842, 'monto' => 12630.00, 'abc' => 'A'],
-        ['nombre' => 'Arroz Costeño 5kg', 'unidades' => 610, 'monto' => 10980.00, 'abc' => 'A'],
-        ['nombre' => 'Leche Gloria Evaporada', 'unidades' => 1284, 'monto' => 6420.00, 'abc' => 'A'],
-        ['nombre' => 'Huevos Pardos x12', 'unidades' => 496, 'monto' => 4464.00, 'abc' => 'B'],
-        ['nombre' => 'Azúcar Rubia 1kg', 'unidades' => 388, 'monto' => 3104.00, 'abc' => 'B'],
-    ];
+    return (new ProductoService())->obtenerTopRotacion();
 }
 
 /**
@@ -608,140 +569,12 @@ function mass_admin_top_rotacion(): array
  */
 function mass_admin_alertas_gondola(): array
 {
-    $productos = mass_productos();
-    $map = [];
-    foreach ($productos as $p) {
-        $map[(int) $p['id']] = $p;
-    }
-
-    $rows = [
-        [
-            'id' => 2,
-            'ean' => '7750243001829',
-            'piso' => 4,
-            'almacen' => 0,
-            'minimo' => 18,
-            'abc' => 'A',
-            'ubicacion' => 'Góndola B4 · Pasillo 02',
-            'estado' => 'critico',
-            'estadoLabel' => 'Quiebre detectado',
-            'accion' => 'Generar OC',
-            'filtro' => 'agotados',
-        ],
-        [
-            'id' => 1,
-            'ean' => '7750885012345',
-            'piso' => 8,
-            'almacen' => 6,
-            'minimo' => 24,
-            'abc' => 'A',
-            'ubicacion' => 'Góndola A2 · Pasillo 01',
-            'estado' => 'bajo',
-            'estadoLabel' => 'Stock crítico',
-            'accion' => 'Pedir +10',
-            'filtro' => 'critico',
-        ],
-        [
-            'id' => 11,
-            'ean' => '7751234009876',
-            'piso' => 2,
-            'almacen' => 12,
-            'minimo' => 20,
-            'abc' => 'B',
-            'ubicacion' => 'Góndola C1 · Pasillo 05',
-            'estado' => 'bajo',
-            'estadoLabel' => 'Stock crítico',
-            'accion' => 'Pedir +15',
-            'filtro' => 'critico',
-        ],
-        [
-            'id' => 8,
-            'ean' => '7750001122334',
-            'piso' => 0,
-            'almacen' => 3,
-            'minimo' => 16,
-            'abc' => 'A',
-            'ubicacion' => 'Almacén · Rack 07',
-            'estado' => 'critico',
-            'estadoLabel' => 'Quiebre detectado',
-            'accion' => 'Solicitar lote',
-            'filtro' => 'agotados',
-        ],
-        [
-            'id' => 3,
-            'ean' => '7754567890123',
-            'piso' => 14,
-            'almacen' => 22,
-            'minimo' => 12,
-            'abc' => 'B',
-            'ubicacion' => 'Góndola D3 · Pasillo 04',
-            'estado' => 'vencer',
-            'estadoLabel' => 'Próximo a vencer',
-            'accion' => 'Revisar lote',
-            'filtro' => 'vencer',
-        ],
-        [
-            'id' => 5,
-            'ean' => '7759988776655',
-            'piso' => 20,
-            'almacen' => 40,
-            'minimo' => 15,
-            'abc' => 'C',
-            'ubicacion' => 'Góndola E1 · Pasillo 06',
-            'estado' => 'ok',
-            'estadoLabel' => 'OC generada',
-            'accion' => 'Ver OC',
-            'filtro' => 'todos',
-        ],
-    ];
-
-    $out = [];
-    foreach ($rows as $r) {
-        $p = $map[$r['id']] ?? null;
-        if (!$p) {
-            continue;
-        }
-        $out[] = array_merge($r, [
-            'nombre' => $p['nombre'],
-            'sku' => 'SKU-' . str_pad((string) $p['id'], 4, '0', STR_PAD_LEFT),
-            'img' => $p['img'],
-            'categoria' => $p['categoria'] ?? ($p['marca'] ?? ''),
-            'marca' => $p['marca'],
-        ]);
-    }
-    return $out;
+    return (new InventarioService())->obtenerAlertasGondola();
 }
 
 function mass_admin_gondola(): array
 {
-    $productos = mass_productos();
-    $map = [];
-    foreach ($productos as $p) {
-        $map[(int) $p['id']] = $p;
-    }
-
-    $rows = [
-        ['id' => 1, 'gondola' => 18, 'trastienda' => 24, 'estado' => 'ok'],
-        ['id' => 2, 'gondola' => 6, 'trastienda' => 12, 'estado' => 'bajo'],
-        ['id' => 11, 'gondola' => 0, 'trastienda' => 4, 'estado' => 'critico'],
-        ['id' => 3, 'gondola' => 22, 'trastienda' => 30, 'estado' => 'ok'],
-        ['id' => 8, 'gondola' => 3, 'trastienda' => 0, 'estado' => 'critico'],
-    ];
-
-    $out = [];
-    foreach ($rows as $r) {
-        $p = $map[$r['id']] ?? null;
-        if (!$p) {
-            continue;
-        }
-        $out[] = array_merge($r, [
-            'nombre' => $p['nombre'],
-            'sku' => 'SKU-' . str_pad((string) $p['id'], 4, '0', STR_PAD_LEFT),
-            'img' => $p['img'],
-            'marca' => $p['marca'],
-        ]);
-    }
-    return $out;
+    return (new InventarioService())->listarGondola();
 }
 
 function mass_admin_picking_cola(): array
@@ -841,87 +674,13 @@ function mass_admin_usuario(): array
 }
 
 /**
- * Catálogo admin (Figma 35-9928) enriquecido con costos, ABC, WMS,
- * overrides de edición y productos nuevos en sesión.
+ * Catálogo admin (Figma 35-9928) — delega en ProductoService.
  *
  * @return array<int, array<string, mixed>>
  */
 function mass_admin_productos(): array
 {
-    $subs = [
-        'Abarrotes' => 'Aceites y Grasas',
-        'Lácteos' => 'Leches y Derivados',
-        'Frutas' => 'Frescos Seleccionados',
-        'Bebidas' => 'Gaseosas y Jugos',
-        'Limpieza' => 'Hogar y Cuidado',
-    ];
-    $abcCycle = ['A', 'B', 'C', 'A', 'B'];
-    $overrides = $_SESSION['admin_producto_overrides'] ?? [];
-    if (!is_array($overrides)) {
-        $overrides = [];
-    }
-
-    $out = [];
-    foreach (mass_productos() as $p) {
-        $id = (int) $p['id'];
-        $skuNum = str_pad((string) $id, 5, '0', STR_PAD_LEFT);
-        $precio = (float) $p['precio'];
-        $costo = round($precio * 0.68, 2);
-        $margenBruto = round($precio - $costo, 2);
-        $margenPct = $precio > 0 ? round(($margenBruto / $precio) * 100, 2) : 0.0;
-        $tone = (string) ($p['stockTone'] ?? 'ok');
-        $stockPiso = $tone === 'bajo' ? 8 : ($tone === 'critico' ? 0 : 42);
-        $stockAlmacen = $tone === 'bajo' ? 4 : 24;
-        $abc = $abcCycle[($id - 1) % count($abcCycle)];
-        $cat = (string) $p['categoria'];
-        $marca = (string) $p['marca'];
-        $imgNombre = strtolower((string) preg_replace('/[^a-z0-9]+/i', '_', $marca)) . '_' . $id . '.jpg';
-
-        $row = [
-            'id' => $id,
-            'sku' => 'SKU-' . $skuNum,
-            'skuInterno' => $skuNum,
-            'ean' => '7756' . str_pad((string) (123400000 + $id), 9, '0', STR_PAD_LEFT),
-            'nombre' => (string) $p['nombre'],
-            'marca' => $marca,
-            'categoria' => $cat,
-            'subcategoria' => $subs[$cat] ?? 'General',
-            'unidad' => (string) ($p['unidad'] ?? 'Unidad'),
-            'descripcion' => 'Artículo comercial Mass · ' . $marca . ' · presentación ' . ($p['unidad'] ?? 'unidad') . '. Listo para góndola y reposición WMS.',
-            'precio' => $precio,
-            'costo' => $costo,
-            'margenPct' => $margenPct,
-            'margenBruto' => $margenBruto,
-            'stockTone' => $tone,
-            'stockPiso' => $stockPiso,
-            'stockAlmacen' => $stockAlmacen,
-            'puntoReorden' => $tone === 'bajo' ? 40 : 25,
-            'capacidadGondola' => 200,
-            'abc' => $abc,
-            'activo' => true,
-            'img' => (string) $p['img'],
-            'imgNombre' => $imgNombre,
-            'esNuevo' => false,
-        ];
-
-        if (isset($overrides[$id]) && is_array($overrides[$id])) {
-            $row = mass_admin_producto_aplicar_campos($row, $overrides[$id]);
-        }
-
-        $out[] = $row;
-    }
-
-    $extras = $_SESSION['admin_productos_extra'] ?? [];
-    if (is_array($extras)) {
-        foreach ($extras as $extra) {
-            if (!is_array($extra) || !isset($extra['id'])) {
-                continue;
-            }
-            $out[] = mass_admin_producto_normalizar_fila($extra);
-        }
-    }
-
-    return $out;
+    return (new ProductoService())->listarAdmin();
 }
 
 /**
@@ -931,18 +690,7 @@ function mass_admin_productos(): array
  */
 function mass_admin_producto_aplicar_campos(array $row, array $campos): array
 {
-    $row = array_merge($row, $campos);
-    $row['id'] = (int) ($row['id'] ?? 0);
-    $row['precio'] = (float) ($row['precio'] ?? 0);
-    $row['costo'] = (float) ($row['costo'] ?? 0);
-    $row['margenBruto'] = round($row['precio'] - $row['costo'], 2);
-    $row['margenPct'] = $row['precio'] > 0
-        ? round(($row['margenBruto'] / $row['precio']) * 100, 2)
-        : 0.0;
-    $skuNum = str_pad((string) $row['id'], 5, '0', STR_PAD_LEFT);
-    $row['skuInterno'] = $skuNum;
-    $row['sku'] = 'SKU-' . $skuNum;
-    return $row;
+    return (new ProductoService())->aplicarCamposAdmin($row, $campos);
 }
 
 /**
@@ -951,218 +699,33 @@ function mass_admin_producto_aplicar_campos(array $row, array $campos): array
  */
 function mass_admin_producto_normalizar_fila(array $fila): array
 {
-    $id = (int) ($fila['id'] ?? 0);
-    $skuNum = str_pad((string) $id, 5, '0', STR_PAD_LEFT);
-    $precio = (float) ($fila['precio'] ?? 0);
-    $costo = (float) ($fila['costo'] ?? 0);
-    $margenBruto = round($precio - $costo, 2);
-    $margenPct = $precio > 0 ? round(($margenBruto / $precio) * 100, 2) : 0.0;
-    $marca = (string) ($fila['marca'] ?? 'MASS');
-
-    return [
-        'id' => $id,
-        'sku' => 'SKU-' . $skuNum,
-        'skuInterno' => $skuNum,
-        'ean' => (string) ($fila['ean'] ?? ''),
-        'nombre' => (string) ($fila['nombre'] ?? ''),
-        'marca' => $marca,
-        'categoria' => (string) ($fila['categoria'] ?? 'Abarrotes'),
-        'subcategoria' => (string) ($fila['subcategoria'] ?? 'General'),
-        'unidad' => (string) ($fila['unidad'] ?? 'Unidad'),
-        'descripcion' => (string) ($fila['descripcion'] ?? ''),
-        'precio' => $precio,
-        'costo' => $costo,
-        'margenPct' => $margenPct,
-        'margenBruto' => $margenBruto,
-        'stockTone' => (string) ($fila['stockTone'] ?? 'ok'),
-        'stockPiso' => (int) ($fila['stockPiso'] ?? 0),
-        'stockAlmacen' => (int) ($fila['stockAlmacen'] ?? 0),
-        'puntoReorden' => (int) ($fila['puntoReorden'] ?? 25),
-        'capacidadGondola' => (int) ($fila['capacidadGondola'] ?? 200),
-        'abc' => (string) ($fila['abc'] ?? 'B'),
-        'activo' => !empty($fila['activo']),
-        'img' => (string) ($fila['img'] ?? 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop'),
-        'imgNombre' => (string) ($fila['imgNombre'] ?? ('nuevo_' . $id . '.jpg')),
-        'esNuevo' => true,
-    ];
+    return (new ProductoService())->normalizarFilaAdmin($fila);
 }
 
 function mass_admin_producto_por_id(int $id): ?array
 {
-    foreach (mass_admin_productos() as $p) {
-        if ((int) $p['id'] === $id) {
-            return $p;
-        }
-    }
-    return null;
+    return (new ProductoService())->obtenerAdminPorId($id);
 }
 
 function mass_admin_producto_siguiente_id(): int
 {
-    $max = 0;
-    foreach (mass_productos() as $p) {
-        $max = max($max, (int) $p['id']);
-    }
-    $extras = $_SESSION['admin_productos_extra'] ?? [];
-    if (is_array($extras)) {
-        foreach ($extras as $p) {
-            if (is_array($p)) {
-                $max = max($max, (int) ($p['id'] ?? 0));
-            }
-        }
-    }
-    return $max + 1;
+    return (new ProductoService())->siguienteIdAdmin();
 }
 
 function mass_admin_producto_plantilla_nueva(): array
 {
-    $id = mass_admin_producto_siguiente_id();
-    $skuNum = str_pad((string) $id, 5, '0', STR_PAD_LEFT);
-    return [
-        'id' => 0,
-        'sku' => 'SKU-' . $skuNum,
-        'skuInterno' => $skuNum,
-        'ean' => '',
-        'nombre' => '',
-        'marca' => 'MASS',
-        'categoria' => '',
-        'subcategoria' => '',
-        'unidad' => '',
-        'descripcion' => '',
-        'precio' => 0.0,
-        'costo' => 0.0,
-        'margenPct' => 0.0,
-        'margenBruto' => 0.0,
-        'stockTone' => 'ok',
-        'stockPiso' => 0,
-        'stockAlmacen' => 0,
-        'puntoReorden' => 0,
-        'capacidadGondola' => 0,
-        'abc' => '',
-        'activo' => true,
-        'img' => 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
-        'imgNombre' => 'nuevo_producto.jpg',
-        'esNuevo' => true,
-    ];
+    return (new ProductoService())->plantillaNuevaAdmin();
 }
 
 /**
- * Reglas de negocio catálogo admin (alta / edición).
+ * Reglas de negocio catálogo admin (alta / edición) — delega en ProductoService / ProductoValidator.
  *
  * @param array<string, mixed> $data
  * @return array{ok:bool,errores:array<int,string>,data:?array<string,mixed>}
  */
 function producto_admin_validar(array $data, int $idExcluir = 0): array
 {
-    $errores = [];
-    $nombre = trim((string) ($data['nombre'] ?? ''));
-    $ean = preg_replace('/\D+/', '', (string) ($data['ean'] ?? '')) ?? '';
-    $unidad = trim((string) ($data['unidad'] ?? ''));
-    $categoria = trim((string) ($data['categoria'] ?? ''));
-    $subcategoria = trim((string) ($data['subcategoria'] ?? ''));
-    $descripcion = trim((string) ($data['descripcion'] ?? ''));
-    $marca = trim((string) ($data['marca'] ?? 'MASS'));
-    $precio = (float) ($data['precio'] ?? 0);
-    $costo = (float) ($data['costo'] ?? 0);
-    $puntoReorden = (int) ($data['puntoReorden'] ?? 0);
-    $capacidad = (int) ($data['capacidadGondola'] ?? 0);
-    $abc = strtoupper(trim((string) ($data['abc'] ?? '')));
-    $activo = !empty($data['activo']) || !empty($data['activo_ui']);
-
-    if ($nombre === '' || mb_strlen($nombre) < 3) {
-        $errores[] = 'El nombre comercial debe tener al menos 3 caracteres';
-    }
-    if (strlen($ean) !== 13) {
-        $errores[] = 'El EAN-13 debe tener exactamente 13 dígitos';
-    }
-    if ($unidad === '') {
-        $errores[] = 'Indica la unidad de medida';
-    }
-    if ($categoria === '') {
-        $errores[] = 'Indica la categoría';
-    }
-    if ($subcategoria === '') {
-        $errores[] = 'Indica la subcategoría';
-    }
-    if ($descripcion === '' || mb_strlen($descripcion) < 10) {
-        $errores[] = 'La descripción de góndola debe tener al menos 10 caracteres';
-    }
-    if ($costo <= 0) {
-        $errores[] = 'El costo unitario debe ser mayor a 0';
-    }
-    if ($precio <= 0) {
-        $errores[] = 'El PVP debe ser mayor a 0';
-    }
-    if ($precio > 0 && $costo > 0 && $precio <= $costo) {
-        $errores[] = 'El PVP debe ser mayor al costo (margen comercial positivo)';
-    }
-    if ($puntoReorden < 1) {
-        $errores[] = 'El punto de reorden debe ser al menos 1';
-    }
-    if ($capacidad < 1) {
-        $errores[] = 'La capacidad de góndola debe ser al menos 1';
-    }
-    if ($capacidad > 0 && $puntoReorden >= $capacidad) {
-        $errores[] = 'El punto de reorden debe ser menor a la capacidad máxima de góndola';
-    }
-    if (!in_array($abc, ['A', 'B', 'C'], true)) {
-        $errores[] = 'Selecciona una clasificación ABC (A, B o C)';
-    }
-
-    // Unicidad EAN / nombre (alta y edición) — un solo recorrido del catálogo
-    $debeValidarUnicidad = $errores === [] || strlen($ean) === 13 || mb_strlen($nombre) >= 3;
-    if ($debeValidarUnicidad) {
-        $nombreNorm = mb_strtolower($nombre);
-        $eanDuplicado = false;
-        $nombreDuplicado = false;
-        foreach (mass_admin_productos() as $p) {
-            if ((int) ($p['id'] ?? 0) === $idExcluir) {
-                continue;
-            }
-            if (!$eanDuplicado && strlen($ean) === 13 && (string) ($p['ean'] ?? '') === $ean) {
-                $errores[] = 'El EAN-13 ya está registrado en otro SKU del WMS';
-                $eanDuplicado = true;
-            }
-            if (
-                !$nombreDuplicado
-                && $nombreNorm !== ''
-                && mb_strtolower((string) ($p['nombre'] ?? '')) === $nombreNorm
-            ) {
-                $errores[] = 'Ya existe un producto con el mismo nombre comercial';
-                $nombreDuplicado = true;
-            }
-            if ($eanDuplicado && $nombreDuplicado) {
-                break;
-            }
-        }
-    }
-
-    // Deduplicar mensajes
-    $errores = array_values(array_unique($errores));
-
-    if ($errores) {
-        return ['ok' => false, 'errores' => $errores, 'data' => null];
-    }
-
-    return [
-        'ok' => true,
-        'errores' => [],
-        'data' => [
-            'nombre' => $nombre,
-            'ean' => $ean,
-            'unidad' => $unidad,
-            'categoria' => $categoria,
-            'subcategoria' => $subcategoria,
-            'descripcion' => $descripcion,
-            'marca' => $marca !== '' ? $marca : 'MASS',
-            'precio' => round($precio, 2),
-            'costo' => round($costo, 2),
-            'puntoReorden' => $puntoReorden,
-            'capacidadGondola' => $capacidad,
-            'abc' => $abc,
-            'activo' => $activo,
-        ],
-    ];
+    return (new ProductoService())->validar($data, $idExcluir);
 }
 
 /**
@@ -1171,51 +734,7 @@ function producto_admin_validar(array $data, int $idExcluir = 0): array
  */
 function mass_admin_producto_guardar(int $id, array $data): array
 {
-    $valid = producto_admin_validar($data, $id);
-    if (!$valid['ok'] || $valid['data'] === null) {
-        return ['ok' => false, 'errores' => $valid['errores'], 'id' => $id];
-    }
-    $campos = $valid['data'];
-
-    // Producto creado en sesión
-    $extras = $_SESSION['admin_productos_extra'] ?? [];
-    if (!is_array($extras)) {
-        $extras = [];
-    }
-    foreach ($extras as $i => $extra) {
-        if (!is_array($extra) || (int) ($extra['id'] ?? 0) !== $id) {
-            continue;
-        }
-        $extras[$i] = array_merge($extra, $campos, [
-            'id' => $id,
-            'esNuevo' => true,
-        ]);
-        $_SESSION['admin_productos_extra'] = $extras;
-        return ['ok' => true, 'errores' => [], 'id' => $id];
-    }
-
-    // Producto del catálogo base → override
-    $base = null;
-    foreach (mass_productos() as $p) {
-        if ((int) $p['id'] === $id) {
-            $base = $p;
-            break;
-        }
-    }
-    if ($id < 1 || $base === null) {
-        return ['ok' => false, 'errores' => ['Producto no encontrado'], 'id' => $id];
-    }
-
-    if (!isset($_SESSION['admin_producto_overrides']) || !is_array($_SESSION['admin_producto_overrides'])) {
-        $_SESSION['admin_producto_overrides'] = [];
-    }
-    $_SESSION['admin_producto_overrides'][$id] = $campos;
-
-    if (class_exists('ProductoRepository') && Database::connected()) {
-        (new ProductoRepository())->update($id, $campos);
-    }
-
-    return ['ok' => true, 'errores' => [], 'id' => $id];
+    return (new ProductoService())->guardarAdmin($id, $data);
 }
 
 /**
@@ -1224,38 +743,5 @@ function mass_admin_producto_guardar(int $id, array $data): array
  */
 function mass_admin_producto_crear(array $data): array
 {
-    // Alta: idExcluir=0 fuerza unicidad de EAN y nombre contra todo el catálogo
-    $valid = producto_admin_validar($data, 0);
-    if (!$valid['ok'] || $valid['data'] === null) {
-        return ['ok' => false, 'errores' => $valid['errores'], 'id' => 0];
-    }
-
-    $id = mass_admin_producto_siguiente_id();
-    $campos = $valid['data'];
-    if (!isset($_SESSION['admin_productos_extra']) || !is_array($_SESSION['admin_productos_extra'])) {
-        $_SESSION['admin_productos_extra'] = [];
-    }
-
-    $payload = array_merge($campos, [
-        'id' => $id,
-        'marca' => $campos['marca'],
-        'stockTone' => 'ok',
-        'stockPiso' => 0,
-        'stockAlmacen' => 0,
-        'img' => 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
-        'imgNombre' => 'nuevo_' . $id . '.jpg',
-        'esNuevo' => true,
-    ]);
-
-    // Con MySQL: fuente de verdad = BD (evita duplicar en sesión + catálogo)
-    if (class_exists('ProductoRepository') && Database::connected()) {
-        $dbId = (new ProductoRepository())->create($payload);
-        if ($dbId > 0) {
-            return ['ok' => true, 'errores' => [], 'id' => $dbId];
-        }
-    }
-
-    $_SESSION['admin_productos_extra'][] = $payload;
-
-    return ['ok' => true, 'errores' => [], 'id' => $id];
+    return (new ProductoService())->crearAdmin($data);
 }

@@ -51,6 +51,13 @@
         </style>
     </head>
     <body>
+        <h2>Auth Logout Cambio Rol (Tests\Feature\AuthLogoutCambioRol)</h2>
+        <ul>
+            <li class="success">Mass asset no rompe rutas de logout ni admin</li>
+            <li class="success">Escenario a logout admin redirige a admin login</li>
+            <li class="success">Escenario b logout cliente redirige a cliente index</li>
+            <li class="success">Escenario c cambiar de rol cierra sesion anterior y establece nueva</li>
+        </ul>
         <h2>Auth Reglas (Tests\Unit\AuthReglas)</h2>
         <ul>
             <li class="success">Auth falla con credenciales vacias</li>
@@ -64,26 +71,121 @@
             <li class="success">Login admin persiste y logout limpia sesion</li>
             <li class="success">Acceso sin autenticar no es admin ni cliente</li>
         </ul>
+        <h2>Base De Prueba Seguridad (Tests\Integration\BaseDePruebaSeguridad)</h2>
+        <ul>
+            <li class="success">Configuracion de prueba apunta a mass online test</li>
+            <li class="success">Acepta solo mass online test distinta de desarrollo</li>
+            <li class="success">Rechaza cualquier otra base with data set "base de desarrollo"</li>
+            <li class="success">Rechaza cualquier otra base with data set "otra base"</li>
+            <li class="success">Rechaza cualquier otra base with data set "mayúsculas"</li>
+            <li class="success">Rechaza cualquier otra base with data set "sufijo"</li>
+            <li class="success">Rechaza cualquier otra base with data set "vacía"</li>
+            <li class="success">Rechaza cualquier otra base with data set "desarrollo configurado como test"</li>
+            <li class="success">Exige conexion activa a la base de prueba</li>
+        </ul>
         <h2>Carrito Sesion (Tests\Feature\CarritoSesion)</h2>
         <ul>
             <li class="success">Agregar producto persiste en sesion y calcula totales</li>
             <li class="success">Cambiar cantidad y eliminar linea</li>
             <li class="success">No agrega producto inexistente ni cantidad invalida</li>
+            <li class="success">Guardar para despues y recuperar guardado</li>
         </ul>
         <h2>Catalogo YSqlite Lab (Tests\Feature\CatalogoYSqliteLab)</h2>
         <ul>
             <li class="success">Filtrar productos por categoria y busqueda</li>
             <li class="success">Sqlite laboratorio guarda y lee en memoria aislada</li>
         </ul>
+        <h2>Categoria Repository Integration (Tests\Integration\CategoriaRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">All sin registros devuelve lista vacia</li>
+            <li class="success">All mapea columnas y ordena por nombre</li>
+            <li class="success">Conserva comillas apostrofes y caracteres especiales</li>
+            <li class="success">Refleja actualizacion y eliminacion en mysql</li>
+            <li class="success">Clave primaria impide ids duplicados</li>
+            <li class="success">Sin conexion devuelve lista vacia</li>
+        </ul>
+        <h2>Conexion Base De Prueba Integration (Tests\Integration\ConexionBaseDePruebaIntegration)</h2>
+        <ul>
+            <li class="success">Database pdo de los repositorios apunta a mass online test</li>
+            <li class="success">Esquema de prueba tiene las nueve tablas utf8mb4</li>
+            <li class="success">Cada prueba parte de tablas vacias salvo roles</li>
+        </ul>
+        <h2>Cupon Repository Integration (Tests\Integration\CuponRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">Descuento de cupon activo</li>
+            <li class="success">Normaliza mayusculas y espacios</li>
+            <li class="success">Cupon inactivo o inexistente devuelve cero</li>
+            <li class="success">Consulta preparada con comillas y caracteres especiales</li>
+            <li class="success">Refleja alta actualizacion desactivacion y baja</li>
+            <li class="success">Clave primaria impide codigos duplicados</li>
+            <li class="success">Sin conexion devuelve senal de fallback</li>
+        </ul>
         <h2>Dinero YFormato (Tests\Unit\DineroYFormato)</h2>
         <ul>
             <li class="success">Dinero formatea con dos decimales</li>
             <li class="success">Escape html previene xss basico</li>
         </ul>
+        <h2>Inventario Repository Integration (Tests\Integration\InventarioRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">By tienda filtra por tienda une producto y ordena por nombre</li>
+            <li class="success">By tienda con comillas y caracteres especiales</li>
+            <li class="success">Update stock actualiza solo la fila indicada</li>
+            <li class="success">Update stock de combinacion inexistente no crea filas</li>
+            <li class="success">Restricciones fk y unique del inventario</li>
+            <li class="success">Eliminar tienda elimina su inventario en cascada</li>
+            <li class="success">Sin conexion devuelve valores neutros</li>
+        </ul>
+        <h2>Models Categoria (Tests\Unit\ModelsCategoria)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto</li>
+            <li class="success">From row convierte tipos y mapea columnas de schema</li>
+            <li class="success">To array conserva estructura y tipos</li>
+        </ul>
+        <h2>Models Cupon (Tests\Unit\ModelsCupon)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto</li>
+            <li class="success">From row y to array con tipos esperados</li>
+        </ul>
+        <h2>Models Inventario Item (Tests\Unit\ModelsInventarioItem)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto</li>
+            <li class="success">From row y to array con y sin campos join</li>
+        </ul>
+        <h2>Models Pedido (Tests\Unit\ModelsPedido)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores nulos por defecto</li>
+            <li class="success">From row y to array con pedido retiro y express</li>
+        </ul>
+        <h2>Models Pedido Detalle (Tests\Unit\ModelsPedidoDetalle)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto</li>
+            <li class="success">From row y to array con producto id nulo</li>
+        </ul>
+        <h2>Models Producto (Tests\Unit\ModelsProducto)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto segun schema</li>
+            <li class="success">From row convierte tipos numericos booleanos y campos nulos</li>
+            <li class="success">Tratamiento de nulos y to array</li>
+        </ul>
+        <h2>Models Tienda (Tests\Unit\ModelsTienda)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto</li>
+            <li class="success">From row y to array conservan tipos</li>
+        </ul>
+        <h2>Models Usuario (Tests\Unit\ModelsUsuario)</h2>
+        <ul>
+            <li class="success">Creacion directa y valores por defecto</li>
+            <li class="success">From row y to array con campos nulos y rol join</li>
+        </ul>
+        <h2>Mysql Disponibilidad (Tests\Feature\MysqlDisponibilidad)</h2>
+        <ul>
+            <li class="success">Mysql persistencia pedido si hay conexion</li>
+        </ul>
         <h2>Pedido Confirmacion (Tests\Feature\PedidoConfirmacion)</h2>
         <ul>
             <li class="success">Confirmar pedido express guarda orden y vacia carrito</li>
             <li class="success">Confirmar retiro tiene envio cero</li>
+            <li class="success">Confirmar persiste en transaccion pdo y hace rollback ante error</li>
         </ul>
         <h2>Pedido Reglas (Tests\Unit\PedidoReglas)</h2>
         <ul>
@@ -95,6 +197,18 @@
             <li class="success">Validar retiro ok en tienda con stock</li>
             <li class="success">Resumen express suma envio respecto retiro</li>
             <li class="success">Tracking express incluye en camino retiro no</li>
+        </ul>
+        <h2>Pedido Repository Integration (Tests\Integration\PedidoRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">Create persiste cabecera y lineas en transaccion</li>
+            <li class="success">Find by codigo devuelve la fila persistida</li>
+            <li class="success">Create con valores minimos aplica defaults y tienda vacia como null</li>
+            <li class="success">Conserva comillas apostrofes y caracteres especiales</li>
+            <li class="success">Linea con producto inexistente hace rollback completo</li>
+            <li class="success">Tienda inexistente y codigo duplicado son rechazados</li>
+            <li class="success">Actualizar y eliminar pedido en mysql</li>
+            <li class="success">Eliminar usuario o tienda deja el pedido con null</li>
+            <li class="success">Sin conexion no persiste ni consulta</li>
         </ul>
         <h2>Producto Admin Persistencia (Tests\Feature\ProductoAdminPersistencia)</h2>
         <ul>
@@ -109,6 +223,50 @@
             <li class="success">Validar rechaza reorden mayor igual capacidad</li>
             <li class="success">Validar rechaza abc no seleccionado</li>
             <li class="success">Validar acepta payload completo valido</li>
+            <li class="success">Servicios calculan margen reorden abc y stock tiendas</li>
+        </ul>
+        <h2>Producto Repository Integration (Tests\Integration\ProductoRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">Create inserta y find devuelve valores persistidos</li>
+            <li class="success">Create con solo nombre aplica valores por defecto</li>
+            <li class="success">Create y find conservan comillas apostrofes y caracteres especiales</li>
+            <li class="success">All devuelve todos ordenados por id</li>
+            <li class="success">Find inexistente devuelve null</li>
+            <li class="success">Find mapea badge precio antes y favorito</li>
+            <li class="success">Update modifica campos y conserva los no editables</li>
+            <li class="success">Update de id inexistente no crea ni modifica filas</li>
+            <li class="success">Ean duplicado viola unique en create y update</li>
+            <li class="success">Eliminar producto propaga cascade y set null</li>
+            <li class="success">Sin conexion devuelve valores neutros</li>
+        </ul>
+        <h2>Servicios Cobertura (Tests\Unit\ServiciosCobertura)</h2>
+        <ul>
+            <li class="success">Catalogo sin mysql usa fallback y busca por id</li>
+            <li class="success">Filtrar catalogo respeta texto acentos precio oferta y comillas</li>
+            <li class="success">Crear y guardar admin persisten en sesion y rechazan datos invalidos</li>
+            <li class="success">Modal admin etiquetas y rotacion</li>
+            <li class="success">Inventario sin mysql no escribe stock y filtra por texto</li>
+            <li class="success">Auth normaliza rol destinos y cierra sesion al cambiar</li>
+            <li class="success">Carrito capa en 99 y pedido vacio no confirma</li>
+            <li class="success">Cupon vacio se quita y el codigo con espacios se normaliza</li>
+        </ul>
+        <h2>Tienda Repository Integration (Tests\Integration\TiendaRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">All mapea columnas y campos derivados</li>
+            <li class="success">Find por id existente e inexistente</li>
+            <li class="success">Conserva comillas apostrofes y caracteres especiales</li>
+            <li class="success">Refleja actualizacion y eliminacion en mysql</li>
+            <li class="success">Sin conexion devuelve vacio y null</li>
+        </ul>
+        <h2>Usuario Repository Integration (Tests\Integration\UsuarioRepositoryIntegration)</h2>
+        <ul>
+            <li class="success">All auth users devuelve activos con su rol</li>
+            <li class="success">Find by identifier contra bd por usuario alias y mayusculas</li>
+            <li class="success">Find by identifier con fuente explicita no consulta bd</li>
+            <li class="success">Comillas apostrofes y caracteres especiales</li>
+            <li class="success">Refleja actualizacion desactivacion y baja</li>
+            <li class="success">Restricciones de rol y usuario unico</li>
+            <li class="success">Sin conexion devuelve vacio</li>
         </ul>
     </body>
 </html>

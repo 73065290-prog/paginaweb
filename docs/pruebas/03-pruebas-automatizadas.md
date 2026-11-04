@@ -4,8 +4,8 @@
 
 | Ítem | Detalle |
 | --- | --- |
-| Herramienta | **PHPUnit 11.5** + **PCOV 1.0.11** |
-| Propósito | Ejecutar de forma repetible las reglas de negocio, validaciones, seguridad de auth y persistencia en sesión/SQLite lab. |
+| Herramienta | **PHPUnit 11.5.50** en el lock actual. La corrida con PCOV 1.0.11 fue PHPUnit 11.5.0 en otra ruta |
+| Propósito | Reglas de negocio, validaciones, auth, sesión y, si el modo es `mysql`, persistencia PDO. P32 no usa esa base: usa SQLite en memoria |
 | Pertinencia | El proyecto es PHP nativo (no Laravel/React). PHPUnit es el estándar de facto; PCOV genera Clover XML consumible por SonarQube. |
 
 ## 2. Casos del plan automatizados
@@ -65,20 +65,23 @@ Equivale a:
 php -d extension=pcov -d pcov.enabled=1 vendor\bin\phpunit --coverage-text --coverage-clover=docs/pruebas/evidencias/coverage/clover.xml --coverage-html=docs/pruebas/evidencias/coverage/html --log-junit=docs/pruebas/evidencias/junit.xml
 ```
 
-## 6. Resultados reales (corrida con cobertura)
+## 6. Resultados reales
 
-| Métrica | Valor medido |
+### 6.1 Corrida con PCOV en otra instalación
+
+Cifras tomadas solo de [evidencias/ejecucion-automatizada.txt](evidencias/ejecucion-automatizada.txt): 32 tests, 99 assertions, 0 fallos, tiempo 00:01.639, líneas 58.30% (811/1391), informe del 2026-10-28 01:29:33, PHPUnit 11.5.0 y PCOV 1.0.11, configuración `D:\xampp\htdocs\paginaweb\phpunit.xml`.
+
+### 6.2 Archivos que hay hoy junto a este documento
+
+| Recurso | Estado |
 | --- | --- |
-| Tests | 32 |
-| Assertions | 99 |
-| Fallidos | 0 |
-| Tiempo | 1.639 s |
-| Cobertura líneas | 58.30% (811/1391) |
-| Evidencia | `docs/pruebas/evidencias/ejecucion-automatizada.txt` |
-| JUnit | `docs/pruebas/evidencias/junit.xml` |
-| Clover | `docs/pruebas/evidencias/coverage/clover.xml` |
-| HTML cobertura | `docs/pruebas/evidencias/coverage/html/index.html` |
-| TestDox HTML | `docs/pruebas/evidencias/testdox.html` |
+| [evidencias/junit.xml](evidencias/junit.xml) | Presente. 130 tests, 770 assertions, 0 fallos. No es la corrida de 32 tests |
+| [evidencias/testdox.html](evidencias/testdox.html) | Presente |
+| [evidencias/coverage/clover.xml](evidencias/coverage/clover.xml) | Ausente |
+| [evidencias/coverage/html/index.html](evidencias/coverage/html/index.html) | Presente, título `D:\xampp\htdocs\paginaweb\includes`, 58.44% (817/1398). No coincide con el 58.30% del texto y no es de este equipo |
+| [evidencias/coverage/consola.txt](evidencias/coverage/consola.txt) | Presente. Este equipo: 130 tests, 770 assertions, `Clover: no generado` |
+
+En este equipo la cobertura porcentual queda pendiente: no hay driver PCOV ni Xdebug. Ni el 58.30% ni el 58.44% se reutilizan como cifra actual.
 
 ## 7. Análisis de fallos
 

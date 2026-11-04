@@ -1,0 +1,81 @@
+PROMPT 29 — Despliegue de prueba y evidencia
+Fecha: 2026-11-03
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+Estado: No aplica. No se publicó la aplicación.
+
+1. Obligatoriedad
+
+Fuente leída, sin modificarla: docs/Matriz_de_registro_paginaweb.xlsx.
+
+Hoja Bolts, fila 3:
+- Columna W: ¿Existe evidencia de despliegue en producción?
+- Columna AZ: ¿Evidencia de despliegue en producción o N.A justificado?
+
+Filas de datos 5 a 59: 55 filas.
+- Columna W: 55 veces «No aplica».
+- Columna X: «Proyecto académico en XAMPP local; sin despliegue a producción».
+- Columna AZ: 55 veces «No aplica».
+- Columna BA: «Proyecto académico local sin despliegue; N.A. justificado».
+
+Hoja Brechas y pendientes, fila 27:
+- Tema: Despliegue.
+- Hecho: No hay despliegue a producción.
+- Nota: El proyecto corre solo en XAMPP local; se marcó «No aplica» en la matriz.
+- Condición: Si el curso lo exige, documentar un despliegue de prueba y su evidencia.
+
+No hay en el repositorio un sílabo, una rúbrica ni una consigna que exija URL pública.
+README.md, docs/pruebas/01-plan-de-pruebas.md y docs/pruebas/INFORME-FINAL.md
+describen la ejecución en XAMPP. La pregunta de la matriz no basta para tratar
+el despliegue como obligatorio, porque la columna AZ admite «N.A. justificado».
+
+Decisión: el despliegue de prueba no es obligatorio. Se detiene la publicación.
+
+2. Hosting y URL
+
+Hosting elegido: ninguno.
+No se contrató un plan gratuito ni de pago.
+URL pública: no existe. No se verificó ninguna.
+
+3. Flujo catálogo, carrito, pedido y confirmación
+
+No se ejecutó contra una URL pública, porque no hay publicación.
+No se simula un pedido registrado en un hosting.
+El procedimiento local sigue siendo el de README.md: Apache de XAMPP,
+importación de database/schema.sql y database/seed.sql, y PDO mediante
+backend/config/database.local.php, archivo que no se versiona.
+
+4. Usuarios demo y secretos
+
+No hay entorno público. No se afirma que los usuarios demo estén deshabilitados
+en un hosting. En local siguen como están en el código actual.
+No se copiaron credenciales, contraseñas, tokens ni datos personales a la
+documentación ni a esta evidencia.
+
+5. Capturas
+
+No hay capturas. No se fabricaron imágenes de un despliegue que no ocurrió.
+
+6. Archivos
+
+Creados:
+- docs/despliegue.md
+- PROMTS/29-despliegue-prueba-evidencia.md
+- PROMTS/evidencias/29-despliegue-prueba-evidencia/resultados.txt
+
+Modificado:
+- README.md, sección «Despliegue» y una línea en el árbol del repositorio.
+
+No se modificó PHP, configuración, scripts ni el esquema SQL.
+No se actualizó la matriz.
+
+7. Git
+
+No hay identificador de bolt en el prompt. No se inventó uno.
+No hay commit de INT-006-HU-29. No hubo push.
+
+8. Pendientes
+
+Si más adelante el curso pide de forma explícita una URL pública, el despliegue
+sigue sin hacer y exige autorización de hosting. Las columnas W y AZ de la
+matriz no se actualizaron en esta pasada.

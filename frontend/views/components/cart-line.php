@@ -5,6 +5,8 @@ declare(strict_types=1);
 /** @var array $item */
 $p = $p ?? [];
 $item = $item ?? [];
+$carritoService = new CarritoService();
+$maxQty = $carritoService->cantidadMaxima();
 $qty = max(1, (int) ($item['cantidad'] ?? 1));
 $precio = (float) ($p['precio'] ?? 0);
 $antes = !empty($p['precioAntes']) ? (float) $p['precioAntes'] : null;
@@ -14,7 +16,9 @@ $tope = !empty($p['tope']) || $qty >= 3 && (int) ($p['id'] ?? 0) === 2;
 $badge = $p['badge'] ?? null;
 $volver = 'pedido.php';
 $cartCheckId = 'cart-sel-' . (int) ($p['id'] ?? 0);
-$cartCheckLabel = 'Seleccionar ' . (string) ($p['nombre'] ?? 'producto');
+$nombreLinea = (string) ($p['nombre'] ?? 'producto');
+$cartCheckLabel = 'Seleccionar ' . $nombreLinea;
+$cartQtyId = 'cart-qty-' . (int) ($p['id'] ?? 0);
 ?>
 <article class="cart-line">
   <label class="cart-check" for="<?= e($cartCheckId) ?>">
@@ -50,26 +54,26 @@ $cartCheckLabel = 'Seleccionar ' . (string) ($p['nombre'] ?? 'producto');
         <input type="hidden" name="accion" value="guardar" />
         <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
         <input type="hidden" name="volver" value="<?= e($volver) ?>" />
-        <button type="submit">♡ Guardar para después</button>
+        <button type="submit">♡ Guardar para después<span class="sr-only"> <?= e($nombreLinea) ?></span></button>
       </form>
       <form method="post" action="carrito.php">
         <?= csrf_field() ?>
         <input type="hidden" name="accion" value="eliminar" />
         <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
         <input type="hidden" name="volver" value="<?= e($volver) ?>" />
-        <button type="submit" class="danger">🗑 Eliminar</button>
+        <button type="submit" class="danger">🗑 Eliminar<span class="sr-only"> <?= e($nombreLinea) ?></span></button>
       </form>
     </div>
   </div>
   <div class="cart-line-side">
-    <form class="qty cart-qty" method="post" action="carrito.php">
+    <form class="qty cart-qty" method="post" action="carrito.php" aria-label="Cantidad de <?= e($nombreLinea) ?>">
       <?= csrf_field() ?>
       <input type="hidden" name="accion" value="set_cantidad" />
       <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" />
       <input type="hidden" name="volver" value="<?= e($volver) ?>" />
-      <button type="submit" name="cantidad" value="<?= max(1, $qty - 1) ?>" aria-label="Menos">−</button>
-      <span><?= $qty ?></span>
-      <button type="submit" name="cantidad" value="<?= min(99, $qty + 1) ?>" aria-label="Más" <?= $tope && $qty >= 3 ? 'disabled' : '' ?>>+</button>
+      <button type="submit" name="cantidad" value="<?= max(1, $qty - 1) ?>" aria-label="Disminuir cantidad de <?= e($nombreLinea) ?>">−</button>
+      <span id="<?= e($cartQtyId) ?>"><span class="sr-only">Cantidad de <?= e($nombreLinea) ?>: </span><?= $qty ?></span>
+      <button type="submit" name="cantidad" value="<?= min($maxQty, $qty + 1) ?>" aria-label="Aumentar cantidad de <?= e($nombreLinea) ?>" <?= $tope && $qty >= 3 ? 'disabled' : '' ?>>+</button>
     </form>
     <div class="cart-subtotal">
       <span>Subtotal</span>

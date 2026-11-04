@@ -8,8 +8,9 @@
 - PHPUnit 11.5 (devDependency en `composer.json`)
 
 ### Base de datos
-- **App:** no usa MySQL; persistencia en `$_SESSION`.
-- **Laboratorio:** SQLite `:memory:` en `Tests\Support\SqliteLabStore` (P32). No toca ninguna BD de desarrollo.
+- **App:** MySQL/MariaDB con PDO (`backend/Database.php`). Con `MASS_USE_DB=0` o sin `database.local.php` habilitado, el modo es demo y la sesión no se guarda en MySQL. Si se pidió MySQL y la conexión falla, el modo es `error` y no hay fallback a demo.
+- **Esta corrida histórica:** la configuración citada abajo es `D:\xampp\htdocs\paginaweb\phpunit.xml`. El laboratorio P32 usa SQLite `:memory:` en `Tests\Support\SqliteLabStore`.
+- **Este equipo:** `phpunit.xml` fija `MASS_USE_DB=0`. Aun así, la corrida del 2026-11-03 registrada en `PROMTS/evidencias/24-ci-github-actions-composer-audit/comandos.txt` llegó a `mass_online`. Ese hecho no se reinterpreta como modo demo.
 
 ### Datos de prueba / condiciones iniciales
 - Catálogo demo en `includes/data.php` (`mass_productos`, usuarios `admin`/`cliente` password `123456`).
@@ -28,7 +29,7 @@ Evidencia cruda de la corrida con cobertura: `docs/pruebas/evidencias/ejecucion-
 
 ## 2. Resultados por caso (suite automatizada)
 
-Fuente: ejecución PHPUnit + PCOV del **2026-10-28 01:58:35** (`OK (32 tests, 99 assertions)`, Time **00:00.402**, Lines **58.44%**).
+Fuente: [evidencias/ejecucion-automatizada.txt](evidencias/ejecucion-automatizada.txt), corrida en `D:\xampp\htdocs\paginaweb`. PHPUnit 11.5.0, PHP 8.2.12 con PCOV 1.0.11, `OK (32 tests, 99 assertions)`, tiempo `00:01.639`, informe de líneas del **2026-10-28 01:29:33** al **58.30% (811/1391)**. No es la cobertura de este equipo. El `junit.xml` actual es otra ejecución y no respalda esta tabla.
 
 | ID | Funcionalidad evaluada | Tipo | Datos de entrada | Procedimiento ejecutado | Resultado esperado | Resultado obtenido | Estado | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -75,8 +76,8 @@ Fuente: ejecución PHPUnit + PCOV del **2026-10-28 01:58:35** (`OK (32 tests, 99
 | Omitidos / Bloqueados | **0** |
 | Assertions | **99** |
 | % aprobación | **100%** = (32/32)×100 |
-| Tiempo | **0.402 s** (corrida con PCOV) |
-| Cobertura de líneas (`includes/`) | **58.44%** (817/1398) |
+| Tiempo | **00:01.639** (texto de `ejecucion-automatizada.txt`) |
+| Cobertura de líneas | **58.30% (811/1391)** en ese archivo. No vigente en este equipo: no hay Clover nuevo |
 
 ## 4. Análisis de defectos / incidencias durante el desarrollo de pruebas
 
@@ -88,3 +89,15 @@ Fuente: ejecución PHPUnit + PCOV del **2026-10-28 01:58:35** (`OK (32 tests, 99
 **Consecuencias:** sin INC-01 la suite reportaba falso negativo. INC-02 evita malinterpretar la API del catálogo.
 
 **Código fuente de producción modificado por fallos de prueba:** ninguno en esta corrida (los arreglos fueron en tests).
+
+## 5. Ejecuciones posteriores en este equipo
+
+No sustituyen la tabla P01–P32. Evitan leer el 58.30% como resultado actual.
+
+| Fecha | Evidencia | Resultado | Cobertura |
+| --- | --- | --- | --- |
+| 2026-11-02 | `PROMTS/evidencias/21-cobertura-phpunit-backend/resumen.txt` y `evidencias/junit.xml` | 130 tests, 770 assertions, 0 fallos en el JUnit guardado. `run_coverage.php` terminó con código 1 por falta de driver | No disponible |
+| 2026-11-02 | `PROMTS/evidencias/20-sonarqube-reescaneo.txt` | `prepare-sonar.bat`: 122 tests, 659 assertions, aviso de driver. El escaneo Sonar no se envió | No disponible |
+| 2026-11-03 | `PROMTS/evidencias/24-ci-github-actions-composer-audit/comandos.txt` | PHPUnit 11.5.50. 134 tests, 794 assertions, 1 fallo. La suite llegó a `mass_online`; el producto 1 se restauró al seed | No medida |
+
+En `C:\xampp\php\ext` no están `php_pcov.dll` ni `php_xdebug.dll`. `evidencias/coverage/clover.xml` no está. `evidencias/coverage/html/index.html` sí está: su título es la ruta `D:\xampp\htdocs\paginaweb\includes` y muestra 58.44% (817/1398). `evidencias/coverage/consola.txt` es de este equipo, 130 tests, y dice `Clover: no generado`.

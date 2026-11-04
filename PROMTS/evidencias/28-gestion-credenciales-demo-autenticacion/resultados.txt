@@ -1,0 +1,114 @@
+PROMPT 28 — Gestión de credenciales demo y autenticación
+Fecha: 2026-11-03
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+Estado: DETENIDO antes de modificar código. Falta autorización para archivos fuera del alcance.
+
+1. Inspección del inicio de sesión
+
+El formulario real está en frontend/views/admin/login.php.
+Ese archivo crea AuthController y, en POST, llama a AuthController::login().
+AuthController::login() llama a AuthService::intentar() y, si acepta, a AuthService::login().
+includes/functions.php solo delega:
+
+- mass_demo_password_hash() -> AuthService::demoPasswordHash()
+- mass_usuarios_auth() -> AuthService::usuariosAuth()
+- auth_intentar() -> AuthService::intentar()
+
+Las pruebas y los scripts scripts/smoke_auth_logout.php y scripts/smoke_views.php usan auth_intentar().
+Esa función no decide la política: la decide AuthService.
+
+2. Dónde están las credenciales demo
+
+backend/services/AuthService.php
+- Constante privada DEMO_PASSWORD_HASH (bcrypt). El secreto no está en texto plano.
+- usuariosDemo() define cuatro identificadores: dos de administrador y dos de cliente.
+- usuariosAuth() usa UsuarioRepository::allAuthUsers() si MySQL devuelve filas.
+- Si MySQL no devuelve filas, cae en usuariosDemo().
+- intentar() verifica con password_verify().
+- Un rol distinto al solicitado responde «Este usuario no corresponde al modo seleccionado (…)».
+  Esa frase confirma que la cuenta existe y que la contraseña coincidió.
+- No hay contador de intentos ni retardo.
+
+backend/repositories/UsuarioRepository.php
+- Lee usuarios activos de MySQL. No distingue una cuenta demo de una cuenta real.
+
+database/seed.sql
+- Inserta los mismos cuatro usuarios demo, con el mismo hash bcrypt, en la tabla usuarios.
+- Si la aplicación está en modo mysql, AuthService autentica esas filas como usuarios de base
+  y no consulta el catálogo demo del código.
+
+backend/config/app.php
+- No define entorno ni una variable de usuarios demo.
+- Solo tiene name, envio_express, max_qty_linea y use_db_env = MASS_USE_DB.
+
+phpunit.xml
+- Fija APP_ENV=testing y MASS_USE_DB=0.
+- Este archivo está fuera del alcance de este prompt.
+
+No existe hoy una distinción de producción. APP_ENV solo aparece en phpunit.xml.
+G22 no aparece en PROMTS/ ni en docs/.
+En PROMTS/04.Registro-suite-pruebas-phpunit.md, INT-001-BOLT-006 ya figura como el hash
+de la contraseña demo, asociado al commit cd06ef0 y a la HU INT-001-HU-04.
+Este prompt reutiliza el mismo identificador para otro trabajo. No se da por cerrado.
+
+3. Por qué no alcanza el alcance autorizado
+
+Cambiar solo includes/functions.php dejaría abierto el inicio de sesión HTTP:
+login.php -> AuthController -> AuthService no pasa por el control nuevo.
+Cambiar solo backend/config/*.php no tiene efecto: AuthService no carga esa política.
+Las pruebas que instancian AuthService seguirían aceptando el catálogo embebido.
+
+4. Archivo indispensable
+
+backend/services/AuthService.php
+
+Por qué es indispensable:
+Es el único punto que valida el formulario, el catálogo demo y el fallback sin MySQL.
+Sin editarlo, la variable APP_DEMO_USERS_ENABLED no puede impedir el acceso demo.
+
+Cambio propuesto:
+- Leer el catálogo y el hash desde backend/config/demo.php.
+- usuariosDemo() devuelve el catálogo solo si la política lo permite.
+- intentar(), antes de aceptar, rechaza los identificadores demo cuando la política
+  los deshabilita, también si la fila vino de MySQL. La respuesta sigue siendo
+  «Credenciales incorrectas», la misma que para un usuario desconocido o una
+  contraseña mala.
+- Entorno production o prod: denegar siempre, aunque APP_DEMO_USERS_ENABLED pida activarlos.
+- Entornos autorizados: local, development, dev, testing y test.
+- Variable ausente, vacía o inválida: denegar. En testing, tests/bootstrap.php
+  puede activarla de forma explícita para no romper la suite.
+- Un rol que no coincide también responde «Credenciales incorrectas», para no
+  confirmar que la cuenta existe. Hay que ajustar la aserción de
+  tests/Unit/AuthReglasTest.php, que hoy espera el texto del modo seleccionado.
+- Contador de fallos en $_SESSION, ventana de tiempo, retardo corto y tope.
+  La contraseña correcta sigue entrando después del retardo y reinicia el contador.
+  No se bloquea la cuenta de forma permanente. Sin dependencias nuevas.
+
+Impacto:
+- El login académico admin/cliente deja de funcionar hasta que el entorno sea
+  local o de prueba y APP_DEMO_USERS_ENABLED esté en un valor afirmativo.
+- Con APP_ENV=production, esas cuentas no entran ni por el fallback ni por seed.sql.
+- Las cuentas cuyo identificador no esté en el catálogo demo siguen igual.
+- Los mensajes de rol cruzado cambian al texto genérico. La prueba P13 debe
+  actualizarse dentro de tests/**.
+- scripts/smoke_auth_logout.php y scripts/smoke_views.php no se editan.
+  Sin las variables, el demo que usan hoy quedaría rechazado.
+
+5. Archivo relacionado, no editado
+
+database/seed.sql sigue guardando el hash y los usuarios demo.
+No hace falta cambiarlo si AuthService rechaza esos identificadores cuando
+la política está apagada. El hash permanece en el repositorio. Sacarlo del
+seed sería otro cambio, fuera de alcance, y no se propone hasta nueva orden.
+
+frontend/views/admin/login.php rellena el campo con un identificador demo.
+No es necesario para el control. No se modifica.
+
+6. Archivos de código tocados en esta pasada
+
+Ninguno de autenticación.
+Creados solo el prompt y esta evidencia.
+No hay commit. No hay push. HEAD no se movió.
+Pruebas automatizadas de esta pasada: no ejecutadas, porque el comportamiento
+de autenticación no cambió. No se presentan como exitosas.

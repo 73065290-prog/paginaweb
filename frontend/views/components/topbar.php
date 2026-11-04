@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 ?>
-<div class="topbar">
+<div class="topbar" role="region" aria-label="Datos de la tienda">
   <div class="container topbar-inner">
     <div class="topbar-left">
       <span>Tienda seleccionada: <strong>Tienda Mass - Av. Sucre 420</strong></span>

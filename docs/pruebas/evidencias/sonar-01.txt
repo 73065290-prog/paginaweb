@@ -1,0 +1,19 @@
+=== Reporte de verificacion SonarQube (PROMPT 01 - INT-003) ===
+Fecha: 2026-11-01 | Modelo IA: Gemini 4 Argon
+Proyecto SonarQube: Pagina_Web_V2
+URL del dashboard SonarQube: http://localhost:9000/dashboard?id=Pagina_Web_V2
+
+1. IDs de regla identificados y verificados en codigo:
+   - javascript:S7773 (Prefer Number.parseFloat / Number.parseInt over global functions):
+     * assets/js/admin.js: 0 apariciones de parseInt(/parseFloat( sin Number. (L58, L59, L98, L107, L108, L167-170, L175, L176).
+     * frontend/assets/js/admin.js: copia identica (MD5 669e49c99621b32a0930aa4e4cc10028), 0 apariciones sin Number.
+   - Web:S6853 / Web:LabelCheck (Form controls should have associated labels with matching for/id):
+     * frontend/views/cliente/catalogo.php: 5 pares <label for> / <input|select id> verificados (priceMaxRange, priceMin, priceMax, catalogSearchQ, sortSelect).
+     * frontend/views/admin/partials/header.php (e includes/admin/header.php): <label for="adminSearchQ"> asociado a <input id="adminSearchQ">.
+     * frontend/views/components/cart-line.php (e includes/components/cart-line.php): $cartCheckId = 'cart-sel-' . (int)($p['id'] ?? 0) genera IDs unicos por linea (verificado con 3 lineas: cart-sel-1, cart-sel-2, cart-sel-3).
+
+2. Estado del servidor SonarQube y ejecucion de scripts\scan-sonar.bat:
+   - Scanner instalado: C:\sonar-scanner\bin\sonar-scanner.bat
+   - Estado de red local: 127.0.0.1:9000 inactivo (servidor SonarQube apagado) y variable de entorno SONAR_TOKEN no definida.
+   - Salida de scripts\scan-sonar.bat: 'ERROR: define SONAR_TOKEN antes de escanear.' (exit code 1).
+   - En cumplimiento estricto de la restriccion 'No marques ninguna incidencia como resuelta sin haberla verificado y guardado la evidencia correspondiente', la columna BM (analisis estatico SonarQube) en Matriz_de_registro_paginaweb.xlsx se mantiene en 'No' hasta que el servidor local http://localhost:9000 este encendido con SONAR_TOKEN configurado.

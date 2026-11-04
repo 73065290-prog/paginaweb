@@ -1,0 +1,110 @@
+PROMPT 26 — revisión de documentación
+Fecha: 2026-11-03
+Modelo: Grok 4.7
+Responsable del prompt: cursor12310-sys
+
+Bolts
+INT-006-BOLT-010: PENDIENTE. No hay métricas de SonarQube ni capturas del Quality Gate.
+INT-001-BOLT-004: PENDIENTE. El plan, la ejecución y el informe se alinearon con las evidencias, pero el informe no está cerrado: faltan datos del estudiante, cobertura de este equipo y las seis capturas.
+No se creó commit. El prompt pide no presentar como terminado un bolt incompleto.
+No hubo push. No se actualizó la matriz.
+
+Documentos revisados
+- README.md — modificado
+- docs/pruebas/INFORME-FINAL.md — modificado
+- docs/pruebas/01-plan-de-pruebas.md — modificado
+- docs/pruebas/02-ejecucion-pruebas.md — modificado
+- docs/pruebas/03-pruebas-automatizadas.md — modificado
+- docs/pruebas/04-comparacion-manual-vs-automatizada.md — modificado
+- docs/pruebas/05-guia-sonarqube.md — modificado
+- docs/pruebas/accesibilidad.md — revisado, sin cambios. No habla de MySQL, Sonar ni cobertura.
+
+No se modificaron imágenes, clover, HTML de cobertura, PHP ni sonar-project.properties.
+
+Placeholders
+- [NOMBRE], [CÓDIGO], [DOCENTE]: no hay un dato confirmado para la portada. El repositorio tiene autores de Git (cursor12310-sys, Kervin-Mansilla, Arny5555) y el correo 73065290@continental.edu.pe. No se usaron como nombre, código ni docente.
+  Estado: sustituidos por «Pendiente de confirmación».
+- [FECHA]: la fecha de esta revisión es 2026-11-03, tomada del reloj de la sesión. Quedó escrita como fecha de la revisión, no como fecha de SonarQube.
+- [COMPLETAR TRAS SONARQUBE]: sustituido por «Pendiente. No disponible», con la fuente del intento del 2026-11-02. No se inventaron cifras.
+
+Persistencia
+Código leído: backend/Database.php.
+- mysql: se pidió base y PDO conectó. Los datos van a MySQL/MariaDB.
+- demo: MASS_USE_DB es 0 o false, o la configuración no pide base. Sesión y datos demo. No se escriben en MySQL.
+- error: se pidió MySQL y la conexión falló. No hay fallback a demo.
+phpunit.xml fija MASS_USE_DB=0.
+Se quitaron las frases «sin MySQL» / «no usa MySQL» de los Markdown del alcance.
+
+Métricas y fuentes
+1. docs/pruebas/evidencias/ejecucion-automatizada.txt
+   PHPUnit 11.5.0, PHP 8.2.12, PCOV 1.0.11
+   Configuración: D:\xampp\htdocs\paginaweb\phpunit.xml
+   OK (32 tests, 99 assertions)
+   Time: 00:01.639
+   Informe: 2026-10-28 01:29:33
+   Lines: 58.30% (811/1391)
+   Otra instalación. No es la cobertura actual.
+
+2. docs/pruebas/evidencias/coverage/html/index.html
+   Título: Code Coverage for D:\xampp\htdocs\paginaweb\includes
+   Total de líneas: 58.44% (817/1398)
+   Tampoco es este equipo. No coincide con el 58.30% del texto.
+   El informe anterior citaba 58.44% (817/1398). Esa cifra está en este HTML y se dejó identificada como reporte viejo, no como resultado vigente.
+
+3. docs/pruebas/evidencias/coverage/consola.txt
+   Este equipo, C:\Users\LENOVO\Downloads\paginaweb (2)\paginaweb
+   PHPUnit 11.5.0, 130 tests, 770 assertions, warning «No code coverage driver available»
+   Clover: no generado. Exit PHPUnit: 1
+   Fecha impresa por PHP: 2026-11-03 05:51:34
+
+4. docs/pruebas/evidencias/junit.xml
+   tests=130 assertions=770 errors=0 failures=0 skipped=0
+   Rutas de este equipo. Sin porcentaje de cobertura.
+
+5. PROMTS/evidencias/20-sonarqube-reescaneo.txt
+   2026-11-02. Servidor UP, Community 26.10.0.133078, id 147B411E-AaFcHgWAYUQ3W8oeAG7p
+   Sin SONAR_TOKEN. scan-sonar.bat exit 1.
+   prepare-sonar.bat: 122 tests, 659 assertions, sin driver.
+   Quality Gate, bugs, vulnerabilities, code smells, coverage, duplicación y ratings: No disponible.
+
+6. PROMTS/evidencias/21-cobertura-phpunit-backend/resumen.txt
+   2026-11-02. 130 tests, 770 assertions, exit 0 en phpunit sin cobertura.
+   run_coverage.php exit 1. Cobertura global y de backend: no disponible.
+
+7. PROMTS/evidencias/24-ci-github-actions-composer-audit/comandos.txt
+   2026-11-03. PHPUnit 11.5.50.
+   composer test: 134 tests, 794 assertions, 1 fallo
+   ProductoAdminPersistenciaTest::test_crear_producto_valido_persiste_en_sesion_admin
+   La suite llegó a mass_online. El producto 1 se restauró al seed.
+   Cobertura: no medida.
+
+docs/pruebas/evidencias/coverage/clover.xml: ausente.
+
+Capturas N.º 1 a N.º 6
+1. Terminal composer test:coverage con 32 OK — no hay imagen.
+2. HTML de cobertura en el navegador — no hay imagen. El HTML antiguo sí existe y no se fotografió.
+3. Quality Gate — no hay imagen. El análisis no se envió.
+4. Bugs / Vulnerabilities / Code Smells — no hay imagen.
+5. Coverage Sonar frente a Clover — no hay imagen ni métrica de Sonar.
+6. Login admin y alta con errores — no hay imagen.
+
+PROMTS/evidencias/20-sonarqube-login-requerido.png existe y es la pantalla de login de SonarQube. No se insertó como captura N.º 3.
+Las PNG de PROMTS/evidencias/22-accesibilidad/ son de accesibilidad. No cubren estas seis capturas.
+No se creó ninguna imagen.
+
+Enlaces
+Revisión automática de enlaces Markdown relativos en README.md y docs/pruebas/*.md, resueltos desde la carpeta del documento.
+OK=41
+Enlaces http de insignias del README=4 (no se descargaron)
+Rotos=2, los dos a propósito y marcados como ausentes en el texto:
+- docs/pruebas/INFORME-FINAL.md -> evidencias/coverage/clover.xml
+- docs/pruebas/03-pruebas-automatizadas.md -> evidencias/coverage/clover.xml
+El HTML de cobertura, junit.xml, testdox.html, ejecucion-automatizada.txt, consola.txt, los cinco Markdown de pruebas, accesibilidad.md, las tres evidencias de PROMTS citadas y la PNG de login resuelven a un archivo existente.
+Las imágenes ./docs/img/ del README también existen.
+
+Pendientes que impiden dar el informe por cerrado
+- Nombre, código y docente.
+- Métricas de SonarQube.
+- Porcentaje de cobertura generado en este equipo.
+- Capturas N.º 1 a N.º 6.
+- La suite del 2026-11-03 no está en verde (1 fallo) y tocó mass_online.

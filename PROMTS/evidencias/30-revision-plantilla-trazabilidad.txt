@@ -1,0 +1,87 @@
+PROMPT 30 — Revisión de plantilla y trazabilidad
+Fecha: 2026-11-03
+Modelo: Grok 4.7
+Responsable: cursor12310-sys
+
+1. Plantilla
+OK | PROMPT NN
+OK | **Intent:**
+OK | **Bolts:**
+OK | **HU:**
+OK | **Modelo IA:**
+OK | **Fecha:**
+OK | **Responsable:**
+OK | ## 1. Rol y perfil
+OK | ## 2. Contexto
+OK | ## 3. Objetivo
+OK | ## 4. Alcance
+OK | ## 5. Pasos obligatorios
+OK | ## 6. Restricciones
+OK | ## 7. Criterios de aceptación
+OK | ## 8. Pruebas y evidencia
+OK | ## 9. Entrega
+
+2. Encabezados y cuerpo de 01 a 03
+OK | 01.Correccion-de-incidencias-de-SonarQube.md | **Intent:** INT-003
+OK | 01.Correccion-de-incidencias-de-SonarQube.md | **Bolts:** INT-003-BOLT-001 a 005
+OK | 01.Correccion-de-incidencias-de-SonarQube.md | **HU:** INT-003-HU-01
+OK | 01.Correccion-de-incidencias-de-SonarQube.md | **Modelo IA:** Gemini 4 Argon
+OK | 01.Correccion-de-incidencias-de-SonarQube.md | **Fecha:** 2026-11-01
+OK | 01.Correccion-de-incidencias-de-SonarQube.md | **Responsable:** cursor12310-sys
+OK cuerpo | 01.Correccion-de-incidencias-de-SonarQube.md | Asume el rol de un **programador senior especializado en PHP nativo, JavaScript,
+OK cuerpo | 01.Correccion-de-incidencias-de-SonarQube.md | El proyecto fue analizado con SonarQube (projectKey Pagina_Web_V2).
+OK cuerpo | 01.Correccion-de-incidencias-de-SonarQube.md | Conserva una única copia del prompt en `PROMTS/`
+OK cuerpo | 01.Correccion-de-incidencias-de-SonarQube.md | Actualiza las columnas Registro/Evidencia de la fila correspondiente
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **ESTADO: Sustituido por prompts 06-19**
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **Intent:** INT-004
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **Bolts:** INT-004-BOLT-001 a 013
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **HU:** INT-004-HU-02
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **Modelo IA:** Gemini 4 Argon
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **Fecha:** 2026-11-01
+OK | 02.Refactorizacion-frontend-backend-mysql.md | **Responsable:** cursor12310-sys
+OK cuerpo | 02.Refactorizacion-frontend-backend-mysql.md | Asume el rol de un **programador senior especializado en arquitectura de softwar
+OK cuerpo | 02.Refactorizacion-frontend-backend-mysql.md | No aplica: utilizar exclusivamente los prompts 06 a 19
+OK cuerpo | 02.Refactorizacion-frontend-backend-mysql.md | No vuelvas a ejecutar este prompt monolítico.
+OK | 03.Correccion-logout-cambio-de-rol.md | **Intent:** INT-005
+OK | 03.Correccion-logout-cambio-de-rol.md | **Bolts:** INT-005-BOLT-001 a 005
+OK | 03.Correccion-logout-cambio-de-rol.md | **HU:** INT-005-HU-03
+OK | 03.Correccion-logout-cambio-de-rol.md | **Modelo IA:** Gemini 4 Argon
+OK | 03.Correccion-logout-cambio-de-rol.md | **Fecha:** 2026-11-01
+OK | 03.Correccion-logout-cambio-de-rol.md | **Responsable:** cursor12310-sys
+OK cuerpo | 03.Correccion-logout-cambio-de-rol.md | Asume el rol de un **programador senior especializado en PHP nativo, autenticaci
+OK cuerpo | 03.Correccion-logout-cambio-de-rol.md | mass_asset("logout.php")
+OK cuerpo | 03.Correccion-logout-cambio-de-rol.md | Escenario C:
+OK cuerpo | 03.Correccion-logout-cambio-de-rol.md | Los 3 escenarios de autenticación y logout pasan
+
+3. Duplicado
+En disco: ausente
+main docs blob=abdf3a6245c66e9095502d1384fe14fba8014e9f
+main PROMTS/01 blob=abdf3a6245c66e9095502d1384fe14fba8014e9f
+Blobs de main iguales: SI
+El archivo de docs no está en el directorio de trabajo. No se borró otro documento.
+main sigue conteniendo ambos paths porque no hay commit: el prompt no asigna un ID de bolt.
+
+4. README
+OK | README | PLANTILLA.md
+OK | README | Cómo usar la plantilla
+OK | README | Trazabilidad
+OK | README | tipo(INT-XXX-BOLT-NNN): descripción
+OK | README | tipo/int-xxx-bolt-nnn
+OK | README | Tickets
+OK | README | No hay integración disponible con Trello ni con Jira
+Enlaces relativos de PROMTS/README.md: 29; rotos: 0
+Prompt 06: no existe. Sí existe PROMTS/06.evidencia-conteo-archivos.txt, que es evidencia y no un prompt.
+Prompt 19: no existe.
+
+5. Codificación
+PROMTS/PLANTILLA.md bom=no utf8=si
+PROMTS/README.md bom=no utf8=si
+PROMTS/01.Correccion-de-incidencias-de-SonarQube.md bom=no utf8=si
+PROMTS/02.Refactorizacion-frontend-backend-mysql.md bom=no utf8=si
+PROMTS/03.Correccion-logout-cambio-de-rol.md bom=no utf8=si
+PROMTS/30-plantilla-estandar-prompts-modelo-ia-tickets.md bom=no utf8=si
+
+6. Tickets y commit
+Trello/Jira: sin herramienta disponible en esta sesión. Tickets creados: 0.
+Commit: no creado. El enunciado dice Transversal y no da INT-XXX-BOLT-NNN.
+FALLOS=0

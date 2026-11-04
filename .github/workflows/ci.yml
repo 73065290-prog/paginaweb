@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: Pruebas y auditoría
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    steps:
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, xml, ctype, dom, tokenizer, pdo, pdo_mysql, pdo_sqlite, curl, fileinfo, zip, iconv
+          coverage: none
+          tools: composer:v2
+
+      - name: Configurar Composer
+        run: composer --version
+
+      - name: Instalar dependencias con composer.lock
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Auditar dependencias
+        run: composer audit --no-interaction
+
+      - name: Ejecutar composer test
+        run: composer test
+
+      - name: Ejecutar la suite completa
+        run: php tests/run_all.php
+
+      - name: Comprobar si SonarQube puede ejecutarse
+        run: |
+          if [ -z "${SONAR_TOKEN}" ] || [ -z "${SONAR_HOST_URL}" ]; then
+            echo "SonarQube omitido: faltan los secretos SONAR_TOKEN o SONAR_HOST_URL."
+            echo "El flujo principal sigue. No hay credenciales en el repositorio."
+          else
+            echo "SonarQube se ejecutará con el servidor de SONAR_HOST_URL."
+          fi
+
+      - name: Analizar con SonarQube
+        if: env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != ''
+        uses: SonarSource/sonarqube-scan-action@v8.4.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Cómo consultar esta ejecución
+        if: always()
+        run: |
+          echo "Resultado del workflow: pestaña Actions del repositorio, ejecución de CI en este Pull Request."
+          echo "Prueba fallida: abre el paso Ejecutar composer test o Ejecutar la suite completa. El log muestra el nombre de la prueba y la aserción."
+          echo "Vulnerabilidad de Composer: abre el paso Auditar dependencias. El comando termina con error si hay un aviso de seguridad."
+          echo "Error de configuración: abre el primer paso en rojo. Puede ser PHP, una extensión, composer.lock o la sintaxis del workflow."
+          echo "SonarQube: si el paso anterior dice que faltan secretos, no hubo análisis. Si corrió, el detalle está en Analizar con SonarQube."
+          echo "Las pruebas de integración que necesitan MariaDB se omiten en este runner si no hay servidor en el puerto 3306. Eso no marca el paso como correcto si otra prueba falla."
