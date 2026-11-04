@@ -46,12 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mass_ops_volver('mermas.php', ['filtro' => $filtro]);
         }
         $errores = $resultado['errores'];
+    } elseif ((string) ($_POST['accion'] ?? '') === 'editar') {
+        $resultado = mass_ops_merma_editar(trim((string) ($_POST['id'] ?? '')), $_POST);
+        if ($resultado['ok']) {
+            flash_set('El registro se actualizó.');
+            mass_ops_volver('mermas.php', ['filtro' => $filtro, 'q' => trim((string) ($_POST['q'] ?? ''))]);
+        }
+        $errores = $resultado['errores'];
+    } elseif ((string) ($_POST['accion'] ?? '') === 'anular') {
+        $resultado = mass_ops_merma_anular(trim((string) ($_POST['id'] ?? '')));
+        if ($resultado['ok']) {
+            flash_set('Registro anulado. Si ya había descuento, el stock volvió a la góndola.');
+            mass_ops_volver('mermas.php', ['filtro' => $filtro]);
+        }
+        $errores = $resultado['errores'];
     }
 }
 
-if (!in_array($filtro, ['todas', 'por_vencer', 'vencidas', 'merma', 'retiradas'], true)) {
+if (!in_array($filtro, ['todas', 'por_vencer', 'vencidas', 'merma', 'retiradas', 'anuladas'], true)) {
     $filtro = 'todas';
 }
+$qMerma = trim((string) ($_GET['q'] ?? ''));
 
 $inventario = mass_ops_inventario();
 $mermas = mass_ops_mermas();
@@ -64,10 +79,54 @@ $mermas = array_values(array_filter(
             'vencidas' => $clase === 'vencida',
             'merma' => (string) $merma['tipo'] === 'merma',
             'retiradas' => (string) $merma['estado'] === 'retirada',
+            'anuladas' => (string) $merma['estado'] === 'anulada',
             default => true,
         };
     }
 ));
+if ($qMerma !== '') {
+    $needleMerma = mb_strtolower($qMerma);
+    $mermas = array_values(array_filter(
+        $mermas,
+        static fn (array $merma): bool => str_contains(mb_strtolower((string) $merma['id'] . ' ' . (string) $merma['nombre'] . ' ' . (string) $merma['sku'] . ' ' . (string) $merma['motivo']), $needleMerma)
+    ));
+}
+$mermasExport = $mermas;
+$opsPager = mass_ops_paginar($mermas, (int) ($_GET['pagina'] ?? 1), 6);
+$mermas = $opsPager['items'];
+$opsQuery = ['filtro' => $filtro, 'q' => $qMerma];
+$planasMerma = [];
+foreach ($mermasExport as $mermaPlana) {
+    $planasMerma[] = [
+        (string) $mermaPlana['id'],
+        (string) $mermaPlana['sku'],
+        (string) $mermaPlana['nombre'],
+        (string) $mermaPlana['tipo'],
+        (string) $mermaPlana['motivo'],
+        (int) $mermaPlana['cantidad'],
+        (string) $mermaPlana['vence'],
+        (string) $mermaPlana['estado'],
+    ];
+}
+$exportMerma = (string) ($_GET['export'] ?? '');
+$encabezadosMerma = ['Registro', 'SKU', 'Producto', 'Tipo', 'Motivo', 'Cantidad', 'Vence', 'Estado'];
+if ($exportMerma === 'csv') {
+    mass_ops_descargar('mermas.csv', 'text/csv; charset=UTF-8', mass_ops_csv($encabezadosMerma, $planasMerma));
+}
+if ($exportMerma === 'xls') {
+    mass_ops_descargar('mermas.xls', 'application/vnd.ms-excel; charset=UTF-8', mass_ops_xls('Mermas y caducidades', $encabezadosMerma, $planasMerma));
+}
+if ($exportMerma === 'pdf') {
+    echo mass_ops_documento_html('Mermas y caducidades', 'Corte ' . mass_ops_hoy(), $encabezadosMerma, $planasMerma);
+    exit;
+}
+$mermaKpi = ['abierta' => 0, 'retirada' => 0, 'anulada' => 0];
+foreach (mass_ops_mermas() as $mermaKpiFila) {
+    $claveMerma = (string) $mermaKpiFila['estado'];
+    if (isset($mermaKpi[$claveMerma])) {
+        $mermaKpi[$claveMerma]++;
+    }
+}
 
 $clasePills = [
     'vencida' => 'critico',
@@ -79,19 +138,30 @@ $clasePills = [
 require MASS_ROOT . '/frontend/views/admin/partials/header.php';
 ?>
 
+<div class="ops-suite">
 <div class="page-toolbar">
   <div>
     <h1 class="admin-title" style="margin:0">Mermas y caducidades</h1>
-    <p class="dash-sub">Registra desmedro o lotes por vencer. Retirar descuenta las unidades de la góndola si todavía no se habían bajado del stock.</p>
+    <p class="dash-sub">Registra, corrige o anula desmedro y lotes. Anular devuelve a góndola lo que ya se había descontado.</p>
   </div>
-  <div class="filters-inline">
-    <a href="mermas.php" class="<?= $filtro === 'todas' ? 'is-active' : '' ?>">Todas</a>
-    <a href="mermas.php?filtro=por_vencer" class="<?= $filtro === 'por_vencer' ? 'is-active' : '' ?>">Por vencer</a>
-    <a href="mermas.php?filtro=vencidas" class="<?= $filtro === 'vencidas' ? 'is-active' : '' ?>">Vencidas</a>
-    <a href="mermas.php?filtro=merma" class="<?= $filtro === 'merma' ? 'is-active' : '' ?>">Mermas</a>
-    <a href="mermas.php?filtro=retiradas" class="<?= $filtro === 'retiradas' ? 'is-active' : '' ?>">Retiradas</a>
-  </div>
+  <?php $opsExportTitulo = 'mermas'; require MASS_ROOT . '/frontend/views/admin/partials/ops-export.php'; ?>
 </div>
+<section class="kpi-grid" style="grid-template-columns: repeat(3, 1fr)">
+  <article class="kpi-card"><h3>Abiertas</h3><p class="kpi-value"><?= (int) $mermaKpi['abierta'] ?></p></article>
+  <article class="kpi-card"><h3>Retiradas</h3><p class="kpi-value"><?= (int) $mermaKpi['retirada'] ?></p></article>
+  <article class="kpi-card"><h3>Anuladas</h3><p class="kpi-value"><?= (int) $mermaKpi['anulada'] ?></p></article>
+</section>
+<form class="ops-filters" method="get" action="mermas.php">
+  <label>Buscar <input type="search" name="q" value="<?= e($qMerma) ?>" placeholder="SKU, producto o motivo" /></label>
+  <label>Vista
+    <select name="filtro">
+      <?php foreach (['todas' => 'Todas', 'por_vencer' => 'Por vencer', 'vencidas' => 'Vencidas', 'merma' => 'Mermas', 'retiradas' => 'Retiradas', 'anuladas' => 'Anuladas'] as $valor => $texto): ?>
+        <option value="<?= e($valor) ?>" <?= $filtro === $valor ? 'selected' : '' ?>><?= e($texto) ?></option>
+      <?php endforeach; ?>
+    </select>
+  </label>
+  <button type="submit" class="btn-mini">Aplicar</button>
+</form>
 
 <?php if (($flash ?? '') !== ''): ?>
   <div class="prod-toast prod-toast--page" role="status"><?= e((string) $flash) ?></div>
@@ -187,23 +257,68 @@ require MASS_ROOT . '/frontend/views/admin/partials/header.php';
             <td><span class="status-pill <?= e($clasePills[$clase] ?? 'ok') ?>"><?= e(mass_ops_merma_clase_label($clase)) ?></span></td>
             <td><span class="status-pill <?= (string) $merma['estado'] === 'retirada' ? 'retirado' : 'bajo' ?>"><?= (string) $merma['estado'] === 'retirada' ? 'Retirada' : 'Abierta' ?></span></td>
             <td>
-              <?php if ((string) $merma['estado'] === 'abierta'): ?>
-                <form method="post" class="inline-form" action="mermas.php">
-                  <?= csrf_field() ?>
-                  <input type="hidden" name="accion" value="retirar" />
-                  <input type="hidden" name="id" value="<?= e((string) $merma['id']) ?>" />
-                  <input type="hidden" name="filtro" value="<?= e($filtro) ?>" />
-                  <button type="submit" class="btn-mini warn">Retirar de góndola</button>
-                </form>
-              <?php else: ?>
-                <span class="status-pill ok">Stock descontado</span>
-              <?php endif; ?>
+              <div class="ops-actions">
+                <?php if ((string) $merma['estado'] === 'abierta'): ?>
+                  <form method="post" class="inline-form" action="mermas.php" data-ops-form>
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="accion" value="retirar" />
+                    <input type="hidden" name="id" value="<?= e((string) $merma['id']) ?>" />
+                    <input type="hidden" name="filtro" value="<?= e($filtro) ?>" />
+                    <button type="submit" class="btn-mini warn">Retirar</button>
+                  </form>
+                  <button type="button" class="ops-btn" data-ops-dialog="dlgMerma"
+                    data-id="<?= e((string) $merma['id']) ?>"
+                    data-cantidad="<?= (int) $merma['cantidad'] ?>"
+                    data-motivo="<?= e((string) $merma['motivo']) ?>"
+                    data-vence="<?= e((string) $merma['vence']) ?>"
+                    data-titulo="Editar <?= e((string) $merma['id']) ?>">Editar</button>
+                <?php endif; ?>
+                <?php if ((string) $merma['estado'] !== 'anulada'): ?>
+                  <form method="post" class="inline-form" action="mermas.php" data-ops-form>
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="accion" value="anular" />
+                    <input type="hidden" name="id" value="<?= e((string) $merma['id']) ?>" />
+                    <input type="hidden" name="filtro" value="<?= e($filtro) ?>" />
+                    <button type="submit" class="ops-btn">Anular</button>
+                  </form>
+                <?php else: ?>
+                  <span class="status-pill retirado">Anulada</span>
+                <?php endif; ?>
+              </div>
             </td>
           </tr>
         <?php endforeach; ?>
       </tbody>
     </table>
   </div>
+  <?php require MASS_ROOT . '/frontend/views/admin/partials/ops-pager.php'; ?>
 </article>
+<dialog class="ops-modal" id="dlgMerma" aria-labelledby="dlgMermaTitle">
+  <form method="post" action="mermas.php" data-ops-form>
+    <?= csrf_field() ?>
+    <input type="hidden" name="accion" value="editar" />
+    <input type="hidden" name="id" data-ops-field="id" />
+    <input type="hidden" name="filtro" value="<?= e($filtro) ?>" />
+    <input type="hidden" name="q" value="<?= e($qMerma) ?>" />
+    <h2 id="dlgMermaTitle" data-ops-title>Editar registro</h2>
+    <div class="ops-form">
+      <label>Cantidad <input type="number" name="cantidad" min="1" max="999" required data-ops-field="cantidad" /></label>
+      <label>Motivo
+        <select name="motivo" data-ops-field="motivo">
+          <?php foreach (['Daño en góndola', 'Desmedro', 'Rotura', 'Vencido', 'Próximo a vencer'] as $motivo): ?>
+            <option value="<?= e($motivo) ?>"><?= e($motivo) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </label>
+      <label>Vence <input type="date" name="vence" data-ops-field="vence" /></label>
+    </div>
+    <div class="ops-actions">
+      <button type="submit" class="btn-mini">Guardar</button>
+      <button type="button" class="ops-btn" data-ops-close>Cerrar</button>
+    </div>
+  </form>
+</dialog>
+</div>
+<script src="<?= e(mass_asset('assets/js/admin-ops.js')) ?>" defer></script>
 
 <?php require MASS_ROOT . '/frontend/views/admin/partials/footer.php'; ?>
